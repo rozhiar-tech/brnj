@@ -1,0 +1,80 @@
+{
+  "@@locale": "ar",
+
+  "appName": "برنج",
+
+  "navHome": "الرئيسية",
+  "navCommunities": "المجتمعات",
+  "navCreate": "إضافة",
+  "navChats": "الدردشات",
+  "navMe": "حسابي",
+
+  "feedFollowing": "المتابَعون",
+  "feedDiscover": "اكتشف",
+  "thisWeekInKitchens": "هالأسبوع بمطابخ العراق",
+
+  "createRecipe": "وصفة",
+  "createCooked": "طبختها",
+  "createPlan": "جدول الأسبوع",
+  "createQuestion": "سؤال",
+  "createPhoto": "صورة",
+
+  "myWeek": "أسبوعي",
+  "planPublish": "نشر",
+  "planCopyToMine": "انسخ هالأسبوع لعندي",
+  "planShoppingList": "قائمة المشتريات",
+  "planAddDish": "أضف أكلة",
+  "planEmptyDay": "ماكو شي مجدول",
+  "planVisibilityPublic": "عام",
+  "planVisibilityFollowers": "المتابعين بس",
+  "planVisibilityPrivate": "خاص",
+
+  "recipeServings": "عدد الأشخاص",
+  "recipeIngredients": "المقادير",
+  "recipeSteps": "الخطوات",
+  "recipeCookMode": "وضع الطبخ",
+  "recipeCookedThis": "طبختها",
+  "recipePrepTime": "{minutes} دقيقة تحضير",
+  "@recipePrepTime": {
+    "placeholders": { "minutes": { "type": "int" } }
+  },
+
+  "statViews": "{count, plural, =0{ماكو مشاهدات} =1{مشاهدة وحدة} =2{مشاهدتين} few{{count} مشاهدات} other{{count} مشاهدة}}",
+  "@statViews": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "verifiedBadge": "موثّق",
+
+  "signInTitle": "سوّي حساب حتى تشارك",
+  "signInBody": "التصفح مجاني. تحتاج حساب حتى تنشر وتعلّق وتدردش وتنشر جدول أسبوعك.",
+  "signInWithPhone": "أكمل برقم الهاتف",
+  "signInWithGoogle": "أكمل بحساب Google",
+  "signInLater": "مو هسه",
+
+  "settingsLanguage": "اللغة",
+  "settingsUiLanguage": "لغة التطبيق",
+  "settingsContentLanguages": "لغات الوصفات",
+  "settingsNumerals": "الأرقام",
+  "settingsNumeralsArabic": "عربية (١٢٣)",
+  "settingsNumeralsLatin": "لاتينية (123)",
+  "settingsIncognito": "لا تظهرني بقوائم المشاهدين",
+  "settingsDataSaver": "توفير البيانات",
+
+  "actionSave": "حفظ",
+  "actionShare": "مشاركة",
+  "actionReport": "إبلاغ",
+  "actionBlock": "حظر",
+  "actionRetry": "حاول مرة ثانية",
+
+  "errorGeneric": "صار خطأ. حاول مرة ثانية.",
+  "errorOffline": "أنت غير متصل. الوصفات المحفوظة تشتغل.",
+
+  "weekdaySaturday": "السبت",
+  "weekdaySunday": "الأحد",
+  "weekdayMonday": "الاثنين",
+  "weekdayTuesday": "الثلاثاء",
+  "weekdayWednesday": "الأربعاء",
+  "weekdayThursday": "الخميس",
+  "weekdayFriday": "الجمعة"
+}

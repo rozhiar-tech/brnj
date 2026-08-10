@@ -1,0 +1,120 @@
+{
+  "indexes": [
+    {
+      "_comment": "Discover feed. One composite index serves the whole ranked feed; the verified boost lives inside `score`, not in a separate query.",
+      "collectionGroup": "recipes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "score", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "_comment": "Following feed — strictly chronological, no ranking, no boost.",
+      "collectionGroup": "recipes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "author.uid", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "_comment": "Search: keyword match narrowed by region, ranked.",
+      "collectionGroup": "recipes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "keywords", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "score", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "_comment": "Browse by region and language, e.g. the regional rails.",
+      "collectionGroup": "recipes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "language", "order": "ASCENDING" },
+        { "fieldPath": "region", "order": "ASCENDING" },
+        { "fieldPath": "score", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "_comment": "Seasonal hubs — Ramadan, Eid, Newroz collections.",
+      "collectionGroup": "recipes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "occasions", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "score", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "_comment": "\"This week in Iraqi kitchens\" — public plans for the current week, most-copied first.",
+      "collectionGroup": "plans",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "visibility", "order": "ASCENDING" },
+        { "fieldPath": "weekStart", "order": "ASCENDING" },
+        { "fieldPath": "stats.copies", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "_comment": "A user's plan archive on their profile.",
+      "collectionGroup": "plans",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "owner.uid", "order": "ASCENDING" },
+        { "fieldPath": "weekStart", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "_comment": "Plans filtered by tag — \"economical week\", \"student budget\".",
+      "collectionGroup": "plans",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "visibility", "order": "ASCENDING" },
+        { "fieldPath": "tags", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "weekStart", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "_comment": "Chat list: every conversation you're in, most recent first.",
+      "collectionGroup": "chats",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "memberIds", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "_comment": "Moderation queue.",
+      "collectionGroup": "reports",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": [
+    {
+      "_comment": "Recipe steps and ingredients are never queried, only read with the document. Exempting them from indexing cuts write cost and index storage on every recipe.",
+      "collectionGroup": "recipes",
+      "fieldPath": "steps",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "recipes",
+      "fieldPath": "ingredients",
+      "indexes": []
+    },
+    {
+      "_comment": "Same for the plan's day array — it's read as part of the document, never filtered on.",
+      "collectionGroup": "plans",
+      "fieldPath": "days",
+      "indexes": []
+    }
+  ]
+}

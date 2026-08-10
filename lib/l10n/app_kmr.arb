@@ -1,0 +1,80 @@
+{
+  "@@locale": "kmr",
+
+  "appName": "برنج",
+
+  "navHome": "سەرەکی",
+  "navCommunities": "کۆمەڵگەه",
+  "navCreate": "زێدەکرن",
+  "navChats": "چات",
+  "navMe": "هەژمارێ من",
+
+  "feedFollowing": "پەیڕەوکری",
+  "feedDiscover": "ڤەدیتن",
+  "thisWeekInKitchens": "ڤێ هەفتێ د مەتبەخێن عێراقێ دا",
+
+  "createRecipe": "ڕەچەتە",
+  "createCooked": "من چێکر",
+  "createPlan": "خشتا هەفتێ",
+  "createQuestion": "پرسیار",
+  "createPhoto": "وێنە",
+
+  "myWeek": "هەفتا من",
+  "planPublish": "بەلاڤکرن",
+  "planCopyToMine": "ڤێ هەفتێ بۆ خۆ کۆپی بکە",
+  "planShoppingList": "لیستا کڕینێ",
+  "planAddDish": "خوارنەکێ زێدە بکە",
+  "planEmptyDay": "تشتەک نەهاتیە دانان",
+  "planVisibilityPublic": "گشتی",
+  "planVisibilityFollowers": "تنێ پەیڕەوکری",
+  "planVisibilityPrivate": "تایبەت",
+
+  "recipeServings": "ژمارا کەسان",
+  "recipeIngredients": "پێکهاتە",
+  "recipeSteps": "گاڤ",
+  "recipeCookMode": "دۆخێ چێکرنێ",
+  "recipeCookedThis": "من چێکر",
+  "recipePrepTime": "{minutes} خولەک ئامادەکرن",
+  "@recipePrepTime": {
+    "placeholders": { "minutes": { "type": "int" } }
+  },
+
+  "statViews": "{count, plural, =0{چو دیتن} =1{١ دیتن} other{{count} دیتن}}",
+  "@statViews": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "verifiedBadge": "پشتراستکری",
+
+  "signInTitle": "هەژمارەکێ چێکە بۆ بەشداریێ",
+  "signInBody": "گەڕان بەلاشە. بۆ بەلاڤکرن و شرۆڤە و چات و بەلاڤکرنا هەفتا خۆ پێدڤی ب هەژمارەکێ هەیە.",
+  "signInWithPhone": "ب ژمارا موبایلێ بەردەوام بە",
+  "signInWithGoogle": "ب هەژمارا Google بەردەوام بە",
+  "signInLater": "نوکە نە",
+
+  "settingsLanguage": "زمان",
+  "settingsUiLanguage": "زمانێ ئەپێ",
+  "settingsContentLanguages": "زمانێ ڕەچەتان",
+  "settingsNumerals": "ژمار",
+  "settingsNumeralsArabic": "عەرەبی (١٢٣)",
+  "settingsNumeralsLatin": "لاتینی (123)",
+  "settingsIncognito": "من د لیستا بینەران دا نیشان نەدە",
+  "settingsDataSaver": "پاراستنا داتایێ",
+
+  "actionSave": "پاراستن",
+  "actionShare": "پارڤەکرن",
+  "actionReport": "ڕاپۆرت",
+  "actionBlock": "بلۆک",
+  "actionRetry": "دیسا هەول بدە",
+
+  "errorGeneric": "خەلەتیەک چێبوو. دیسا هەول بدە.",
+  "errorOffline": "تو ئۆفلاینی. ڕەچەتێن پاراستی کاردکەن.",
+
+  "weekdaySaturday": "شەمی",
+  "weekdaySunday": "ئێکشەم",
+  "weekdayMonday": "دووشەم",
+  "weekdayTuesday": "سێشەم",
+  "weekdayWednesday": "چوارشەم",
+  "weekdayThursday": "پێنجشەم",
+  "weekdayFriday": "ئینی"
+}

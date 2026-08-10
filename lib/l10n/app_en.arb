@@ -1,0 +1,80 @@
+{
+  "@@locale": "en",
+
+  "appName": "Brnj",
+
+  "navHome": "Home",
+  "navCommunities": "Communities",
+  "navCreate": "Create",
+  "navChats": "Chats",
+  "navMe": "Me",
+
+  "feedFollowing": "Following",
+  "feedDiscover": "Discover",
+  "thisWeekInKitchens": "This week in Iraqi kitchens",
+
+  "createRecipe": "Recipe",
+  "createCooked": "I cooked this",
+  "createPlan": "Weekly plan",
+  "createQuestion": "Question",
+  "createPhoto": "Photo",
+
+  "myWeek": "My week",
+  "planPublish": "Publish",
+  "planCopyToMine": "Copy this week to mine",
+  "planShoppingList": "Shopping list",
+  "planAddDish": "Add a dish",
+  "planEmptyDay": "Nothing planned",
+  "planVisibilityPublic": "Public",
+  "planVisibilityFollowers": "Followers only",
+  "planVisibilityPrivate": "Private",
+
+  "recipeServings": "Servings",
+  "recipeIngredients": "Ingredients",
+  "recipeSteps": "Steps",
+  "recipeCookMode": "Cook mode",
+  "recipeCookedThis": "I cooked this",
+  "recipePrepTime": "{minutes} min prep",
+  "@recipePrepTime": {
+    "placeholders": { "minutes": { "type": "int" } }
+  },
+
+  "statViews": "{count, plural, =0{No views} =1{1 view} other{{count} views}}",
+  "@statViews": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "verifiedBadge": "Verified",
+
+  "signInTitle": "Create an account to join in",
+  "signInBody": "Browsing is free. You need an account to post, comment, chat, and publish your week.",
+  "signInWithPhone": "Continue with phone",
+  "signInWithGoogle": "Continue with Google",
+  "signInLater": "Not now",
+
+  "settingsLanguage": "Language",
+  "settingsUiLanguage": "App language",
+  "settingsContentLanguages": "Recipe languages",
+  "settingsNumerals": "Numbers",
+  "settingsNumeralsArabic": "Arabic-Indic (١٢٣)",
+  "settingsNumeralsLatin": "Latin (123)",
+  "settingsIncognito": "Don't show me in viewer lists",
+  "settingsDataSaver": "Data saver",
+
+  "actionSave": "Save",
+  "actionShare": "Share",
+  "actionReport": "Report",
+  "actionBlock": "Block",
+  "actionRetry": "Retry",
+
+  "errorGeneric": "Something went wrong. Try again.",
+  "errorOffline": "You're offline. Saved recipes still work.",
+
+  "weekdaySaturday": "Saturday",
+  "weekdaySunday": "Sunday",
+  "weekdayMonday": "Monday",
+  "weekdayTuesday": "Tuesday",
+  "weekdayWednesday": "Wednesday",
+  "weekdayThursday": "Thursday",
+  "weekdayFriday": "Friday"
+}

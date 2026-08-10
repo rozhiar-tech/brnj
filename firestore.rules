@@ -1,0 +1,263 @@
+rules_version = '2';
+
+// Brnj — Firestore security rules.
+//
+// Two principles run through the whole file:
+//   1. Nothing that affects ranking or reputation is client-writable. stats,
+//      counts, score, verified, and roles are Function-owned. A client that
+//      can write its own view count will write its own view count.
+//   2. Guests are real (anonymous) users, so every rule can assume a uid.
+//      Guests simply fail the isRegistered() check on anything social.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---- helpers ----------------------------------------------------------
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // Anonymous users are signed in but not registered. Browsing is free;
+    // posting is not.
+    function isRegistered() {
+      return signedIn() && request.auth.token.firebase.sign_in_provider != 'anonymous';
+    }
+
+    function isSelf(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    // Set by an admin Function only — never self-serve.
+    function isVerified() {
+      return signedIn() && request.auth.token.verified == true;
+    }
+
+    function isModerator() {
+      return signedIn() && request.auth.token.moderator == true;
+    }
+
+    // The fields a client may never write. Every content rule composes this.
+    function noProtectedFields() {
+      return !request.resource.data.diff(resource.data).affectedKeys()
+        .hasAny(['stats', 'score', 'verified', 'counts', 'roles', 'tier']);
+    }
+
+    function noProtectedFieldsOnCreate() {
+      return !request.resource.data.keys()
+        .hasAny(['stats', 'score', 'counts', 'roles', 'tier']);
+    }
+
+    // Cheap spam brake: a client can't write two documents in the same second.
+    function notTooFast() {
+      return request.time > resource.data.updatedAt + duration.value(1, 's');
+    }
+
+    function isBlockedBy(ownerUid) {
+      return exists(/databases/$(database)/documents/users/$(ownerUid)/blocked/$(request.auth.uid));
+    }
+
+    // ---- users ------------------------------------------------------------
+
+    match /users/{uid} {
+      // Profiles are public so guests can browse authors, but a blocked user
+      // sees nothing.
+      allow read: if signedIn() && !isBlockedBy(uid);
+
+      allow create: if isSelf(uid)
+                    && noProtectedFieldsOnCreate()
+                    && request.resource.data.displayName is string
+                    && request.resource.data.displayName.size() <= 40;
+
+      allow update: if isSelf(uid) && noProtectedFields();
+
+      // Deletion goes through the Auth onDelete Function so the user's content
+      // and viewer records are purged too.
+      allow delete: if false;
+
+      // Owner-only subcollections.
+      match /tokens/{tokenId} {
+        allow read, write: if isSelf(uid);
+      }
+      match /blocked/{blockedUid} {
+        allow read, write: if isSelf(uid);
+      }
+      match /saved/{recipeId} {
+        allow read, write: if isSelf(uid);
+      }
+      match /notifications/{id} {
+        allow read, update, delete: if isSelf(uid);
+        allow create: if false; // Functions only
+      }
+      match /stats/{day} {
+        allow read: if isSelf(uid);
+        allow write: if false; // Functions only
+      }
+
+      // Follow graph is public; you may only write your own edges.
+      match /following/{targetUid} {
+        allow read: if signedIn();
+        allow write: if isSelf(uid) && isRegistered();
+      }
+      match /followers/{followerUid} {
+        allow read: if signedIn();
+        allow write: if false; // mirrored by a Function
+      }
+    }
+
+    // ---- recipes ----------------------------------------------------------
+
+    match /recipes/{recipeId} {
+      function isAuthor() {
+        return signedIn() && resource.data.author.uid == request.auth.uid;
+      }
+
+      allow read: if signedIn()
+                  && (resource.data.status == 'published' || isAuthor() || isModerator());
+
+      allow create: if isRegistered()
+                    && request.resource.data.author.uid == request.auth.uid
+                    // The denormalised verified flag has to match the token,
+                    // or anyone could mint themselves a boost.
+                    && request.resource.data.author.verified == isVerified()
+                    && noProtectedFieldsOnCreate()
+                    && request.resource.data.title is string
+                    && request.resource.data.title.size() > 0
+                    && request.resource.data.title.size() <= 120
+                    && request.resource.data.ingredients.size() <= 80
+                    && request.resource.data.steps.size() <= 60
+                    && request.resource.data.keywords.size() <= 60;
+
+      allow update: if isAuthor() && noProtectedFields();
+      allow delete: if isAuthor() || isModerator();
+
+      match /likes/{uid} {
+        allow read: if signedIn();
+        allow create, delete: if isSelf(uid) && isRegistered();
+        allow update: if false;
+      }
+
+      match /cooked/{uid} {
+        allow read: if signedIn();
+        allow write: if isSelf(uid) && isRegistered();
+      }
+
+      match /comments/{commentId} {
+        allow read: if signedIn();
+        allow create: if isRegistered()
+                      && request.resource.data.author.uid == request.auth.uid
+                      && request.resource.data.text.size() <= 2000;
+        allow update: if signedIn()
+                      && resource.data.author.uid == request.auth.uid
+                      && noProtectedFields();
+        allow delete: if signedIn()
+                      && (resource.data.author.uid == request.auth.uid
+                          || get(/databases/$(database)/documents/recipes/$(recipeId)).data.author.uid == request.auth.uid
+                          || isModerator());
+      }
+
+      // Who viewed. Readable only by the content's author — counts are public,
+      // names are not. See the plan: a visible viewer list changes who is
+      // willing to browse at all.
+      match /viewers/{uid} {
+        allow read: if get(/databases/$(database)/documents/recipes/$(recipeId)).data.author.uid == request.auth.uid
+                    || isModerator();
+        allow write: if false; // written by the aggregation Function
+      }
+    }
+
+    // ---- weekly plans -----------------------------------------------------
+
+    match /plans/{planId} {
+      function isOwner() {
+        return signedIn() && resource.data.owner.uid == request.auth.uid;
+      }
+
+      function follows(ownerUid) {
+        return exists(/databases/$(database)/documents/users/$(request.auth.uid)/following/$(ownerUid));
+      }
+
+      allow read: if signedIn() && (
+                    isOwner()
+                    || isModerator()
+                    || resource.data.visibility == 'public'
+                    || (resource.data.visibility == 'followers' && follows(resource.data.owner.uid))
+                  );
+
+      // The document id is {uid}_{weekStart}. Pinning the id to the caller's
+      // uid is what makes one-plan-per-user-per-week true by construction,
+      // with no query and no transaction.
+      allow create: if isRegistered()
+                    && request.resource.data.owner.uid == request.auth.uid
+                    && planId.split('_')[0] == request.auth.uid
+                    && request.resource.data.owner.verified == isVerified()
+                    && noProtectedFieldsOnCreate()
+                    && request.resource.data.days.size() == 7;
+
+      allow update: if isOwner()
+                    && noProtectedFields()
+                    && request.resource.data.days.size() == 7;
+
+      allow delete: if isOwner() || isModerator();
+
+      match /comments/{commentId} {
+        allow read: if signedIn();
+        allow create: if isRegistered()
+                      && request.resource.data.author.uid == request.auth.uid;
+        allow update, delete: if signedIn()
+                              && (resource.data.author.uid == request.auth.uid || isModerator());
+      }
+
+      match /viewers/{uid} {
+        allow read: if get(/databases/$(database)/documents/plans/$(planId)).data.owner.uid == request.auth.uid
+                    || isModerator();
+        allow write: if false;
+      }
+    }
+
+    // ---- view events ------------------------------------------------------
+
+    // Clients append here; a Function aggregates into stats and viewers, then
+    // deletes. Nobody reads this collection — it's a write-only queue.
+    match /viewEvents/{eventId} {
+      allow create: if signedIn()
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.targetType in ['recipe', 'plan', 'post'];
+      allow read, update, delete: if false;
+    }
+
+    // ---- moderation -------------------------------------------------------
+
+    match /reports/{reportId} {
+      allow create: if isRegistered()
+                    && request.resource.data.reporterId == request.auth.uid;
+      allow read, update: if isModerator();
+      allow delete: if false;
+    }
+
+    match /verificationRequests/{uid} {
+      allow read: if isSelf(uid) || isModerator();
+      allow create: if isSelf(uid) && isRegistered()
+                    && request.resource.data.status == 'pending';
+      allow update: if isModerator();
+      allow delete: if false;
+    }
+
+    // ---- reference data ---------------------------------------------------
+
+    match /ingredients/{id} {
+      allow read: if true; // needed before sign-in for the composer autocomplete
+      allow write: if isModerator();
+    }
+
+    match /config/{doc} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Anything not matched above is closed.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

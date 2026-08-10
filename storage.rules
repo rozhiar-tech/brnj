@@ -1,0 +1,72 @@
+rules_version = '2';
+
+// Bandwidth is the real cost centre, so the size caps here are load-bearing,
+// not paranoia. The client already compresses to ~250KB before upload; these
+// limits catch the paths where it didn't.
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isRegistered() {
+      return signedIn() && request.auth.token.firebase.sign_in_provider != 'anonymous';
+    }
+
+    function isImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+
+    function isAudio() {
+      return request.resource.contentType.matches('audio/.*');
+    }
+
+    // Verified users get a larger ceiling; everyone else is held to what a
+    // compressed 1440px JPEG should weigh.
+    function imageSizeOk() {
+      return request.resource.size < (request.auth.token.verified == true
+        ? 16 * 1024 * 1024
+        : 8 * 1024 * 1024);
+    }
+
+    // Voice notes cap at 2 minutes of AAC ~32kbps mono, which is well under 1MB.
+    function audioSizeOk() {
+      return request.resource.size < 2 * 1024 * 1024;
+    }
+
+    // Paths mirror ownership so the rules stay this short.
+
+    match /users/{uid}/avatar/{fileName} {
+      allow read: if true;
+      allow write: if request.auth.uid == uid && isImage() && imageSizeOk();
+    }
+
+    match /recipes/{recipeId}/{fileName} {
+      allow read: if true;
+      allow write: if isRegistered() && (isImage() || isAudio())
+                   && (isImage() ? imageSizeOk() : audioSizeOk());
+    }
+
+    match /plans/{planId}/{fileName} {
+      allow read: if true;
+      // The plan id is {uid}_{weekStart}, so ownership is checkable from the path.
+      allow write: if isRegistered()
+                   && planId.split('_')[0] == request.auth.uid
+                   && isImage() && imageSizeOk();
+    }
+
+    match /chats/{chatId}/{fileName} {
+      // Chat media is only reachable by someone who already has the URL, and
+      // Firestore rules gate who can read the message carrying it.
+      allow read: if signedIn();
+      allow write: if isRegistered() && (isImage() || isAudio())
+                   && (isImage() ? imageSizeOk() : audioSizeOk());
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,70 @@
+name: brnj
+description: "Brnj — a community recipe app for Iraq."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.9.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # Firebase
+  firebase_core: ^4.13.0
+  firebase_auth: ^6.5.7
+  cloud_firestore: ^6.8.0
+  firebase_storage: ^13.4.6
+  firebase_messaging: ^16.5.0
+  firebase_app_check: ^0.4.6
+  firebase_analytics: ^12.4.6
+  firebase_crashlytics: ^5.2.7
+  firebase_remote_config: ^6.5.6
+  firebase_database: ^12.4.7
+
+  # App
+  flutter_riverpod: ^3.3.2
+  go_router: ^17.2.3
+  intl: any
+  shared_preferences: ^2.5.5
+
+  # Media
+  cached_network_image: ^3.4.1
+  image_picker: ^1.2.2
+  flutter_image_compress: ^2.5.1
+  record: ^6.2.1
+  just_audio: ^0.10.6
+
+  # Misc
+  wakelock_plus: ^1.4.0
+  share_plus: ^12.0.2
+  timeago: ^3.7.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  # Bundled rather than fetched: the app must work on a cold start with no
+  # network, and these faces carry the Kurdish letters (ڵ ڕ ۆ ێ گ چ پ ژ) that
+  # Cairo/Tajawal render badly or not at all.
+  #
+  # Drop the .ttf files into assets/fonts/ and uncomment. Download from
+  # https://github.com/IBM/plex/releases (IBM Plex Sans Arabic).
+  # fonts:
+  #   - family: PlexArabic
+  #     fonts:
+  #       - asset: assets/fonts/IBMPlexSansArabic-Regular.ttf
+  #         weight: 400
+  #       - asset: assets/fonts/IBMPlexSansArabic-Medium.ttf
+  #         weight: 500
+  #       - asset: assets/fonts/IBMPlexSansArabic-SemiBold.ttf
+  #         weight: 600
+  #       - asset: assets/fonts/IBMPlexSansArabic-Bold.ttf
+  #         weight: 700
