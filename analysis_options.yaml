@@ -1,1 +1,19 @@
 include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    # Flutter's Swift Package Manager support copies plugin sources (including
+    # their own tests) here, and the analyser would otherwise report ~900
+    # issues from other people's packages.
+    - build/**
+    - lib/l10n/gen/**
+
+linter:
+  rules:
+    # Three of four locales are RTL. Anything positional is a bug waiting to
+    # happen, so make the analyser catch it rather than a reviewer.
+    - use_colored_box
+    - prefer_const_constructors
+    - prefer_const_declarations
+    - avoid_print
+    - unawaited_futures

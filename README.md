@@ -102,7 +102,7 @@ way.
 
 ## Note on the toolchain
 
-Built against Flutter 3.35.2 / Dart 3.9. The current `freezed` and
-`json_serializable` need Dart 3.10+, so models use hand-written converters —
-which suits Firestore anyway, since `Timestamp` needs custom handling
-regardless. Upgrading Flutter would unlock codegen if you want it.
+Built against Flutter 3.44.9. Models use hand-written converters rather than
+`freezed` / `json_serializable`, which suits Firestore anyway since `Timestamp`
+needs custom handling regardless. Codegen now resolves on this toolchain if you
+decide you want it — it would mainly save `copyWith` boilerplate.

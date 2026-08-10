@@ -147,12 +147,9 @@ abstract final class BrnjTheme {
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
-      pageTransitionsTheme: const PageTransitionsTheme(
-        builders: {
-          TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
-          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-        },
-      ),
+      // Page transitions are left at the Material defaults: since Flutter 3.44
+      // those are predictive-back on Android and Cupertino on iOS, which is
+      // exactly what an override would have specified.
     );
   }
 }
