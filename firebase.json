@@ -12,5 +12,34 @@
     "storage": { "port": 9199 },
     "ui": { "enabled": true, "port": 4000 },
     "singleProjectMode": true
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "brnj-54249",
+          "appId": "1:24550424690:android:39bf259124a9dd0ec502eb",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "brnj-54249",
+          "appId": "1:24550424690:ios:ec03c2ec78046304c502eb",
+          "uploadDebugSymbols": true,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "brnj-54249",
+          "configurations": {
+            "android": "1:24550424690:android:39bf259124a9dd0ec502eb",
+            "ios": "1:24550424690:ios:ec03c2ec78046304c502eb",
+            "web": "1:24550424690:web:431c926912e6c234c502eb"
+          }
+        }
+      }
+    }
   }
 }

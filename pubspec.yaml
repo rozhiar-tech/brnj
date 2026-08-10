@@ -52,19 +52,19 @@ flutter:
   generate: true
 
   # Bundled rather than fetched: the app must work on a cold start with no
-  # network, and these faces carry the Kurdish letters (ڵ ڕ ۆ ێ گ چ پ ژ) that
+  # network, and this face carries the Kurdish letters (ڵ ڕ ۆ ێ گ چ پ ژ) that
   # Cairo/Tajawal render badly or not at all.
   #
-  # Drop the .ttf files into assets/fonts/ and uncomment. Download from
-  # https://github.com/IBM/plex/releases (IBM Plex Sans Arabic).
-  # fonts:
-  #   - family: PlexArabic
-  #     fonts:
-  #       - asset: assets/fonts/IBMPlexSansArabic-Regular.ttf
-  #         weight: 400
-  #       - asset: assets/fonts/IBMPlexSansArabic-Medium.ttf
-  #         weight: 500
-  #       - asset: assets/fonts/IBMPlexSansArabic-SemiBold.ttf
-  #         weight: 600
-  #       - asset: assets/fonts/IBMPlexSansArabic-Bold.ttf
-  #         weight: 700
+  # Only the four weights the type scale actually uses are declared — every
+  # bundled weight ships in the binary whether it's referenced or not.
+  fonts:
+    - family: PlexArabic
+      fonts:
+        - asset: assets/fonts/IBMPlexSansArabic-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/IBMPlexSansArabic-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/IBMPlexSansArabic-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/IBMPlexSansArabic-Bold.ttf
+          weight: 700

@@ -6,10 +6,10 @@ import 'brnj_colors.dart';
 /// from this face, so Kurdish letters (ڵ ڕ ۆ ێ گ چ پ ژ) are drawn properly
 /// rather than falling back to a face that doesn't have them.
 ///
-/// Null until the .ttf files are dropped into assets/fonts/ and the `fonts:`
-/// block in pubspec.yaml is uncommented; until then Flutter's platform default
-/// applies, which is fine for development.
-const String? kAppFontFamily = null; // 'PlexArabic'
+/// Declared in pubspec.yaml at weights 400/500/600/700 — the four the type
+/// scale uses. Unused weights are not bundled, since every declared face ships
+/// in the binary whether anything references it or not.
+const String kAppFontFamily = 'PlexArabic';
 
 abstract final class BrnjTheme {
   static ThemeData light() => _build(Brightness.light);
