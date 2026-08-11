@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../features/home/home_screen.dart';
 import '../features/plan/my_week_screen.dart';
+import '../features/plan/plan_detail_screen.dart';
 import '../features/shell/placeholder_screen.dart';
 import '../features/shell/shell_screen.dart';
 import '../l10n/gen/app_localizations.dart';
@@ -17,7 +18,6 @@ abstract final class Routes {
   static const me = '/me';
 
   static const recipe = '/recipe/:id';
-  static const plan = '/plan/:id';
   static const profile = '/user/:handle';
 
   static String recipeFor(String id) => '/recipe/$id';
@@ -39,6 +39,16 @@ GoRouter createRouter() => GoRouter(
             GoRoute(
               path: Routes.home,
               builder: (context, state) => const HomeScreen(),
+              routes: [
+                // Nested so a plan opens over the Home tab and keeps its back
+                // stack. Also the deep-link target for shared weeks, which
+                // mostly arrive over WhatsApp.
+                GoRoute(
+                  path: 'plan/:id',
+                  builder: (context, state) =>
+                      PlanDetailScreen(planId: state.pathParameters['id']!),
+                ),
+              ],
             ),
           ],
         ),

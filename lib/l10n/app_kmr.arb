@@ -1,24 +1,19 @@
 {
   "@@locale": "kmr",
-
   "appName": "برنج",
-
   "navHome": "سەرەکی",
   "navCommunities": "کۆمەڵگەه",
   "navCreate": "زێدەکرن",
   "navChats": "چات",
   "navMe": "هەژمارێ من",
-
   "feedFollowing": "پەیڕەوکری",
   "feedDiscover": "ڤەدیتن",
   "thisWeekInKitchens": "ڤێ هەفتێ د مەتبەخێن عێراقێ دا",
-
   "createRecipe": "ڕەچەتە",
   "createCooked": "من چێکر",
   "createPlan": "خشتا هەفتێ",
   "createQuestion": "پرسیار",
   "createPhoto": "وێنە",
-
   "myWeek": "هەفتا من",
   "planPublish": "بەلاڤکرن",
   "planCopyToMine": "ڤێ هەفتێ بۆ خۆ کۆپی بکە",
@@ -27,7 +22,11 @@
   "planEmptyDay": "تشتەک نەهاتیە دانان",
   "planAddNamed": "\"{title}\" زێدە بکە",
   "@planAddNamed": {
-    "placeholders": { "title": { "type": "String" } }
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
   },
   "planPickerEmpty": "ناڤێ خوارنێ ل جۆرێ بنڤیسە، یان ڕەچەتان بپارێزە دا ل ڤێرێ هەلبژێری.",
   "planGuestTitle": "خشتا هەفتا خۆ دانە",
@@ -40,7 +39,6 @@
   "planVisibilityPublic": "گشتی",
   "planVisibilityFollowers": "تنێ پەیڕەوکری",
   "planVisibilityPrivate": "تایبەت",
-
   "recipeServings": "ژمارا کەسان",
   "recipeIngredients": "پێکهاتە",
   "recipeSteps": "گاڤ",
@@ -48,16 +46,21 @@
   "recipeCookedThis": "من چێکر",
   "recipePrepTime": "{minutes} خولەک ئامادەکرن",
   "@recipePrepTime": {
-    "placeholders": { "minutes": { "type": "int" } }
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
   },
-
   "statViews": "{count, plural, =0{چو دیتن} =1{١ دیتن} other{{count} دیتن}}",
   "@statViews": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-
   "verifiedBadge": "پشتراستکری",
-
   "signInTitle": "هەژمارەکێ چێکە بۆ بەشداریێ",
   "signInBody": "گەڕان بەلاشە. بۆ بەلاڤکرن و شرۆڤە و چات و بەلاڤکرنا هەفتا خۆ پێدڤی ب هەژمارەکێ هەیە.",
   "signInWithPhone": "ب ژمارا موبایلێ بەردەوام بە",
@@ -70,7 +73,6 @@
   "signInErrorInvalidCode": "کۆد خەلەتە. کۆنترۆل بکە و دیسا هەول بدە.",
   "signInErrorCodeExpired": "دەمێ کۆدی خلاس بوو. کۆدەکێ نی بخوازە.",
   "signInErrorTooMany": "هەولێن پر زێدە. چەند خولەکان بسەکنە و دیسا هەول بدە.",
-
   "settingsLanguage": "زمان",
   "settingsUiLanguage": "زمانێ ئەپێ",
   "settingsContentLanguages": "زمانێ ڕەچەتان",
@@ -79,21 +81,28 @@
   "settingsNumeralsLatin": "لاتینی (123)",
   "settingsIncognito": "من د لیستا بینەران دا نیشان نەدە",
   "settingsDataSaver": "پاراستنا داتایێ",
-
   "actionSave": "پاراستن",
   "actionShare": "پارڤەکرن",
   "actionReport": "ڕاپۆرت",
   "actionBlock": "بلۆک",
   "actionRetry": "دیسا هەول بدە",
-
   "errorGeneric": "خەلەتیەک چێبوو. دیسا هەول بدە.",
   "errorOffline": "تو ئۆفلاینی. ڕەچەتێن پاراستی کاردکەن.",
-
   "weekdaySaturday": "شەمی",
   "weekdaySunday": "ئێکشەم",
   "weekdayMonday": "دووشەم",
   "weekdayTuesday": "سێشەم",
   "weekdayWednesday": "چوارشەم",
   "weekdayThursday": "پێنجشەم",
-  "weekdayFriday": "ئینی"
+  "weekdayFriday": "ئینی",
+  "planCopiedCount": "{count, plural, =0{چو کۆپی} =1{١ کۆپی} other{{count} کۆپی}}",
+  "@planCopiedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "planCopiedConfirmation": "بۆ هەفتا بێت هاتە کۆپیکرن. د هەفتا خۆ دا بگوهۆڕە.",
+  "planRailEmpty": "هێشتا چو هەفتە نەهاتینە بەلاڤکرن. دبیت یا تە یا ئێکێ بیت."
 }

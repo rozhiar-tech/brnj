@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/bootstrap.dart';
 import '../../app/settings.dart';
 import '../../app/theme/brnj_theme.dart';
 import '../../core/iraqi_week.dart';
 import '../../core/numerals.dart';
+import '../../data/models/weekly_plan.dart';
+import '../../data/providers.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../shared/verified_tick.dart';
 
@@ -27,7 +30,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final numerals = ref.watch(numeralStyleProvider);
     final firebase = ref.watch(firebaseStatusProvider);
 
@@ -79,7 +81,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ],
       ),
-      floatingActionButton: theme.platform == TargetPlatform.iOS ? null : null,
     );
   }
 }
@@ -157,27 +158,72 @@ class _ThisWeekRail extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(
-          height: 132,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsetsDirectional.only(start: Gap.lg, end: Gap.lg),
-            itemCount: _samplePlans.length,
-            separatorBuilder: (_, _) => const SizedBox(width: Gap.md),
-            itemBuilder: (context, i) =>
-                _PlanCard(sample: _samplePlans[i], numerals: numerals),
-          ),
-        ),
+        SizedBox(height: 132, child: _PlanRail(numerals: numerals)),
         const SizedBox(height: Gap.lg),
       ],
     );
   }
 }
 
-class _PlanCard extends StatelessWidget {
-  const _PlanCard({required this.sample, required this.numerals});
+/// The public weeks for the selected week, straight from Firestore.
+///
+/// An empty rail is a real state and it says so, rather than showing a
+/// spinner forever or pretending there is content — before launch there
+/// genuinely are no published weeks, and the honest empty state is what tells
+/// you the seeding still has to happen.
+class _PlanRail extends ConsumerWidget {
+  const _PlanRail({required this.numerals});
 
-  final _SamplePlan sample;
+  final NumeralStyle numerals;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final plansAsync = ref.watch(publicWeekPlansProvider);
+    final theme = Theme.of(context);
+
+    return plansAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, _) => Center(
+        child: Text(
+          AppLocalizations.of(context).errorGeneric,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ),
+      data: (plans) {
+        if (plans.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: Gap.lg),
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(
+                AppLocalizations.of(context).planRailEmpty,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.outline,
+                ),
+              ),
+            ),
+          );
+        }
+
+        return ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsetsDirectional.only(start: Gap.lg, end: Gap.lg),
+          itemCount: plans.length,
+          separatorBuilder: (_, _) => const SizedBox(width: Gap.md),
+          itemBuilder: (context, i) =>
+              _PlanCard(plan: plans[i], numerals: numerals),
+        );
+      },
+    );
+  }
+}
+
+class _PlanCard extends StatelessWidget {
+  const _PlanCard({required this.plan, required this.numerals});
+
+  final WeeklyPlan plan;
   final NumeralStyle numerals;
 
   @override
@@ -186,51 +232,55 @@ class _PlanCard extends StatelessWidget {
     return SizedBox(
       width: 200,
       child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(Gap.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 12,
-                    backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                    child: Text(
-                      sample.author.characters.first,
-                      style: theme.textTheme.labelSmall,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => context.go('/plan/${plan.id}'),
+          child: Padding(
+            padding: const EdgeInsets.all(Gap.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 12,
+                      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                      child: Text(
+                        plan.owner.name.characters.first,
+                        style: theme.textTheme.labelSmall,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: Gap.sm),
-                  Flexible(
-                    child: Text(
-                      sample.author,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.labelMedium,
+                    const SizedBox(width: Gap.sm),
+                    Flexible(
+                      child: Text(
+                        plan.owner.name,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.labelMedium,
+                      ),
                     ),
-                  ),
-                  if (sample.verified) ...[
-                    const SizedBox(width: Gap.xs),
-                    const VerifiedTick(size: 14),
+                    if (plan.owner.verified) ...[
+                      const SizedBox(width: Gap.xs),
+                      const VerifiedTick(size: 14),
+                    ],
                   ],
-                ],
-              ),
-              const SizedBox(height: Gap.sm),
-              Text(
-                sample.title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.titleSmall,
-              ),
-              const Spacer(),
-              Text(
-                '${formatCount(sample.dishes, style: numerals)} · '
-                '${formatCount(sample.copies, style: numerals)} ↺',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
                 ),
-              ),
-            ],
+                const SizedBox(height: Gap.sm),
+                Text(
+                  plan.title ?? AppLocalizations.of(context).myWeek,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleSmall,
+                ),
+                const Spacer(),
+                Text(
+                  '${formatCount(plan.dishCount, style: numerals)} · '
+                  '${formatCount(plan.stats.copies, style: numerals)} ↺',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -314,21 +364,6 @@ class _RecipeCard extends StatelessWidget {
 // --- Sample content -------------------------------------------------------
 // Placeholder until the repositories are wired. Real strings, so the layout is
 // tested against the scripts it actually has to render.
-
-class _SamplePlan {
-  const _SamplePlan(this.author, this.title, this.dishes, this.copies, this.verified);
-  final String author;
-  final String title;
-  final int dishes;
-  final int copies;
-  final bool verified;
-}
-
-const _samplePlans = [
-  _SamplePlan('أم علي', 'أسبوع اقتصادي', 9, 214, true),
-  _SamplePlan('ژیان', 'هەفتەی خێرا', 7, 88, false),
-  _SamplePlan('أم حسن', 'أسبوع رمضان', 14, 1203, true),
-];
 
 class _SampleRecipe {
   const _SampleRecipe(this.title, this.author, this.minutes, this.tags, this.verified);

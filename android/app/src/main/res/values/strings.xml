@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        The launcher label. Kept as a resource rather than inline in the
+        manifest so it can be overridden per locale later — a Kurdish or Arabic
+        device may eventually want the mark alone without the Latin spelling.
+    -->
+    <string name="app_name">Brnj برنج</string>
+</resources>

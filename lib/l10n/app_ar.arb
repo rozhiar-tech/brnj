@@ -1,24 +1,19 @@
 {
   "@@locale": "ar",
-
   "appName": "برنج",
-
   "navHome": "الرئيسية",
   "navCommunities": "المجتمعات",
   "navCreate": "إضافة",
   "navChats": "الدردشات",
   "navMe": "حسابي",
-
   "feedFollowing": "المتابَعون",
   "feedDiscover": "اكتشف",
   "thisWeekInKitchens": "هالأسبوع بمطابخ العراق",
-
   "createRecipe": "وصفة",
   "createCooked": "طبختها",
   "createPlan": "جدول الأسبوع",
   "createQuestion": "سؤال",
   "createPhoto": "صورة",
-
   "myWeek": "أسبوعي",
   "planPublish": "نشر",
   "planCopyToMine": "انسخ هالأسبوع لعندي",
@@ -27,7 +22,11 @@
   "planEmptyDay": "ماكو شي مجدول",
   "planAddNamed": "أضف \"{title}\"",
   "@planAddNamed": {
-    "placeholders": { "title": { "type": "String" } }
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
   },
   "planPickerEmpty": "اكتب اسم الأكلة فوق، أو احفظ وصفات حتى تختارها من هنا.",
   "planGuestTitle": "جدول أسبوعك",
@@ -40,7 +39,6 @@
   "planVisibilityPublic": "عام",
   "planVisibilityFollowers": "المتابعين بس",
   "planVisibilityPrivate": "خاص",
-
   "recipeServings": "عدد الأشخاص",
   "recipeIngredients": "المقادير",
   "recipeSteps": "الخطوات",
@@ -48,16 +46,21 @@
   "recipeCookedThis": "طبختها",
   "recipePrepTime": "{minutes} دقيقة تحضير",
   "@recipePrepTime": {
-    "placeholders": { "minutes": { "type": "int" } }
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
   },
-
   "statViews": "{count, plural, =0{ماكو مشاهدات} =1{مشاهدة وحدة} =2{مشاهدتين} few{{count} مشاهدات} other{{count} مشاهدة}}",
   "@statViews": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-
   "verifiedBadge": "موثّق",
-
   "signInTitle": "سوّي حساب حتى تشارك",
   "signInBody": "التصفح مجاني. تحتاج حساب حتى تنشر وتعلّق وتدردش وتنشر جدول أسبوعك.",
   "signInWithPhone": "أكمل برقم الهاتف",
@@ -70,7 +73,6 @@
   "signInErrorInvalidCode": "الكود غلط. تأكد منه وحاول مرة ثانية.",
   "signInErrorCodeExpired": "الكود انتهت صلاحيته. اطلب كود جديد.",
   "signInErrorTooMany": "محاولات وايد. انتظر شوية وحاول مرة ثانية.",
-
   "settingsLanguage": "اللغة",
   "settingsUiLanguage": "لغة التطبيق",
   "settingsContentLanguages": "لغات الوصفات",
@@ -79,21 +81,28 @@
   "settingsNumeralsLatin": "لاتينية (123)",
   "settingsIncognito": "لا تظهرني بقوائم المشاهدين",
   "settingsDataSaver": "توفير البيانات",
-
   "actionSave": "حفظ",
   "actionShare": "مشاركة",
   "actionReport": "إبلاغ",
   "actionBlock": "حظر",
   "actionRetry": "حاول مرة ثانية",
-
   "errorGeneric": "صار خطأ. حاول مرة ثانية.",
   "errorOffline": "أنت غير متصل. الوصفات المحفوظة تشتغل.",
-
   "weekdaySaturday": "السبت",
   "weekdaySunday": "الأحد",
   "weekdayMonday": "الاثنين",
   "weekdayTuesday": "الثلاثاء",
   "weekdayWednesday": "الأربعاء",
   "weekdayThursday": "الخميس",
-  "weekdayFriday": "الجمعة"
+  "weekdayFriday": "الجمعة",
+  "planCopiedCount": "{count, plural, =0{ماكو نسخ} =1{نسخة وحدة} =2{نسختين} few{{count} نسخ} other{{count} نسخة}}",
+  "@planCopiedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "planCopiedConfirmation": "انتسخ للأسبوع الجاي. تكدر تعدله من أسبوعك.",
+  "planRailEmpty": "ماكو جداول منشورة بعد. جدولك يمكن يكون الأول."
 }
