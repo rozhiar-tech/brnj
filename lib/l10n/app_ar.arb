@@ -51,6 +51,13 @@
   "signInWithPhone": "أكمل برقم الهاتف",
   "signInWithGoogle": "أكمل بحساب Google",
   "signInLater": "مو هسه",
+  "signInPhoneHint": "770 123 4567",
+  "signInCodeTitle": "دخّل الكود اللي وصلك",
+  "signInCodeHint": "123456",
+  "signInVerify": "تأكيد",
+  "signInErrorInvalidCode": "الكود غلط. تأكد منه وحاول مرة ثانية.",
+  "signInErrorCodeExpired": "الكود انتهت صلاحيته. اطلب كود جديد.",
+  "signInErrorTooMany": "محاولات وايد. انتظر شوية وحاول مرة ثانية.",
 
   "settingsLanguage": "اللغة",
   "settingsUiLanguage": "لغة التطبيق",

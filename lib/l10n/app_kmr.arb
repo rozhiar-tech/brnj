@@ -51,6 +51,13 @@
   "signInWithPhone": "ب ژمارا موبایلێ بەردەوام بە",
   "signInWithGoogle": "ب هەژمارا Google بەردەوام بە",
   "signInLater": "نوکە نە",
+  "signInPhoneHint": "770 123 4567",
+  "signInCodeTitle": "کۆدێ کو مە بۆ تە شاند بنڤیسە",
+  "signInCodeHint": "123456",
+  "signInVerify": "پشتراستکرن",
+  "signInErrorInvalidCode": "کۆد خەلەتە. کۆنترۆل بکە و دیسا هەول بدە.",
+  "signInErrorCodeExpired": "دەمێ کۆدی خلاس بوو. کۆدەکێ نی بخوازە.",
+  "signInErrorTooMany": "هەولێن پر زێدە. چەند خولەکان بسەکنە و دیسا هەول بدە.",
 
   "settingsLanguage": "زمان",
   "settingsUiLanguage": "زمانێ ئەپێ",

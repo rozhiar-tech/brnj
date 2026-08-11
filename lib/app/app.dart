@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../data/providers.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'localization.dart';
 import 'router.dart';
@@ -15,8 +18,30 @@ class BrnjApp extends ConsumerStatefulWidget {
   ConsumerState<BrnjApp> createState() => _BrnjAppState();
 }
 
-class _BrnjAppState extends ConsumerState<BrnjApp> {
+class _BrnjAppState extends ConsumerState<BrnjApp> with WidgetsBindingObserver {
   late final _router = createRouter();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Someone who reads five recipes and then swipes the app away should still
+    // be counted, so the buffered view events are flushed on the way out
+    // rather than waiting for a timer that will never fire.
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.detached) {
+      unawaited(ref.read(viewTrackerProvider).flush());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

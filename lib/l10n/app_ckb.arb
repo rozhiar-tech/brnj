@@ -51,6 +51,13 @@
   "signInWithPhone": "بە ژمارەی مۆبایل بەردەوام بە",
   "signInWithGoogle": "بە هەژماری Google بەردەوام بە",
   "signInLater": "ئێستا نا",
+  "signInPhoneHint": "770 123 4567",
+  "signInCodeTitle": "ئەو کۆدە بنووسە کە بۆمان ناردیت",
+  "signInCodeHint": "123456",
+  "signInVerify": "پشتڕاستکردنەوە",
+  "signInErrorInvalidCode": "کۆدەکە هەڵەیە. بیپشکنە و دووبارە هەوڵ بدە.",
+  "signInErrorCodeExpired": "کۆدەکە بەسەرچووە. داوای کۆدێکی نوێ بکە.",
+  "signInErrorTooMany": "هەوڵی زۆر. چەند خولەکێک چاوەڕێ بکە و دووبارە هەوڵ بدە.",
 
   "settingsLanguage": "زمان",
   "settingsUiLanguage": "زمانی ئەپ",

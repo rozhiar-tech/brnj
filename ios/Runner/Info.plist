@@ -66,5 +66,21 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<!-- REVERSED_CLIENT_ID from GoogleService-Info.plist. Google Sign-In needs
+	     it to hand control back after the consent screen, and Firebase phone
+	     auth needs it for the reCAPTCHA fallback when APNs is unavailable —
+	     which is most of the time in the simulator. Without it, both flows
+	     leave the user stranded in Safari. -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.24550424690-gkk5snoob4gritv4c8uruvjusgi5ge4g</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

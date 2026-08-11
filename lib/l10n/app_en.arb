@@ -51,6 +51,13 @@
   "signInWithPhone": "Continue with phone",
   "signInWithGoogle": "Continue with Google",
   "signInLater": "Not now",
+  "signInPhoneHint": "770 123 4567",
+  "signInCodeTitle": "Enter the code we sent you",
+  "signInCodeHint": "123456",
+  "signInVerify": "Verify",
+  "signInErrorInvalidCode": "That code isn't right. Check it and try again.",
+  "signInErrorCodeExpired": "That code expired. Ask for a new one.",
+  "signInErrorTooMany": "Too many attempts. Wait a few minutes and try again.",
 
   "settingsLanguage": "Language",
   "settingsUiLanguage": "App language",

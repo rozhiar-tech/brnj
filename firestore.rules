@@ -48,11 +48,6 @@ service cloud.firestore {
         .hasAny(['stats', 'score', 'counts', 'roles', 'tier']);
     }
 
-    // Cheap spam brake: a client can't write two documents in the same second.
-    function notTooFast() {
-      return request.time > resource.data.updatedAt + duration.value(1, 's');
-    }
-
     function isBlockedBy(ownerUid) {
       return exists(/databases/$(database)/documents/users/$(ownerUid)/blocked/$(request.auth.uid));
     }
