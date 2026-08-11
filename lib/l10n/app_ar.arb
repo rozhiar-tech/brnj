@@ -25,6 +25,18 @@
   "planShoppingList": "قائمة المشتريات",
   "planAddDish": "أضف أكلة",
   "planEmptyDay": "ماكو شي مجدول",
+  "planAddNamed": "أضف \"{title}\"",
+  "@planAddNamed": {
+    "placeholders": { "title": { "type": "String" } }
+  },
+  "planPickerEmpty": "اكتب اسم الأكلة فوق، أو احفظ وصفات حتى تختارها من هنا.",
+  "planGuestTitle": "جدول أسبوعك",
+  "planGuestBody": "رتّب شنو راح تطبخ، يوم بيوم. سوّي حساب حتى يبقى محفوظ — وحتى الطباخين الباقين يقدرون ينسخونه.",
+  "mealLunch": "غداء",
+  "mealDinner": "عشاء",
+  "mealBreakfast": "فطور",
+  "mealSuhoor": "سحور",
+  "mealIftar": "إفطار",
   "planVisibilityPublic": "عام",
   "planVisibilityFollowers": "المتابعين بس",
   "planVisibilityPrivate": "خاص",

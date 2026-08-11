@@ -25,6 +25,18 @@
   "planShoppingList": "Shopping list",
   "planAddDish": "Add a dish",
   "planEmptyDay": "Nothing planned",
+  "planAddNamed": "Add \"{title}\"",
+  "@planAddNamed": {
+    "placeholders": { "title": { "type": "String" } }
+  },
+  "planPickerEmpty": "Type a dish name above, or save recipes to pick them here.",
+  "planGuestTitle": "Plan your week",
+  "planGuestBody": "Lay out what you're cooking, day by day. Create an account to keep it — and to let other cooks copy it.",
+  "mealLunch": "Lunch",
+  "mealDinner": "Dinner",
+  "mealBreakfast": "Breakfast",
+  "mealSuhoor": "Suhoor",
+  "mealIftar": "Iftar",
   "planVisibilityPublic": "Public",
   "planVisibilityFollowers": "Followers only",
   "planVisibilityPrivate": "Private",

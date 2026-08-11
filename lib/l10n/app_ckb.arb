@@ -25,6 +25,18 @@
   "planShoppingList": "لیستی کڕین",
   "planAddDish": "خواردنێک زیاد بکە",
   "planEmptyDay": "هیچ دانەنراوە",
+  "planAddNamed": "\"{title}\" زیاد بکە",
+  "@planAddNamed": {
+    "placeholders": { "title": { "type": "String" } }
+  },
+  "planPickerEmpty": "ناوی خواردنەکە لە سەرەوە بنووسە، یان ڕێسەت پاشەکەوت بکە بۆ ئەوەی لێرە هەڵیبژێریت.",
+  "planGuestTitle": "خشتەی هەفتەکەت دابنێ",
+  "planGuestBody": "ڕیز بکە چی لێدەنێیت، ڕۆژ بە ڕۆژ. هەژمارێک دروست بکە بۆ پاراستنی — و بۆ ئەوەی چێشتلێنەرانی تر کۆپی بکەن.",
+  "mealLunch": "نانی نیوەڕۆ",
+  "mealDinner": "نانی ئێوارە",
+  "mealBreakfast": "نانی بەیانی",
+  "mealSuhoor": "بەیانیخواردن",
+  "mealIftar": "ئیفتار",
   "planVisibilityPublic": "گشتی",
   "planVisibilityFollowers": "تەنها شوێنکەوتووان",
   "planVisibilityPrivate": "تایبەت",

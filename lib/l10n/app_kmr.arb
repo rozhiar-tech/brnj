@@ -25,6 +25,18 @@
   "planShoppingList": "لیستا کڕینێ",
   "planAddDish": "خوارنەکێ زێدە بکە",
   "planEmptyDay": "تشتەک نەهاتیە دانان",
+  "planAddNamed": "\"{title}\" زێدە بکە",
+  "@planAddNamed": {
+    "placeholders": { "title": { "type": "String" } }
+  },
+  "planPickerEmpty": "ناڤێ خوارنێ ل جۆرێ بنڤیسە، یان ڕەچەتان بپارێزە دا ل ڤێرێ هەلبژێری.",
+  "planGuestTitle": "خشتا هەفتا خۆ دانە",
+  "planGuestBody": "ڕێز بکە تو دێ چی چێکەی، ڕۆژ ب ڕۆژ. هەژمارەکێ چێکە دا بمینیت — و دا چێکەرێن دی کۆپی بکەن.",
+  "mealLunch": "فراڤین",
+  "mealDinner": "شیڤ",
+  "mealBreakfast": "تاشتێ",
+  "mealSuhoor": "پاشیڤ",
+  "mealIftar": "فتار",
   "planVisibilityPublic": "گشتی",
   "planVisibilityFollowers": "تنێ پەیڕەوکری",
   "planVisibilityPrivate": "تایبەت",

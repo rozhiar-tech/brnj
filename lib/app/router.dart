@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/home/home_screen.dart';
+import '../features/plan/my_week_screen.dart';
 import '../features/shell/placeholder_screen.dart';
 import '../features/shell/shell_screen.dart';
 import '../l10n/gen/app_localizations.dart';
@@ -72,11 +73,16 @@ GoRouter createRouter() => GoRouter(
           routes: [
             GoRoute(
               path: Routes.me,
-              builder: (context, state) => PlaceholderScreen(
-                title: AppLocalizations.of(context).navMe,
-                icon: Icons.person_outline,
-                note: 'Profile, my week, saved recipes, and stats.',
-              ),
+              // Until the profile screen exists, the Me tab opens straight
+              // onto the week — it's the part of the profile people actually
+              // maintain, and shipping it behind a placeholder helps nobody.
+              builder: (context, state) => const MyWeekScreen(),
+              routes: [
+                GoRoute(
+                  path: 'week',
+                  builder: (context, state) => const MyWeekScreen(),
+                ),
+              ],
             ),
           ],
         ),
