@@ -63,13 +63,13 @@ class DefaultFirebaseOptions {
     projectId: 'brnj-54249',
     storageBucket: 'brnj-54249.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCZP59rbNfhByc7LSYvv4KDYj09g6mtN1E',
     appId: '1:24550424690:ios:ec03c2ec78046304c502eb',
     messagingSenderId: '24550424690',
     projectId: 'brnj-54249',
     storageBucket: 'brnj-54249.firebasestorage.app',
+    androidClientId: '24550424690-51ufkbmhh4sjtuij3m1eq616co1mdmd8.apps.googleusercontent.com',
     iosClientId: '24550424690-gkk5snoob4gritv4c8uruvjusgi5ge4g.apps.googleusercontent.com',
     iosBundleId: 'com.brnj.brnj',
   );
