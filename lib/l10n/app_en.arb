@@ -104,5 +104,7 @@
     }
   },
   "planCopiedConfirmation": "Copied to next week. Edit it in your week.",
-  "planRailEmpty": "No weeks published yet. Yours could be the first."
+  "planRailEmpty": "No weeks published yet. Yours could be the first.",
+  "routeNotFoundTitle": "This page isn't here",
+  "routeNotFoundBody": "The link may be old, or the page may have been removed."
 }

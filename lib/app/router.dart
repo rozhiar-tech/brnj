@@ -5,6 +5,7 @@ import '../features/home/home_screen.dart';
 import '../features/plan/my_week_screen.dart';
 import '../features/plan/plan_detail_screen.dart';
 import '../features/shell/placeholder_screen.dart';
+import '../features/shell/route_not_found_screen.dart';
 import '../features/shell/shell_screen.dart';
 import '../l10n/gen/app_localizations.dart';
 
@@ -30,6 +31,10 @@ final _rootKey = GlobalKey<NavigatorState>();
 GoRouter createRouter() => GoRouter(
   navigatorKey: _rootKey,
   initialLocation: Routes.home,
+  // go_router's default fallback is untranslated and overflows on a phone, so
+  // a routing miss reports itself as a layout error instead of as a miss.
+  errorBuilder: (context, state) =>
+      RouteNotFoundScreen(uri: state.uri, error: state.error),
   routes: [
     StatefulShellRoute.indexedStack(
       builder: (context, state, shell) => ShellScreen(navigationShell: shell),
