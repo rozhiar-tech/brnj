@@ -23,10 +23,21 @@ service firebase.storage {
       return request.resource.contentType.matches('audio/.*');
     }
 
+    // Almost nobody carries this claim, and reading a key that is absent from
+    // the token errors the whole expression rather than evaluating false —
+    // taking down every rule that composes it. The `in` check is what makes
+    // the absent case survivable. (The same mistake denied every avatar
+    // upload until it was found.)
+    function isVerified() {
+      return signedIn()
+        && 'verified' in request.auth.token
+        && request.auth.token.verified == true;
+    }
+
     // Verified users get a larger ceiling; everyone else is held to what a
     // compressed 1440px JPEG should weigh.
     function imageSizeOk() {
-      return request.resource.size < (request.auth.token.verified == true
+      return request.resource.size < (isVerified()
         ? 16 * 1024 * 1024
         : 8 * 1024 * 1024);
     }
@@ -40,7 +51,13 @@ service firebase.storage {
 
     match /users/{uid}/avatar/{fileName} {
       allow read: if true;
-      allow write: if request.auth.uid == uid && isImage() && imageSizeOk();
+      // signedIn() first: request.auth is null for an unauthenticated caller,
+      // so reaching straight for request.auth.uid errors instead of denying.
+      allow write: if signedIn()
+                   && request.auth.uid == uid
+                   && isImage()
+                   && imageSizeOk();
+      allow delete: if signedIn() && request.auth.uid == uid;
     }
 
     match /recipes/{recipeId}/{fileName} {
