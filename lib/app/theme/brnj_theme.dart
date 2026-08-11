@@ -101,16 +101,24 @@ abstract final class BrnjTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       ),
+      // Height is themed; width is the layout's business.
+      //
+      // `Size.fromHeight(52)` looks like it only sets height, but it is
+      // `Size(double.infinity, 52)` — an infinite *minimum width*. That is
+      // harmless wherever the parent bounds the width (a Column, a ListView),
+      // and it throws the moment a button lands somewhere width is unbounded,
+      // such as a Row. Callers that want a full-width button say so with a
+      // stretched cross axis or a SizedBox.
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          minimumSize: const Size.fromHeight(52),
+          minimumSize: const Size(64, 52),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          minimumSize: const Size.fromHeight(52),
+          minimumSize: const Size(64, 52),
           side: BorderSide(color: hairline),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         ),

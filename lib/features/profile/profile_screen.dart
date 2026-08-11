@@ -85,9 +85,12 @@ class _GuestProfile extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: Gap.xl),
-          FilledButton(
-            onPressed: () => requireAccount(context, ref),
-            child: Text(l10n.signInWithPhone),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: () => requireAccount(context, ref),
+              child: Text(l10n.signInWithPhone),
+            ),
           ),
         ],
       ),

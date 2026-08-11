@@ -298,16 +298,21 @@ class _ActionBarState extends ConsumerState<_ActionBar> {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(Gap.lg),
-        child: FilledButton.icon(
-          onPressed: _copying || isMine ? null : _copy,
-          icon: _copying
-              ? const SizedBox(
-                  height: 18,
-                  width: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.copy_all_outlined),
-          label: Text(l10n.planCopyToMine),
+        // Full width is a deliberate choice here, not an accident of the
+        // theme: copying a week is the one action this screen exists for.
+        child: SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            onPressed: _copying || isMine ? null : _copy,
+            icon: _copying
+                ? const SizedBox(
+                    height: 18,
+                    width: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.copy_all_outlined),
+            label: Text(l10n.planCopyToMine),
+          ),
         ),
       ),
     );
