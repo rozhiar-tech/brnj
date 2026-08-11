@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1260 480">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0C1211"/>
+      <stop offset="1" stop-color="#0A0D0C"/>
+    </linearGradient>
+  </defs>
+  <rect width="1260" height="480" fill="url(#bg)"/>
+
+  <g transform="translate(80,142) scale(1.2)">
+    <path d="M 44 96 C 44 142, 78 168, 120 168 C 162 168, 196 142, 196 96" fill="none" stroke="#4ED9B0" stroke-width="13" stroke-linecap="round"/>
+    <path d="M 120 162 C 100 138, 142 116, 118 90 C 98 69, 138 55, 121 38" fill="none" stroke="#4ED9B0" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="120" cy="196" r="9" fill="#D9A855"/>
+  </g>
+
+  <text x="460" y="235" font-family="Fraunces" font-weight="600" font-size="150" fill="#F4EFE6">Brnj</text>
+  <text x="463" y="318" font-family="Amiri" font-weight="700" font-size="72" fill="#4ED9B0" direction="rtl">برنج</text>
+
+  <line x1="463" y1="386" x2="1190" y2="386" stroke="#2A302D" stroke-width="1.5"/>
+
+  <text x="463" y="426" font-family="JetBrains Mono" font-size="21" letter-spacing="3" fill="#D9A855">RECIPES</text>
+  <text x="620" y="426" font-family="JetBrains Mono" font-size="21" letter-spacing="3" fill="#6B7570">·</text>
+  <text x="650" y="426" font-family="JetBrains Mono" font-size="21" letter-spacing="3" fill="#D9A855">COMMUNITY</text>
+  <text x="860" y="426" font-family="JetBrains Mono" font-size="21" letter-spacing="3" fill="#6B7570">·</text>
+  <text x="890" y="426" font-family="JetBrains Mono" font-size="21" letter-spacing="3" fill="#D9A855">KITCHEN TABLE TALK</text>
+</svg>
