@@ -10,6 +10,7 @@ import 'models/weekly_plan.dart';
 import 'repositories/auth_repository.dart';
 import 'repositories/plan_repository.dart';
 import 'repositories/recipe_repository.dart';
+import 'repositories/user_repository.dart';
 import 'repositories/view_tracker.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) => AuthRepository());
@@ -17,6 +18,7 @@ final recipeRepositoryProvider = Provider<RecipeRepository>(
   (ref) => RecipeRepository(),
 );
 final planRepositoryProvider = Provider<PlanRepository>((ref) => PlanRepository());
+final userRepositoryProvider = Provider<UserRepository>((ref) => UserRepository());
 
 final viewTrackerProvider = Provider<ViewTracker>((ref) {
   final tracker = ViewTracker(prefs: ref.watch(sharedPreferencesProvider));

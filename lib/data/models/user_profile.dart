@@ -44,6 +44,18 @@ class UserPrivacy {
     'showRealName': showRealName,
     'incognito': incognito,
   };
+
+  UserPrivacy copyWith({
+    DmMode? dmMode,
+    bool? discoverable,
+    bool? showRealName,
+    bool? incognito,
+  }) => UserPrivacy(
+    dmMode: dmMode ?? this.dmMode,
+    discoverable: discoverable ?? this.discoverable,
+    showRealName: showRealName ?? this.showRealName,
+    incognito: incognito ?? this.incognito,
+  );
 }
 
 class UserCounts {

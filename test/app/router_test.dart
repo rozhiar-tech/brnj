@@ -59,6 +59,31 @@ void main() {
     expect(tester.takeException(), isNull, reason: 'the screen must not overflow');
   });
 
+  testWidgets('every named sub-route resolves', (tester) async {
+    await pumpApp(tester);
+    final context = tester.element(find.byType(Navigator).first);
+
+    // These are reachable only by tapping through the profile, so a typo in a
+    // path would otherwise surface as a "Page Not Found" in someone's hands.
+    for (final location in [
+      '/me',
+      '/me/week',
+      '/me/edit',
+      '/me/settings',
+      '/me/verification',
+      '/plan/some_2026-08-15',
+    ]) {
+      GoRouter.of(context).go(location);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(
+        find.byType(RouteNotFoundScreen),
+        findsNothing,
+        reason: '$location did not resolve',
+      );
+    }
+  });
+
   testWidgets('each destination navigates without falling through', (tester) async {
     await pumpApp(tester);
 

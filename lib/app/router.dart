@@ -4,6 +4,10 @@ import 'package:go_router/go_router.dart';
 import '../features/home/home_screen.dart';
 import '../features/plan/my_week_screen.dart';
 import '../features/plan/plan_detail_screen.dart';
+import '../features/profile/edit_profile_screen.dart';
+import '../features/profile/profile_screen.dart';
+import '../features/profile/settings_screen.dart';
+import '../features/profile/verification_screen.dart';
 import '../features/shell/placeholder_screen.dart';
 import '../features/shell/route_not_found_screen.dart';
 import '../features/shell/shell_screen.dart';
@@ -88,14 +92,23 @@ GoRouter createRouter() => GoRouter(
           routes: [
             GoRoute(
               path: Routes.me,
-              // Until the profile screen exists, the Me tab opens straight
-              // onto the week — it's the part of the profile people actually
-              // maintain, and shipping it behind a placeholder helps nobody.
-              builder: (context, state) => const MyWeekScreen(),
+              builder: (context, state) => const ProfileScreen(),
               routes: [
                 GoRoute(
                   path: 'week',
                   builder: (context, state) => const MyWeekScreen(),
+                ),
+                GoRoute(
+                  path: 'edit',
+                  builder: (context, state) => const EditProfileScreen(),
+                ),
+                GoRoute(
+                  path: 'settings',
+                  builder: (context, state) => const SettingsScreen(),
+                ),
+                GoRoute(
+                  path: 'verification',
+                  builder: (context, state) => const VerificationScreen(),
                 ),
               ],
             ),

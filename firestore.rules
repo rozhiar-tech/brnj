@@ -105,6 +105,26 @@ service cloud.firestore {
       }
     }
 
+    // ---- handles ----------------------------------------------------------
+
+    // One document per claimed handle, id = the handle itself. Uniqueness is a
+    // property of the document id, not of a query, so two people claiming the
+    // same name in the same instant cannot both succeed.
+    match /handles/{handle} {
+      // Public so the composer can tell you a name is taken before you submit.
+      allow read: if true;
+
+      // create fails if the document already exists, which is the whole
+      // mechanism. Handles are never updated — changing one is a delete plus a
+      // create, so the old name is genuinely released.
+      allow create: if isRegistered()
+                    && request.resource.data.uid == request.auth.uid
+                    && handle.matches('^[a-z0-9_]{3,20}$');
+
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+      allow update: if false;
+    }
+
     // ---- recipes ----------------------------------------------------------
 
     match /recipes/{recipeId} {
