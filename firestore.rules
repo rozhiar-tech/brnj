@@ -29,12 +29,17 @@ service cloud.firestore {
     }
 
     // Set by an admin Function only — never self-serve.
+    //
+    // Read through token.get() with a default: almost nobody has these claims,
+    // and reaching for a key that isn't on the token makes the whole rule
+    // error out rather than evaluate false. That failure mode is silent and
+    // takes every rule composing it down with it.
     function isVerified() {
-      return signedIn() && request.auth.token.verified == true;
+      return signedIn() && request.auth.token.get('verified', false) == true;
     }
 
     function isModerator() {
-      return signedIn() && request.auth.token.moderator == true;
+      return signedIn() && request.auth.token.get('moderator', false) == true;
     }
 
     // The fields a client may never write. Every content rule composes this.
@@ -107,8 +112,14 @@ service cloud.firestore {
         return signedIn() && resource.data.author.uid == request.auth.uid;
       }
 
+      // Same null guard as plans: a listener attached to a recipe that has been
+      // deleted, or a stale share link, should resolve to "not there" rather
+      // than to a permission error.
       allow read: if signedIn()
-                  && (resource.data.status == 'published' || isAuthor() || isModerator());
+                  && (resource == null
+                      || resource.data.status == 'published'
+                      || isAuthor()
+                      || isModerator());
 
       allow create: if isRegistered()
                     && request.resource.data.author.uid == request.auth.uid
@@ -168,16 +179,31 @@ service cloud.firestore {
         return signedIn() && resource.data.owner.uid == request.auth.uid;
       }
 
+      // Ownership from the document id, which works before the document
+      // exists. The id is {uid}_{weekStart} and creation pins that prefix to
+      // the caller, so the path is as trustworthy as the payload.
+      function ownsPath() {
+        return signedIn() && planId.split('_')[0] == request.auth.uid;
+      }
+
       function follows(ownerUid) {
         return exists(/databases/$(database)/documents/users/$(request.auth.uid)/following/$(ownerUid));
       }
 
-      allow read: if signedIn() && (
-                    isOwner()
-                    || isModerator()
-                    || resource.data.visibility == 'public'
-                    || (resource.data.visibility == 'followers' && follows(resource.data.owner.uid))
-                  );
+      // The editor listens to the current user's plan document before it
+      // exists — the first write happens when a dish is added, not when the
+      // screen opens. For a missing document `resource` is null, so any rule
+      // reaching for resource.data errors and the listener fails with
+      // permission-denied instead of an empty snapshot. Hence the path check
+      // first, and a null guard before every resource.data access.
+      allow read: if ownsPath()
+                  || isModerator()
+                  || (resource != null && (
+                       isOwner()
+                       || resource.data.visibility == 'public'
+                       || (resource.data.visibility == 'followers'
+                           && follows(resource.data.owner.uid))
+                     ));
 
       // The document id is {uid}_{weekStart}. Pinning the id to the caller's
       // uid is what makes one-plan-per-user-per-week true by construction,

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -43,7 +44,8 @@ class MyWeekScreen extends ConsumerWidget {
                 ? _GuestPrompt(week: week)
                 : planAsync.when(
                     loading: () => const Center(child: CircularProgressIndicator()),
-                    error: (_, _) => _ErrorState(
+                    error: (error, _) => _ErrorState(
+                      error: error,
                       onRetry: () => ref.invalidate(myWeekProvider),
                     ),
                     data: (plan) => plan == null
@@ -377,21 +379,43 @@ class _PublishBar extends ConsumerWidget {
 }
 
 class _ErrorState extends StatelessWidget {
-  const _ErrorState({required this.onRetry});
+  const _ErrorState({required this.onRetry, this.error});
 
   final VoidCallback onRetry;
+  final Object? error;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+
+    if (kDebugMode && error != null) {
+      debugPrint('My week failed to load: $error');
+    }
+
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(l10n.errorGeneric),
-          const SizedBox(height: Gap.md),
-          OutlinedButton(onPressed: onRetry, child: Text(l10n.actionRetry)),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(Gap.xl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(l10n.errorGeneric, textAlign: TextAlign.center),
+            const SizedBox(height: Gap.md),
+            OutlinedButton(onPressed: onRetry, child: Text(l10n.actionRetry)),
+            // A bare "Retry" tells nobody anything when the real cause is a
+            // rejected read. Debug builds surface it rather than hiding it.
+            if (kDebugMode && error != null) ...[
+              const SizedBox(height: Gap.xl),
+              SelectableText(
+                '$error',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.outline,
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
