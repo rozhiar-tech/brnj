@@ -1,11 +1,11 @@
 {
-    "name": "brnj",
-    "short_name": "brnj",
+    "name": "Brnj برنج",
+    "short_name": "Brnj",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#0A0D0C",
+    "theme_color": "#0D6A64",
+    "description": "A community recipe app for Iraq.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

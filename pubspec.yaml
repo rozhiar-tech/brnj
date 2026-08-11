@@ -47,6 +47,29 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.4
+
+# Regenerate with: dart run flutter_launcher_icons
+flutter_launcher_icons:
+  # iOS and legacy Android use the full square artwork, corners and all.
+  image_path: "assets/icon/app_icon.png"
+  android: true
+  ios: true
+  # iOS rejects icons with an alpha channel at App Store submission.
+  remove_alpha_ios: true
+
+  # Android adaptive icons are two layers the launcher masks to whatever shape
+  # the device uses, so the artwork is supplied separately from the ground.
+  adaptive_icon_background: "#0F1A17"
+  adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
+  # Android 13+ themed icons: recoloured from the user's wallpaper.
+  adaptive_icon_monochrome: "assets/icon/app_icon_monochrome.png"
+
+  web:
+    generate: true
+    image_path: "assets/icon/app_icon.png"
+    background_color: "#0A0D0C"
+    theme_color: "#0D6A64"
 
 flutter:
   uses-material-design: true

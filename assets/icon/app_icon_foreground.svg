@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!--
+    Android adaptive-icon foreground: transparent, artwork centred and scaled to
+    ~85% of the canvas: flutter_launcher_icons wraps this in a 16% inset, so the
+    mark lands at ~58% of the final layer, inside the guaranteed-visible zone. The
+    launcher masks this to a circle, squircle, or teardrop depending on the
+    device, and anything outside that zone can be cropped.
+  -->
+  <g transform="translate(-54.8,-60) scale(2.59)">
+    <path d="M 44 96 C 44 142, 78 168, 120 168 C 162 168, 196 142, 196 96" fill="none" stroke="#4ED9B0" stroke-width="14" stroke-linecap="round"/>
+    <path d="M 120 162 C 100 138, 142 116, 118 90 C 98 69, 138 55, 121 38" fill="none" stroke="#4ED9B0" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="120" cy="196" r="10" fill="#D9A855"/>
+  </g>
+</svg>

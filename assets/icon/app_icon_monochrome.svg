@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!--
+    Android 13+ themed icon. The launcher recolours this to match the user's
+    wallpaper palette, so only the alpha channel carries information — the mark
+    is drawn flat white and the brass dot loses its colour by design.
+  -->
+  <g transform="translate(-54.8,-60) scale(2.59)">
+    <path d="M 44 96 C 44 142, 78 168, 120 168 C 162 168, 196 142, 196 96" fill="none" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round"/>
+    <path d="M 120 162 C 100 138, 142 116, 118 90 C 98 69, 138 55, 121 38" fill="none" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="120" cy="196" r="10" fill="#FFFFFF"/>
+  </g>
+</svg>
