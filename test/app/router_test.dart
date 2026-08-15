@@ -72,6 +72,10 @@ void main() {
       '/me/settings',
       '/me/verification',
       '/plan/some_2026-08-15',
+      '/me/recipes',
+      '/create/recipe',
+      '/create/recipe/abc123',
+      '/recipe/abc123',
     ]) {
       GoRouter.of(context).go(location);
       await tester.pump();

@@ -52,3 +52,10 @@ firebase-debug.log
 
 # Generated localisations
 lib/l10n/gen/
+
+# Rules test harness
+test_rules/node_modules/
+test_rules/package-lock.json
+firebase-debug.log
+firestore-debug.log
+ui-debug.log

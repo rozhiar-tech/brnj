@@ -16,6 +16,11 @@ class RecipeRepository {
 
   // --- reading -------------------------------------------------------------
 
+  Future<Recipe?> getRecipe(String id) async {
+    final doc = await _recipes.doc(id).get();
+    return doc.exists ? Recipe.fromDoc(doc) : null;
+  }
+
   Stream<Recipe?> watchRecipe(String id) => _recipes
       .doc(id)
       .snapshots()

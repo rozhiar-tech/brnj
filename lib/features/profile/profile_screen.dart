@@ -199,7 +199,7 @@ class _ProfileBody extends ConsumerWidget {
           leading: const Icon(Icons.menu_book_outlined),
           title: Text(l10n.profileMyRecipes),
           trailing: const Icon(Icons.chevron_right),
-          onTap: () {},
+          onTap: () => context.go('/me/recipes'),
         ),
         if (!profile.verified)
           ListTile(

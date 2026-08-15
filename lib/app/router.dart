@@ -8,6 +8,9 @@ import '../features/profile/edit_profile_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/profile/settings_screen.dart';
 import '../features/profile/verification_screen.dart';
+import '../features/recipe/composer/recipe_composer_screen.dart';
+import '../features/recipe/my_recipes_screen.dart';
+import '../features/recipe/recipe_detail_screen.dart';
 import '../features/shell/placeholder_screen.dart';
 import '../features/shell/route_not_found_screen.dart';
 import '../features/shell/shell_screen.dart';
@@ -40,6 +43,20 @@ GoRouter createRouter() => GoRouter(
   errorBuilder: (context, state) =>
       RouteNotFoundScreen(uri: state.uri, error: state.error),
   routes: [
+    // The composer sits outside the shell: it is a full-screen task, and the
+    // bottom bar has nothing to offer while you are writing a recipe. Pushed
+    // rather than gone to, so back returns to wherever it was opened from.
+    GoRoute(
+      path: '/create/recipe',
+      builder: (context, state) => const RecipeComposerScreen(),
+      routes: [
+        GoRoute(
+          path: ':id',
+          builder: (context, state) =>
+              RecipeComposerScreen(draftId: state.pathParameters['id']),
+        ),
+      ],
+    ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, shell) => ShellScreen(navigationShell: shell),
       branches: [
@@ -56,6 +73,11 @@ GoRouter createRouter() => GoRouter(
                   path: 'plan/:id',
                   builder: (context, state) =>
                       PlanDetailScreen(planId: state.pathParameters['id']!),
+                ),
+                GoRoute(
+                  path: 'recipe/:id',
+                  builder: (context, state) =>
+                      RecipeDetailScreen(recipeId: state.pathParameters['id']!),
                 ),
               ],
             ),
@@ -109,6 +131,10 @@ GoRouter createRouter() => GoRouter(
                 GoRoute(
                   path: 'verification',
                   builder: (context, state) => const VerificationScreen(),
+                ),
+                GoRoute(
+                  path: 'recipes',
+                  builder: (context, state) => const MyRecipesScreen(),
                 ),
               ],
             ),

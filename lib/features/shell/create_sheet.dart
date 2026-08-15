@@ -1,7 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/theme/brnj_theme.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../auth/sign_in_sheet.dart';
 
 /// The five things a person can make. Recipe and Weekly plan are the two
 /// social objects; the rest are low-effort posts that keep the feed warm
@@ -12,37 +17,52 @@ void showCreateSheet(BuildContext context) {
     showDragHandle: true,
     builder: (context) {
       final l10n = AppLocalizations.of(context);
-      return SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _CreateOption(
-              icon: Icons.menu_book_outlined,
-              label: l10n.createRecipe,
-              onTap: () => Navigator.pop(context),
-            ),
-            _CreateOption(
-              icon: Icons.local_fire_department_outlined,
-              label: l10n.createCooked,
-              onTap: () => Navigator.pop(context),
-            ),
-            _CreateOption(
-              icon: Icons.calendar_month_outlined,
-              label: l10n.createPlan,
-              onTap: () => Navigator.pop(context),
-            ),
-            _CreateOption(
-              icon: Icons.help_outline,
-              label: l10n.createQuestion,
-              onTap: () => Navigator.pop(context),
-            ),
-            _CreateOption(
-              icon: Icons.photo_outlined,
-              label: l10n.createPhoto,
-              onTap: () => Navigator.pop(context),
-            ),
-            const SizedBox(height: Gap.sm),
-          ],
+
+      // Creating anything needs an account. The gate signs the person in and
+      // then completes what they were doing, rather than dropping them back
+      // on the feed to find the button again.
+      Future<void> go(WidgetRef ref, String route) async {
+        final navigator = Navigator.of(context);
+        if (!await requireAccount(context, ref)) return;
+        navigator.pop();
+        // Not awaited: the pushed route's result is nothing this sheet needs,
+        // and the sheet is already gone by the time it returns.
+        if (context.mounted) unawaited(context.push(route));
+      }
+
+      return Consumer(
+        builder: (context, ref, _) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _CreateOption(
+                icon: Icons.menu_book_outlined,
+                label: l10n.createRecipe,
+                onTap: () => go(ref, '/create/recipe'),
+              ),
+              _CreateOption(
+                icon: Icons.local_fire_department_outlined,
+                label: l10n.createCooked,
+                onTap: () => Navigator.pop(context),
+              ),
+              _CreateOption(
+                icon: Icons.calendar_month_outlined,
+                label: l10n.createPlan,
+                onTap: () => go(ref, '/me/week'),
+              ),
+              _CreateOption(
+                icon: Icons.help_outline,
+                label: l10n.createQuestion,
+                onTap: () => Navigator.pop(context),
+              ),
+              _CreateOption(
+                icon: Icons.photo_outlined,
+                label: l10n.createPhoto,
+                onTap: () => Navigator.pop(context),
+              ),
+              const SizedBox(height: Gap.sm),
+            ],
+          ),
         ),
       );
     },

@@ -10,6 +10,7 @@ import '../../core/numerals.dart';
 import '../../data/models/weekly_plan.dart';
 import '../../data/providers.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../../shared/recipe_card.dart';
 import '../../shared/verified_tick.dart';
 
 enum _Feed { following, discover }
@@ -52,8 +53,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 padding: const EdgeInsets.fromLTRB(Gap.lg, 0, Gap.lg, Gap.sm),
                 child: SegmentedButton<_Feed>(
                   segments: [
-                    ButtonSegment(value: _Feed.following, label: Text(l10n.feedFollowing)),
-                    ButtonSegment(value: _Feed.discover, label: Text(l10n.feedDiscover)),
+                    ButtonSegment(
+                      value: _Feed.following,
+                      label: Text(l10n.feedFollowing),
+                    ),
+                    ButtonSegment(
+                      value: _Feed.discover,
+                      label: Text(l10n.feedDiscover),
+                    ),
                   ],
                   selected: {_feed},
                   showSelectedIcon: false,
@@ -68,17 +75,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
           SliverToBoxAdapter(child: _ThisWeekRail(numerals: numerals)),
 
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(Gap.lg, Gap.sm, Gap.lg, Gap.xxl),
-            sliver: SliverList.separated(
-              itemCount: _sampleFeed.length,
-              separatorBuilder: (_, _) => const SizedBox(height: Gap.lg),
-              itemBuilder: (context, i) => _RecipeCard(
-                sample: _sampleFeed[i],
-                numerals: numerals,
-              ),
-            ),
-          ),
+          _FeedSliver(numerals: numerals),
         ],
       ),
     );
@@ -104,7 +101,10 @@ class _SetupBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.build_outlined, color: theme.colorScheme.onSecondaryContainer),
+          Icon(
+            Icons.build_outlined,
+            color: theme.colorScheme.onSecondaryContainer,
+          ),
           const SizedBox(width: Gap.md),
           Expanded(
             child: Text(
@@ -244,7 +244,8 @@ class _PlanCard extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 12,
-                      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                      backgroundColor:
+                          theme.colorScheme.surfaceContainerHighest,
                       child: Text(
                         plan.owner.name.characters.first,
                         style: theme.textTheme.labelSmall,
@@ -288,94 +289,71 @@ class _PlanCard extends StatelessWidget {
   }
 }
 
-class _RecipeCard extends StatelessWidget {
-  const _RecipeCard({required this.sample, required this.numerals});
+/// The Discover feed.
+///
+/// Real recipes now — the sample cards that used to sit here were the last
+/// piece of fiction on the main screen, and an honest empty state is more use
+/// than a fake full one.
+class _FeedSliver extends ConsumerWidget {
+  const _FeedSliver({required this.numerals});
 
-  final _SampleRecipe sample;
   final NumeralStyle numerals;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 4:3 is the shape food photography wants. Real cards load the 400px
-          // thumbnail variant here, never the full-size image.
-          AspectRatio(
-            aspectRatio: 4 / 3,
-            child: ColoredBox(
-              color: theme.colorScheme.surfaceContainerHighest,
-              child: Center(
-                child: Icon(
-                  Icons.restaurant,
-                  size: 32,
-                  color: theme.colorScheme.outline,
-                ),
+    final feedAsync = ref.watch(discoverFeedProvider);
+
+    return feedAsync.when(
+      loading: () => const SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.all(Gap.xxl),
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ),
+      error: (_, _) => SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.all(Gap.xxl),
+          child: Center(child: Text(l10n.errorGeneric)),
+        ),
+      ),
+      data: (recipes) {
+        if (recipes.isEmpty) {
+          return SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(Gap.xxl),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.restaurant_menu,
+                    size: 40,
+                    color: theme.colorScheme.outline,
+                  ),
+                  const SizedBox(height: Gap.md),
+                  Text(
+                    l10n.feedEmpty,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               ),
             ),
+          );
+        }
+
+        return SliverPadding(
+          padding: const EdgeInsets.fromLTRB(Gap.lg, Gap.sm, Gap.lg, Gap.xxl),
+          sliver: SliverList.separated(
+            itemCount: recipes.length,
+            separatorBuilder: (_, _) => const SizedBox(height: Gap.lg),
+            itemBuilder: (context, i) =>
+                RecipeCard(recipe: recipes[i], numerals: numerals),
           ),
-          Padding(
-            padding: const EdgeInsets.all(Gap.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(sample.title, style: theme.textTheme.titleMedium),
-                const SizedBox(height: Gap.xs),
-                Row(
-                  children: [
-                    Text(
-                      sample.author,
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    if (sample.verified) ...[
-                      const SizedBox(width: Gap.xs),
-                      const VerifiedTick(size: 14),
-                    ],
-                    const Spacer(),
-                    Text(
-                      '${formatCount(sample.minutes, style: numerals)} min',
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: Gap.md),
-                Wrap(
-                  spacing: Gap.sm,
-                  children: [
-                    for (final tag in sample.tags) Chip(label: Text(tag)),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
-
-// --- Sample content -------------------------------------------------------
-// Placeholder until the repositories are wired. Real strings, so the layout is
-// tested against the scripts it actually has to render.
-
-class _SampleRecipe {
-  const _SampleRecipe(this.title, this.author, this.minutes, this.tags, this.verified);
-  final String title;
-  final String author;
-  final int minutes;
-  final List<String> tags;
-  final bool verified;
-}
-
-const _sampleFeed = [
-  _SampleRecipe('دولمة بغدادية', 'أم علي', 95, ['بغدادي', 'غداء'], true),
-  _SampleRecipe('کوفتەی شۆربا', 'ژیان', 60, ['کوردی', 'شۆربا'], false),
-  _SampleRecipe('تشريب باقلاء', 'أبو مصطفى', 45, ['بصراوي', 'فطور'], false),
-];

@@ -338,28 +338,38 @@ class Recipe {
   );
 
   Recipe copyWith({
+    String? id,
     String? title,
+    String? language,
     String? description,
     String? coverUrl,
+    List<String>? gallery,
+    Region? region,
+    List<String>? tags,
+    List<String>? occasions,
+    Difficulty? difficulty,
+    CostBand? costBand,
+    int? prepMinutes,
+    int? cookMinutes,
+    int? servings,
     List<Ingredient>? ingredients,
     List<RecipeStep>? steps,
     RecipeStatus? status,
-    int? servings,
   }) => Recipe(
-    id: id,
+    id: id ?? this.id,
     author: author,
     title: title ?? this.title,
-    language: language,
+    language: language ?? this.language,
     description: description ?? this.description,
     coverUrl: coverUrl ?? this.coverUrl,
-    gallery: gallery,
-    region: region,
-    tags: tags,
-    occasions: occasions,
-    difficulty: difficulty,
-    costBand: costBand,
-    prepMinutes: prepMinutes,
-    cookMinutes: cookMinutes,
+    gallery: gallery ?? this.gallery,
+    region: region ?? this.region,
+    tags: tags ?? this.tags,
+    occasions: occasions ?? this.occasions,
+    difficulty: difficulty ?? this.difficulty,
+    costBand: costBand ?? this.costBand,
+    prepMinutes: prepMinutes ?? this.prepMinutes,
+    cookMinutes: cookMinutes ?? this.cookMinutes,
     servings: servings ?? this.servings,
     ingredients: ingredients ?? this.ingredients,
     steps: steps ?? this.steps,
@@ -369,4 +379,17 @@ class Recipe {
     createdAt: createdAt,
     updatedAt: updatedAt,
   );
+
+  /// What still has to be filled in before this can be published.
+  ///
+  /// Returned as keys rather than sentences so the composer can localise them
+  /// and point at the step that owns each one.
+  List<String> get publishBlockers => [
+    if (title.trim().isEmpty) 'title',
+    if (coverUrl == null) 'cover',
+    if (ingredients.isEmpty) 'ingredients',
+    if (steps.where((s) => s.text.trim().isNotEmpty).isEmpty) 'steps',
+  ];
+
+  bool get canPublish => publishBlockers.isEmpty;
 }
