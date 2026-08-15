@@ -10,6 +10,7 @@ import '../../core/numerals.dart';
 import '../../data/models/weekly_plan.dart';
 import '../../data/providers.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../../shared/error_view.dart';
 import '../../shared/recipe_card.dart';
 import '../../shared/verified_tick.dart';
 
@@ -183,14 +184,7 @@ class _PlanRail extends ConsumerWidget {
 
     return plansAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, _) => Center(
-        child: Text(
-          AppLocalizations.of(context).errorGeneric,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ),
+      error: (error, _) => ErrorView(error: error),
       data: (plans) {
         if (plans.isEmpty) {
           return Padding(
@@ -312,10 +306,13 @@ class _FeedSliver extends ConsumerWidget {
           child: Center(child: CircularProgressIndicator()),
         ),
       ),
-      error: (_, _) => SliverToBoxAdapter(
-        child: Padding(
-          padding: const EdgeInsets.all(Gap.xxl),
-          child: Center(child: Text(l10n.errorGeneric)),
+      error: (error, _) => SliverToBoxAdapter(
+        child: SizedBox(
+          height: 260,
+          child: ErrorView(
+            error: error,
+            onRetry: () => ref.invalidate(discoverFeedProvider),
+          ),
         ),
       ),
       data: (recipes) {

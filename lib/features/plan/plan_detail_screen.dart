@@ -9,6 +9,7 @@ import '../../data/models/weekly_plan.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/view_tracker.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../../shared/error_view.dart';
 import '../../shared/verified_tick.dart';
 import '../auth/sign_in_sheet.dart';
 
@@ -65,7 +66,7 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
       appBar: AppBar(),
       body: planAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(child: Text(l10n.errorGeneric)),
+        error: (error, _) => ErrorView(error: error),
         data: (plan) => plan == null
             ? Center(child: Text(l10n.errorGeneric))
             : _PlanBody(plan: plan),

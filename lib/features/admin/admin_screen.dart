@@ -7,6 +7,7 @@ import '../../data/models/user_profile.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/admin_repository.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../../shared/error_view.dart';
 import '../profile/profile_screen.dart';
 
 final _verificationQueueProvider = StreamProvider<List<VerificationRequest>>(
@@ -510,12 +511,5 @@ class _QueueError extends StatelessWidget {
   final Object error;
 
   @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(Gap.xxl),
-        child: Text('$error', textAlign: TextAlign.center),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => ErrorView(error: error);
 }

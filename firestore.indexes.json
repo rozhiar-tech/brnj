@@ -177,6 +177,67 @@
           "order": "ASCENDING"
         }
       ]
+    },
+    {
+      "_comment": "My recipes, drafts included. Dropping the status filter means the (status, author.uid, createdAt) index no longer applies — a composite index only serves a query that uses its leading fields.",
+      "collectionGroup": "recipes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "author.uid",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "_comment": "Plans rail filtered by tag — \"economical week\", \"student budget\".",
+      "collectionGroup": "plans",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "visibility",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "weekStart",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "tags",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "stats.copies",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "_comment": "Plans rail filtered by region.",
+      "collectionGroup": "plans",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "visibility",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "weekStart",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "region",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "stats.copies",
+          "order": "DESCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": [

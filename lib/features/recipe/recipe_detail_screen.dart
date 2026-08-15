@@ -10,6 +10,7 @@ import '../../data/models/recipe.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/view_tracker.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../../shared/error_view.dart';
 import '../../shared/verified_tick.dart';
 import '../auth/sign_in_sheet.dart';
 import 'composer/composer_labels.dart';
@@ -69,7 +70,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
     return Scaffold(
       body: recipeAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(child: Text(l10n.errorGeneric)),
+        error: (error, _) => ErrorView(error: error),
         data: (recipe) => recipe == null
             ? Center(child: Text(l10n.errorGeneric))
             : _Body(

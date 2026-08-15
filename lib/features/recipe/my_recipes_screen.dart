@@ -7,6 +7,7 @@ import '../../app/theme/brnj_theme.dart';
 import '../../data/models/recipe.dart';
 import '../../data/providers.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../../shared/error_view.dart';
 import '../../shared/recipe_card.dart';
 
 /// Everything this person has written, drafts first.
@@ -27,7 +28,10 @@ class MyRecipesScreen extends ConsumerWidget {
       appBar: AppBar(title: Text(l10n.profileMyRecipes)),
       body: recipesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(child: Text(l10n.errorGeneric)),
+        error: (error, _) => ErrorView(
+          error: error,
+          onRetry: () => ref.invalidate(myRecipesProvider),
+        ),
         data: (recipes) {
           if (recipes.isEmpty) {
             return Center(
