@@ -184,7 +184,13 @@ class RecipeRepository {
         .collection('saved')
         .doc(recipeId);
     return saved
-        ? doc.set({'at': FieldValue.serverTimestamp()})
+        ? doc.set({
+            // Duplicated from the document id on purpose: the nightly recount
+            // counts saves with a collection-group query, and a collection
+            // group cannot be filtered by a subcollection's own document id.
+            'recipeId': recipeId,
+            'at': FieldValue.serverTimestamp(),
+          })
         : doc.delete();
   }
 
