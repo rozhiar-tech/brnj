@@ -9,6 +9,7 @@ import '../../core/numerals.dart';
 import '../../data/models/weekly_plan.dart';
 import '../../data/providers.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../../shared/option_sheet.dart';
 import '../auth/sign_in_sheet.dart';
 import 'add_dish_sheet.dart';
 import 'week_header.dart';
@@ -341,26 +342,19 @@ class _PublishBar extends ConsumerWidget {
   }
 
   Future<void> _publish(BuildContext context, WidgetRef ref) async {
-    final visibility = await showModalBottomSheet<PlanVisibility>(
-      context: context,
-      showDragHandle: true,
-      builder: (context) {
-        final l10n = AppLocalizations.of(context);
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (final option in PlanVisibility.values)
-                ListTile(
-                  leading: Icon(_visibilityIcon(option)),
-                  title: Text(_visibilityLabel(l10n, option)),
-                  selected: option == plan.visibility,
-                  onTap: () => Navigator.pop(context, option),
-                ),
-            ],
+    final l10n = AppLocalizations.of(context);
+    final visibility = await showOptionSheet<PlanVisibility>(
+      context,
+      title: l10n.planPublish,
+      selected: plan.visibility,
+      options: [
+        for (final option in PlanVisibility.values)
+          SheetOption(
+            value: option,
+            label: _visibilityLabel(l10n, option),
+            icon: _visibilityIcon(option),
           ),
-        );
-      },
+      ],
     );
     if (visibility == null) return;
 

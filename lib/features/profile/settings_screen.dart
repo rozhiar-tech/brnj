@@ -12,6 +12,7 @@ import '../../data/models/user_profile.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../../shared/option_sheet.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -155,32 +156,20 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  /// Single-choice sheet.
-  ///
-  /// Flutter 3.44 deprecated per-tile `groupValue`/`onChanged` in favour of a
-  /// [RadioGroup] ancestor owning the selection, so the group is declared once
-  /// here rather than repeated on every tile.
+  /// Single-choice sheet. Shares the scrollable, height-capped sheet with the
+  /// rest of the app so no list of options can outgrow its container.
   static Future<T?> _pickOne<T>(
     BuildContext context, {
     required T? selected,
     required List<(T value, String label)> options,
   }) {
-    return showModalBottomSheet<T>(
-      context: context,
-      showDragHandle: true,
-      builder: (context) => SafeArea(
-        child: RadioGroup<T>(
-          groupValue: selected,
-          onChanged: (value) => Navigator.pop(context, value),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (final (value, label) in options)
-                RadioListTile<T>(title: Text(label), value: value),
-            ],
-          ),
-        ),
-      ),
+    return showOptionSheet<T>(
+      context,
+      selected: selected,
+      options: [
+        for (final (value, label) in options)
+          SheetOption(value: value, label: label),
+      ],
     );
   }
 

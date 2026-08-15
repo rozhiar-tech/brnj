@@ -140,84 +140,88 @@ class _SignInSheetState extends ConsumerState<_SignInSheet> {
         top: Gap.sm,
         bottom: MediaQuery.viewInsetsOf(context).bottom + Gap.xl,
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            onCodeStep ? l10n.signInCodeTitle : l10n.signInTitle,
-            style: theme.textTheme.headlineSmall,
-          ),
-          const SizedBox(height: Gap.sm),
-          Text(
-            l10n.signInBody,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: Gap.xl),
-
-          if (onCodeStep) ...[
-            TextField(
-              controller: _codeController,
-              autofocus: true,
-              // Latin keypad regardless of locale: people type 123 even when
-              // they read ١٢٣, and an Arabic-Indic keypad generates complaints.
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(6),
-              ],
-              textDirection: TextDirection.ltr,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.headlineSmall?.copyWith(letterSpacing: 8),
-              decoration: InputDecoration(hintText: l10n.signInCodeHint),
-            ),
-            const SizedBox(height: Gap.lg),
-            FilledButton(
-              onPressed: _busy ? null : _confirmCode,
-              child: _busy ? const _Spinner() : Text(l10n.signInVerify),
-            ),
-          ] else ...[
-            TextField(
-              controller: _phoneController,
-              autofocus: true,
-              keyboardType: TextInputType.phone,
-              textDirection: TextDirection.ltr,
-              decoration: InputDecoration(
-                hintText: l10n.signInPhoneHint,
-                prefixText: '+964 ',
-              ),
-            ),
-            const SizedBox(height: Gap.lg),
-            FilledButton(
-              onPressed: _busy ? null : _sendCode,
-              child: _busy ? const _Spinner() : Text(l10n.signInWithPhone),
-            ),
-            const SizedBox(height: Gap.md),
-            OutlinedButton.icon(
-              onPressed: _busy ? null : _google,
-              icon: const Icon(Icons.g_mobiledata, size: 28),
-              label: Text(l10n.signInWithGoogle),
-            ),
-          ],
-
-          if (_error != null) ...[
-            const SizedBox(height: Gap.md),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
             Text(
-              _messageFor(_error!, l10n),
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.error,
+              onCodeStep ? l10n.signInCodeTitle : l10n.signInTitle,
+              style: theme.textTheme.headlineSmall,
+            ),
+            const SizedBox(height: Gap.sm),
+            Text(
+              l10n.signInBody,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-          ],
+            const SizedBox(height: Gap.xl),
 
-          const SizedBox(height: Gap.sm),
-          TextButton(
-            onPressed: _busy ? null : () => Navigator.of(context).pop(false),
-            child: Text(l10n.signInLater),
-          ),
-        ],
+            if (onCodeStep) ...[
+              TextField(
+                controller: _codeController,
+                autofocus: true,
+                // Latin keypad regardless of locale: people type 123 even when
+                // they read ١٢٣, and an Arabic-Indic keypad generates complaints.
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(6),
+                ],
+                textDirection: TextDirection.ltr,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  letterSpacing: 8,
+                ),
+                decoration: InputDecoration(hintText: l10n.signInCodeHint),
+              ),
+              const SizedBox(height: Gap.lg),
+              FilledButton(
+                onPressed: _busy ? null : _confirmCode,
+                child: _busy ? const _Spinner() : Text(l10n.signInVerify),
+              ),
+            ] else ...[
+              TextField(
+                controller: _phoneController,
+                autofocus: true,
+                keyboardType: TextInputType.phone,
+                textDirection: TextDirection.ltr,
+                decoration: InputDecoration(
+                  hintText: l10n.signInPhoneHint,
+                  prefixText: '+964 ',
+                ),
+              ),
+              const SizedBox(height: Gap.lg),
+              FilledButton(
+                onPressed: _busy ? null : _sendCode,
+                child: _busy ? const _Spinner() : Text(l10n.signInWithPhone),
+              ),
+              const SizedBox(height: Gap.md),
+              OutlinedButton.icon(
+                onPressed: _busy ? null : _google,
+                icon: const Icon(Icons.g_mobiledata, size: 28),
+                label: Text(l10n.signInWithGoogle),
+              ),
+            ],
+
+            if (_error != null) ...[
+              const SizedBox(height: Gap.md),
+              Text(
+                _messageFor(_error!, l10n),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.error,
+                ),
+              ),
+            ],
+
+            const SizedBox(height: Gap.sm),
+            TextButton(
+              onPressed: _busy ? null : () => Navigator.of(context).pop(false),
+              child: Text(l10n.signInLater),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -86,8 +86,13 @@ class _AddDishSheetState extends ConsumerState<_AddDishSheet> {
         right: Gap.lg,
         bottom: MediaQuery.viewInsetsOf(context).bottom + Gap.lg,
       ),
+      // The keyboard is open the whole time this sheet is used, so the height
+      // has to come out of what is left rather than out of the full screen.
       child: SizedBox(
-        height: MediaQuery.sizeOf(context).height * 0.7,
+        height:
+            (MediaQuery.sizeOf(context).height -
+                MediaQuery.viewInsetsOf(context).bottom) *
+            0.72,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -221,7 +226,11 @@ class _RecipeList extends StatelessWidget {
             ),
             child: const Icon(Icons.restaurant, size: 20),
           ),
-          title: Text(recipe.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+          title: Text(
+            recipe.title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
           subtitle: Text(recipe.author.name),
           onTap: () => onPick(recipe),
         );

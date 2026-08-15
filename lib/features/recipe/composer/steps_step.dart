@@ -7,6 +7,7 @@ import '../../../app/theme/brnj_theme.dart';
 import '../../../data/models/recipe.dart';
 import '../../../data/providers.dart';
 import '../../../l10n/gen/app_localizations.dart';
+import '../../../shared/option_sheet.dart';
 
 /// Step 3: how it's made.
 ///
@@ -153,25 +154,17 @@ class _StepCardState extends ConsumerState<_StepCard> {
 
   Future<void> _pickTimer() async {
     final l10n = AppLocalizations.of(context);
-    final minutes = await showModalBottomSheet<int>(
-      context: context,
-      showDragHandle: true,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: Text(l10n.composerNoTimer),
-              onTap: () => Navigator.pop(context, 0),
-            ),
-            for (final m in [1, 2, 3, 5, 10, 15, 20, 30, 45, 60, 90, 120])
-              ListTile(
-                title: Text(l10n.composerTimerMinutes(m)),
-                onTap: () => Navigator.pop(context, m),
-              ),
-          ],
-        ),
-      ),
+    final minutes = await showOptionSheet<int>(
+      context,
+      title: l10n.composerStepTimer,
+      selected: widget.step.timerSeconds == null
+          ? 0
+          : widget.step.timerSeconds! ~/ 60,
+      options: [
+        SheetOption(value: 0, label: l10n.composerNoTimer),
+        for (final m in [1, 2, 3, 5, 10, 15, 20, 30, 45, 60, 90, 120])
+          SheetOption(value: m, label: l10n.composerTimerMinutes(m)),
+      ],
     );
     if (minutes == null) return;
     _emit(timerSeconds: minutes * 60, clearTimer: minutes == 0);
