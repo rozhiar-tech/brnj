@@ -91,6 +91,24 @@ void main() {
     }
   });
 
+  testWidgets('a Firebase Auth callback URL is swallowed, not routed', (tester) async {
+    // Completing a phone sign-in returns through the app's reversed-client-id
+    // scheme. Flutter forwards it to the router, which has no route for it —
+    // so the person landed on "This page isn't here" on top of a sign-in that
+    // had actually worked.
+    await pumpApp(tester);
+    final context = tester.element(find.byType(Navigator).first);
+
+    GoRouter.of(context).go(
+      'com.googleusercontent.apps.24550424690-abc://firebaseauth/link'
+      '?deep_link_id=https%3A%2F%2Fbrnj.firebaseapp.com',
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.byType(RouteNotFoundScreen), findsNothing);
+  });
+
   testWidgets('each destination navigates without falling through', (tester) async {
     await pumpApp(tester);
 

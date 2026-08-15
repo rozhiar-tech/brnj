@@ -71,6 +71,17 @@
 	     auth needs it for the reCAPTCHA fallback when APNs is unavailable —
 	     which is most of the time in the simulator. Without it, both flows
 	     leave the user stranded in Safari. -->
+	<!-- Flutter forwards every incoming URL to the router. Firebase Auth's
+	     reCAPTCHA and Google sign-in callbacks come back through the
+	     reversed-client-id scheme below, and go_router has no route for them —
+	     so completing a phone sign-in landed on "This page isn't here" while
+	     Firebase quietly finished the job underneath.
+
+	     The app has no universal links yet, so nothing is lost by turning the
+	     forwarding off. Turn it back on when share links are set up, and route
+	     around the auth callbacks explicitly. -->
+	<key>FlutterDeepLinkingEnabled</key>
+	<false/>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

@@ -38,6 +38,26 @@ abstract final class Routes {
 
 final _rootKey = GlobalKey<NavigatorState>();
 
+/// Swallows URLs that were never meant for the router.
+///
+/// Firebase Auth returns from reCAPTCHA and Google sign-in through the app's
+/// own `com.googleusercontent.apps.…://firebaseauth/link?…` scheme. Firebase
+/// consumes those itself; the router seeing them at all is an accident of
+/// Flutter forwarding every incoming URL. Routing one produced a "This page
+/// isn't here" screen on top of a sign-in that had actually succeeded.
+///
+/// The platform-side fix is `FlutterDeepLinkingEnabled=false` in Info.plist.
+/// This is the belt to that pair of braces, and it also covers Android, where
+/// the same callbacks arrive by a different path.
+///
+/// In-app navigation always produces a scheme-less URI, so anything carrying a
+/// non-web scheme is by definition not ours.
+String? _ignoreForeignSchemes(BuildContext context, GoRouterState state) {
+  final scheme = state.uri.scheme;
+  if (scheme.isEmpty || scheme == 'http' || scheme == 'https') return null;
+  return Routes.home;
+}
+
 GoRouter createRouter() => GoRouter(
   navigatorKey: _rootKey,
   initialLocation: Routes.home,
@@ -45,6 +65,8 @@ GoRouter createRouter() => GoRouter(
   // a routing miss reports itself as a layout error instead of as a miss.
   errorBuilder: (context, state) =>
       RouteNotFoundScreen(uri: state.uri, error: state.error),
+
+  redirect: _ignoreForeignSchemes,
   routes: [
     // The composer sits outside the shell: it is a full-screen task, and the
     // bottom bar has nothing to offer while you are writing a recipe. Pushed
