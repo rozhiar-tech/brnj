@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -21,6 +23,7 @@ class SettingsScreen extends ConsumerWidget {
     final activeLocale = ref.watch(activeLocaleProvider);
     final isGuest = ref.watch(isGuestProvider);
     final profile = ref.watch(myProfileProvider).value;
+    final uid = ref.watch(currentUidProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settingsTitle)),
@@ -100,6 +103,28 @@ class SettingsScreen extends ConsumerWidget {
               onTap: () => context.go('/me'),
             )
           else ...[
+            // Debug builds only. Granting the first moderator claim needs this
+            // uid on the command line, and hunting for it in the Firebase
+            // console is a worse first five minutes than a tap to copy.
+            if (kDebugMode && uid != null)
+              ListTile(
+                leading: const Icon(Icons.badge_outlined),
+                title: Text(l10n.settingsUserId),
+                subtitle: Text(
+                  uid,
+                  style: const TextStyle(fontSize: 11),
+                  textDirection: TextDirection.ltr,
+                ),
+                trailing: const Icon(Icons.copy, size: 18),
+                onTap: () async {
+                  await Clipboard.setData(ClipboardData(text: uid));
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(l10n.settingsUserIdCopied)),
+                    );
+                  }
+                },
+              ),
             ListTile(
               leading: const Icon(Icons.logout),
               title: Text(l10n.settingsSignOut),

@@ -258,5 +258,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "settingsUserId": "معرّف حسابك",
+  "settingsUserIdCopied": "انتسخ"
 }

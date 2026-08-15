@@ -258,5 +258,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "settingsUserId": "Your user ID",
+  "settingsUserIdCopied": "Copied"
 }

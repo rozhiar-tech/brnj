@@ -39,19 +39,31 @@ The incremental counters stay simple and fast; `nightlyRankAndReconcile`
 recounts from the subcollections, which are the truth. Drift heals within a day
 rather than accumulating.
 
-## Granting the first moderator
+## Granting the first admin
 
-`setVerified` requires a `moderator` or `admin` custom claim, and nobody has one
-initially. Bootstrap it once from a machine with a service-account key:
+`setVerified` and `setModerator` both require a claim nobody has yet, and the
+Firebase CLI has no command for custom claims — so the first one is granted by
+hand, once. Everything after that happens in the app under Me → Moderation.
 
-```bash
-GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json node -e "
-  const admin = require('firebase-admin');
-  admin.initializeApp();
-  admin.auth().setCustomUserClaims('YOUR_UID', { admin: true, moderator: true })
-    .then(() => console.log('done'));
-"
-```
+1. **Get your uid.** Run the app in debug and open Me → Settings → Account →
+   Your user ID, which copies it. (Or Firebase Console → Authentication → Users.)
 
-Claims only refresh when the client's ID token does — sign out and back in, or
-call `getIdToken(true)`.
+2. **Download a service-account key.** Firebase Console → Project settings →
+   Service accounts → Generate new private key.
+
+3. **Run it:**
+
+   ```bash
+   cd functions
+   npm install                                    # once
+   node scripts/grant-admin.js <uid> --key=/path/to/key.json
+   ```
+
+4. **Sign out and back in** in the app. Custom claims only reach a device when
+   its ID token is reissued, so an already-signed-in session won't see it.
+   Me → Moderation also has a retry button that forces a token refresh.
+
+5. **Delete the key.** It is a root credential for the entire project and you
+   only need it this once.
+
+Revoke with `node scripts/grant-admin.js <uid> --revoke --key=…`.

@@ -258,5 +258,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "settingsUserId": "ناسنامەی هەژمارت",
+  "settingsUserIdCopied": "کۆپی کرا"
 }
