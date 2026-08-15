@@ -141,20 +141,44 @@ service cloud.firestore {
                       || isAuthor()
                       || isModerator());
 
+      // Size ceilings, applied to drafts and published recipes alike. These
+      // bound what one document can cost; they say nothing about whether it is
+      // finished.
+      function withinLimits() {
+        return request.resource.data.title is string
+               && request.resource.data.title.size() <= 120
+               && request.resource.data.ingredients.size() <= 80
+               && request.resource.data.steps.size() <= 60
+               && request.resource.data.keywords.size() <= 60;
+      }
+
+      // A draft is incomplete by definition. The composer creates one the
+      // moment a cover photo is picked — before a title has been typed —
+      // because autosave from the first interaction is the whole design.
+      // Requiring a title to *exist* made picking a photo the first thing that
+      // could fail.
+      //
+      // Completeness is a condition of publishing, not of saving.
+      function completeEnoughToPublish() {
+        return request.resource.data.status != 'published'
+               || (request.resource.data.title.size() > 0
+                   && request.resource.data.ingredients.size() > 0
+                   && request.resource.data.steps.size() > 0);
+      }
+
       allow create: if isRegistered()
                     && request.resource.data.author.uid == request.auth.uid
                     // The denormalised verified flag has to match the token,
                     // or anyone could mint themselves a boost.
                     && request.resource.data.author.verified == isVerified()
                     && noProtectedFieldsOnCreate()
-                    && request.resource.data.title is string
-                    && request.resource.data.title.size() > 0
-                    && request.resource.data.title.size() <= 120
-                    && request.resource.data.ingredients.size() <= 80
-                    && request.resource.data.steps.size() <= 60
-                    && request.resource.data.keywords.size() <= 60;
+                    && withinLimits()
+                    && completeEnoughToPublish();
 
-      allow update: if isAuthor() && noProtectedFields();
+      allow update: if isAuthor()
+                    && noProtectedFields()
+                    && withinLimits()
+                    && completeEnoughToPublish();
       allow delete: if isAuthor() || isModerator();
 
       match /likes/{uid} {

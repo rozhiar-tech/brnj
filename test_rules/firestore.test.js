@@ -137,22 +137,76 @@ describe('plans', () => {
 });
 
 describe('recipes', () => {
-  const recipe = (uid, isVerified = false) => ({
+  const recipe = (uid, overrides = {}, isVerified = false) => ({
     author: authorStub(uid, isVerified),
     title: 'دولمة',
     language: 'ar',
     status: 'draft',
-    ingredients: [],
-    steps: [],
+    ingredients: [{ item: 'رز', unit: 'istikan' }],
+    steps: [{ text: 'اغسل الرز' }],
     keywords: [],
     tags: [],
     occasions: [],
     gallery: [],
+    ...overrides,
   });
 
   it('lets a registered user create their own draft', async () => {
     await assertSucceeds(
       setDoc(doc(user('user1').firestore(), 'recipes/r1'), recipe('user1')),
+    );
+  });
+
+  it('lets the composer create a completely empty draft', async () => {
+    // This is the real first write: the composer creates the draft the moment
+    // a cover photo is picked, before anything has been typed. The earlier
+    // test used a filled-in draft and passed while this flow was denied in the
+    // app, which is exactly the gap worth closing.
+    await assertSucceeds(
+      setDoc(
+        doc(user('user1').firestore(), 'recipes/r1'),
+        recipe('user1', { title: '', ingredients: [], steps: [] }),
+      ),
+    );
+  });
+
+  it('lets an empty draft be filled in one field at a time', async () => {
+    const db = user('user1').firestore();
+    await setDoc(
+      doc(db, 'recipes/r1'),
+      recipe('user1', { title: '', ingredients: [], steps: [] }),
+    );
+    // Autosave writes after every keystroke-ish change; a half-typed title is
+    // a normal intermediate state, not an error.
+    await assertSucceeds(
+      setDoc(doc(db, 'recipes/r1'), recipe('user1', { title: 'دو' })),
+    );
+  });
+
+  it('refuses publishing without a title', async () => {
+    await assertFails(
+      setDoc(
+        doc(user('user1').firestore(), 'recipes/r1'),
+        recipe('user1', { title: '', status: 'published' }),
+      ),
+    );
+  });
+
+  it('refuses publishing with no steps', async () => {
+    await assertFails(
+      setDoc(
+        doc(user('user1').firestore(), 'recipes/r1'),
+        recipe('user1', { steps: [], status: 'published' }),
+      ),
+    );
+  });
+
+  it('allows publishing a complete recipe', async () => {
+    await assertSucceeds(
+      setDoc(
+        doc(user('user1').firestore(), 'recipes/r1'),
+        recipe('user1', { status: 'published' }),
+      ),
     );
   });
 
@@ -174,6 +228,15 @@ describe('recipes', () => {
         ...recipe('user1'),
         score: 9999,
       }),
+    );
+  });
+
+  it('refuses a title past the length ceiling', async () => {
+    await assertFails(
+      setDoc(
+        doc(user('user1').firestore(), 'recipes/r1'),
+        recipe('user1', { title: 'ا'.repeat(121) }),
+      ),
     );
   });
 
