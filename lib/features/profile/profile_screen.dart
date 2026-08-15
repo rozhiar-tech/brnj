@@ -201,6 +201,15 @@ class _ProfileBody extends ConsumerWidget {
           trailing: const Icon(Icons.chevron_right),
           onTap: () => context.go('/me/recipes'),
         ),
+        // Only rendered when the token actually carries the claim, so the
+        // route is never advertised to someone who would bounce off it.
+        if (ref.watch(isModeratorProvider))
+          ListTile(
+            leading: const Icon(Icons.shield_outlined),
+            title: Text(l10n.adminTitle),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/admin'),
+          ),
         if (!profile.verified)
           ListTile(
             leading: const Icon(Icons.verified_outlined),

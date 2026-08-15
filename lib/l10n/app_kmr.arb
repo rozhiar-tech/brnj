@@ -229,5 +229,34 @@
   "recipeScalingWarning": "خوێ و بەهارات و دەمێ چێکرنێ وەکی یێن دی زێدە نابن — دەمێ چێدکەی تام بکە.",
   "feedEmpty": "هێشتا ڕەچەتە نینن. یێ ئێکێ بە — ل + بدە و ئێکێ بنڤیسە.",
   "recipeDrafts": "ڕەشنڤیس",
-  "recipePublished": "بەلاڤکری"
+  "recipePublished": "بەلاڤکری",
+  "adminTitle": "چاڤدێری",
+  "adminVerification": "پشتراستکرن",
+  "adminReports": "ڕاپۆرت",
+  "adminUsers": "بکارئینەر",
+  "adminQueueEmpty": "چو تشت چاڤەڕێ ناکەت",
+  "adminApprove": "پشتراست بکە",
+  "adminDecline": "ڕەتکرن",
+  "adminDismiss": "پشتگوهـ ئێخستن",
+  "adminHide": "ڤەشارتنا ناڤەڕۆکی",
+  "adminMakeModerator": "وی بکە چاڤدێر",
+  "adminNoAccess": "ئەڤ ڕوپەل بۆ چاڤدێرانە",
+  "adminNoAccessHint": "ئەگەر نوکە بوویی چاڤدێر، دەرکەڤە و ڤەگەڕە — یان دیسا هەول بدە.",
+  "cookModeDone": "خلاس",
+  "searchHint": "لێگەڕیان بۆ ڕەچەتە",
+  "searchPrompt": "ناڤێ خوارنێ، پێکهاتە، یان هەرێمەکێ بنڤیسە.",
+  "searchNoResults": "چو نەهاتە دیتن. ب پەیڤێن کێمتر بجەڕبینە.",
+  "cookedSheetBody": "نیشا مە بدە یا تە چاوا دەرکەفت. وێنە ب خواستا تە یە — گەلەک خوارنێن خۆش د وێنەیێ دا جوان دەرناکەڤن.",
+  "cookedAddPhoto": "وێنا خۆ زێدە بکە",
+  "cookedNoteLabel": "تشتەک هەیە زێدە بکەی؟",
+  "cookedNoteHelp": "تە چ گوهۆڕی، چ سەرکەفتی، ئاگەهداریا چی بی.",
+  "cookedPost": "بەلاڤکرن",
+  "recipeCookedBy": "{count, plural, =0{هێشتا چو کەسی چێنەکریە} =1{١ کەسی چێکریە} other{{count} کەسان چێکریە}}",
+  "@recipeCookedBy": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

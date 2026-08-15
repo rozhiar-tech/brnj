@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/theme/brnj_theme.dart';
 import '../../data/providers.dart';
@@ -71,7 +74,25 @@ class _SignInSheetState extends ConsumerState<_SignInSheet> {
   }
 
   void _done() {
+    final uid = ref.read(authRepositoryProvider).uid;
+    if (uid != null) {
+      // Now, not at launch: the person has just chosen to take part, which is
+      // the only moment a notification prompt reads as reasonable.
+      unawaited(ref.read(messagingRepositoryProvider).register(uid));
+    }
+    // A moderator who signs in goes straight to the queues.
+    unawaited(_routeModerator());
     if (mounted) Navigator.of(context).pop(true);
+  }
+
+  Future<void> _routeModerator() async {
+    final claims = await ref
+        .read(adminRepositoryProvider)
+        .claims(refresh: true);
+    if (!claims.canModerate || !mounted) return;
+    ref.invalidate(adminClaimsProvider);
+    // Not awaited: the route outlives this sheet, which is about to close.
+    if (mounted) unawaited(context.push('/admin'));
   }
 
   Future<void> _sendCode() => _run(() async {
@@ -155,9 +176,7 @@ class _SignInSheetState extends ConsumerState<_SignInSheet> {
             const SizedBox(height: Gap.lg),
             FilledButton(
               onPressed: _busy ? null : _confirmCode,
-              child: _busy
-                  ? const _Spinner()
-                  : Text(l10n.signInVerify),
+              child: _busy ? const _Spinner() : Text(l10n.signInVerify),
             ),
           ] else ...[
             TextField(
@@ -173,9 +192,7 @@ class _SignInSheetState extends ConsumerState<_SignInSheet> {
             const SizedBox(height: Gap.lg),
             FilledButton(
               onPressed: _busy ? null : _sendCode,
-              child: _busy
-                  ? const _Spinner()
-                  : Text(l10n.signInWithPhone),
+              child: _busy ? const _Spinner() : Text(l10n.signInWithPhone),
             ),
             const SizedBox(height: Gap.md),
             OutlinedButton.icon(

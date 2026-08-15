@@ -8,8 +8,10 @@ import '../core/iraqi_week.dart';
 import 'models/recipe.dart';
 import 'models/user_profile.dart';
 import 'models/weekly_plan.dart';
+import 'repositories/admin_repository.dart';
 import 'repositories/auth_repository.dart';
 import 'repositories/media_repository.dart';
+import 'repositories/messaging_repository.dart';
 import 'repositories/plan_repository.dart';
 import 'repositories/recipe_repository.dart';
 import 'repositories/user_repository.dart';
@@ -23,6 +25,28 @@ final planRepositoryProvider = Provider<PlanRepository>((ref) => PlanRepository(
 final userRepositoryProvider = Provider<UserRepository>((ref) => UserRepository());
 final mediaRepositoryProvider = Provider<MediaRepository>(
   (ref) => MediaRepository(),
+);
+final adminRepositoryProvider = Provider<AdminRepository>(
+  (ref) => AdminRepository(),
+);
+final messagingRepositoryProvider = Provider<MessagingRepository>(
+  (ref) => MessagingRepository(),
+);
+
+/// Moderation powers, read from the Auth token.
+///
+/// Recomputed whenever the signed-in user changes. Claims only reach the client
+/// when the ID token is reissued, so a freshly granted moderator has to sign
+/// out and back in — or the granting screen forces a refresh.
+final adminClaimsProvider = FutureProvider<AdminClaims>((ref) async {
+  ref.watch(authStateProvider);
+  return ref.watch(adminRepositoryProvider).claims();
+});
+
+/// True once the token says so. Defaults to false while loading, so no
+/// moderation affordance is ever shown speculatively.
+final isModeratorProvider = Provider<bool>(
+  (ref) => ref.watch(adminClaimsProvider).value?.canModerate ?? false,
 );
 
 final viewTrackerProvider = Provider<ViewTracker>((ref) {

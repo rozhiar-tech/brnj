@@ -229,5 +229,34 @@
   "recipeScalingWarning": "الملح والبهار والوقت ما يتضاعفون مثل الباقي — ذوق وانت تطبخ.",
   "feedEmpty": "ماكو وصفات بعد. كون الأول — اضغط + واكتب وحدة.",
   "recipeDrafts": "المسودات",
-  "recipePublished": "المنشورة"
+  "recipePublished": "المنشورة",
+  "adminTitle": "الإشراف",
+  "adminVerification": "التوثيق",
+  "adminReports": "البلاغات",
+  "adminUsers": "المستخدمين",
+  "adminQueueEmpty": "ماكو شي منتظر",
+  "adminApprove": "وثّق",
+  "adminDecline": "رفض",
+  "adminDismiss": "تجاهل",
+  "adminHide": "إخفاء المحتوى",
+  "adminMakeModerator": "اجعله مشرف",
+  "adminNoAccess": "هاي الشاشة للمشرفين",
+  "adminNoAccessHint": "إذا هسه صرت مشرف، سجّل خروج ودخول — أو اضغط إعادة المحاولة.",
+  "cookModeDone": "خلصت",
+  "searchHint": "دور على وصفة",
+  "searchPrompt": "اكتب أكلة، أو مقدار، أو منطقة.",
+  "searchNoResults": "ماكو نتائج. جرّب كلمات أقل.",
+  "cookedSheetBody": "ورّينا شلون طلعت مالتك. الصورة اختيارية — هواي أكلات زينة ما تطلع حلوة بالصورة.",
+  "cookedAddPhoto": "أضف صورتك",
+  "cookedNoteLabel": "تحب تضيف شي؟",
+  "cookedNoteHelp": "شنو غيّرت، شنو نجح، وشنو تنتبه إله.",
+  "cookedPost": "نشر",
+  "recipeCookedBy": "{count, plural, =0{ماكو أحد طبخها بعد} =1{واحد طبخها} =2{اثنين طبخوها} few{{count} أشخاص طبخوها} other{{count} شخص طبخها}}",
+  "@recipeCookedBy": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

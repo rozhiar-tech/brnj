@@ -7,10 +7,13 @@ import '../features/plan/plan_detail_screen.dart';
 import '../features/profile/edit_profile_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/profile/settings_screen.dart';
+import '../features/admin/admin_screen.dart';
 import '../features/profile/verification_screen.dart';
 import '../features/recipe/composer/recipe_composer_screen.dart';
+import '../features/recipe/cook_mode_screen.dart';
 import '../features/recipe/my_recipes_screen.dart';
 import '../features/recipe/recipe_detail_screen.dart';
+import '../features/search/search_screen.dart';
 import '../features/shell/placeholder_screen.dart';
 import '../features/shell/route_not_found_screen.dart';
 import '../features/shell/shell_screen.dart';
@@ -46,6 +49,21 @@ GoRouter createRouter() => GoRouter(
     // The composer sits outside the shell: it is a full-screen task, and the
     // bottom bar has nothing to offer while you are writing a recipe. Pushed
     // rather than gone to, so back returns to wherever it was opened from.
+    // Moderation, cook mode and search are all full-screen tasks with nothing
+    // to gain from the bottom bar, so they sit outside the shell.
+    GoRoute(
+      path: '/admin',
+      builder: (context, state) => const AdminScreen(),
+    ),
+    GoRoute(
+      path: '/search',
+      builder: (context, state) => const SearchScreen(),
+    ),
+    GoRoute(
+      path: '/cook/:id',
+      builder: (context, state) =>
+          CookModeScreen(recipeId: state.pathParameters['id']!),
+    ),
     GoRoute(
       path: '/create/recipe',
       builder: (context, state) => const RecipeComposerScreen(),

@@ -76,6 +76,9 @@ void main() {
       '/create/recipe',
       '/create/recipe/abc123',
       '/recipe/abc123',
+      '/admin',
+      '/search',
+      '/cook/abc123',
     ]) {
       GoRouter.of(context).go(location);
       await tester.pump();

@@ -229,5 +229,34 @@
   "recipeScalingWarning": "خوێ و بەهارات و کاتی لێنان وەک ئەوانی تر نازیاد دەبن — لە کاتی لێناندا تامی بکە.",
   "feedEmpty": "هێشتا ڕێسەت نییە. یەکەم کەس بە — + دابگرە و یەکێک بنووسە.",
   "recipeDrafts": "ڕەشنووسەکان",
-  "recipePublished": "بڵاوکراوەکان"
+  "recipePublished": "بڵاوکراوەکان",
+  "adminTitle": "چاودێری",
+  "adminVerification": "پشتڕاستکردنەوە",
+  "adminReports": "ڕاپۆرتەکان",
+  "adminUsers": "بەکارهێنەران",
+  "adminQueueEmpty": "هیچ شتێک چاوەڕێ ناکات",
+  "adminApprove": "پشتڕاستی بکەرەوە",
+  "adminDecline": "ڕەتکردنەوە",
+  "adminDismiss": "پشتگوێخستن",
+  "adminHide": "شاردنەوەی ناوەڕۆک",
+  "adminMakeModerator": "بیکە بە چاودێر",
+  "adminNoAccess": "ئەم شاشەیە بۆ چاودێرانە",
+  "adminNoAccessHint": "ئەگەر تازە کراویت بە چاودێر، بچۆ دەرەوە و بگەڕێوە — یان دووبارە هەوڵ بدە.",
+  "cookModeDone": "تەواو",
+  "searchHint": "گەڕان بۆ ڕێسەت",
+  "searchPrompt": "ناوی خواردن، پێکهاتە، یان ناوچەیەک بنووسە.",
+  "searchNoResults": "هیچ نەدۆزرایەوە. بە وشەی کەمتر تاقی بکەرەوە.",
+  "cookedSheetBody": "پیشانمان بدە هی تۆ چۆن دەرچوو. وێنە ئارەزوومەندانەیە — زۆر خواردنی خۆش لە وێنەدا جوان دەرناچن.",
+  "cookedAddPhoto": "وێنەکەت زیاد بکە",
+  "cookedNoteLabel": "شتێک هەیە زیادی بکەیت؟",
+  "cookedNoteHelp": "چیت گۆڕی، چی سەرکەوتوو بوو، چی ئاگاداری بیت.",
+  "cookedPost": "بڵاوکردنەوە",
+  "recipeCookedBy": "{count, plural, =0{هێشتا کەس لێینەناوە} =1{١ کەس لێیناوە} other{{count} کەس لێیانناوە}}",
+  "@recipeCookedBy": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

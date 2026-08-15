@@ -42,7 +42,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             title: Text(l10n.appName),
             actions: [
               IconButton(
-                onPressed: () {},
+                onPressed: () => context.push('/search'),
                 icon: const Icon(Icons.search),
                 tooltip: MaterialLocalizations.of(context).searchFieldLabel,
               ),

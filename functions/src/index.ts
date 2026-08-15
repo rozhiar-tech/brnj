@@ -10,6 +10,12 @@ initializeApp();
 export { aggregateViewEvents } from './views';
 export { nightlyRankAndReconcile } from './ranking';
 export { setVerified, setModerator } from './admin';
+export {
+  notifyOnLike,
+  notifyOnCooked,
+  notifyOnComment,
+  notifyOnFollow,
+} from './notifications';
 export { onUserDeleted, cleanupOrphanedMedia } from './cleanup';
 export {
   onLikeCreated,

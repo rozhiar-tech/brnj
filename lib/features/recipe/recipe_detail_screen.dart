@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/settings.dart';
 import '../../app/theme/brnj_theme.dart';
@@ -10,7 +11,9 @@ import '../../data/providers.dart';
 import '../../data/repositories/view_tracker.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../shared/verified_tick.dart';
+import '../auth/sign_in_sheet.dart';
 import 'composer/composer_labels.dart';
+import 'cooked_sheet.dart';
 
 final _recipeProvider = StreamProvider.family<Recipe?, String>(
   (ref, id) => ref.watch(recipeRepositoryProvider).watchRecipe(id),
@@ -41,12 +44,14 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
     super.initState();
     final uid = ref.read(currentUidProvider);
     if (uid != null) {
-      _endView = ref.read(viewTrackerProvider).trackScreen(
-        type: ViewTargetType.recipe,
-        targetId: widget.recipeId,
-        viewerUid: uid,
-        isGuest: ref.read(isGuestProvider),
-      );
+      _endView = ref
+          .read(viewTrackerProvider)
+          .trackScreen(
+            type: ViewTargetType.recipe,
+            targetId: widget.recipeId,
+            viewerUid: uid,
+            isGuest: ref.read(isGuestProvider),
+          );
     }
   }
 
@@ -79,6 +84,9 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                 }),
               ),
       ),
+      bottomNavigationBar: recipeAsync.value == null
+          ? null
+          : _ActionBar(recipe: recipeAsync.value!),
     );
   }
 }
@@ -177,7 +185,8 @@ class _Body extends ConsumerWidget {
                   ingredient: ingredients[i],
                   checked: checked.contains(i),
                   numerals: numerals,
-                  showGroupHeader: i == 0 ||
+                  showGroupHeader:
+                      i == 0 ||
                       ingredients[i].group != ingredients[i - 1].group,
                   onToggle: () => onToggle(i),
                 ),
@@ -215,7 +224,10 @@ class _StatStrip extends StatelessWidget {
           label: l10n.composerTimerMinutes(recipe.totalMinutes),
           numerals: numerals,
         ),
-        _Chip(icon: Icons.place_outlined, label: regionLabel(l10n, recipe.region)),
+        _Chip(
+          icon: Icons.place_outlined,
+          label: regionLabel(l10n, recipe.region),
+        ),
         _Chip(
           icon: Icons.local_fire_department_outlined,
           label: difficultyLabel(l10n, recipe.difficulty),
@@ -240,9 +252,7 @@ class _Chip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Chip(
       avatar: Icon(icon, size: 14),
-      label: Text(
-        numerals == null ? label : label.toNumeralStyle(numerals!),
-      ),
+      label: Text(numerals == null ? label : label.toNumeralStyle(numerals!)),
       visualDensity: VisualDensity.compact,
     );
   }
@@ -372,9 +382,7 @@ class _IngredientTile extends StatelessWidget {
                           decoration: checked
                               ? TextDecoration.lineThrough
                               : null,
-                          color: checked
-                              ? theme.colorScheme.outline
-                              : null,
+                          color: checked ? theme.colorScheme.outline : null,
                         ),
                       ),
                       // The substitution note is shown inline rather than
@@ -465,6 +473,67 @@ class _StepTile extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// The bar that turns reading into cooking.
+///
+/// Cook mode is the primary action and gets the width to say so; "I cooked
+/// this" sits beside it because the moment someone finishes is the moment they
+/// might post, and asking later never works.
+class _ActionBar extends ConsumerWidget {
+  const _ActionBar({required this.recipe});
+
+  final Recipe recipe;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final saved = ref.watch(savedRecipeIdsProvider).value ?? const [];
+    final isSaved = saved.contains(recipe.id);
+    final uid = ref.watch(currentUidProvider);
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(Gap.lg),
+        child: Row(
+          children: [
+            IconButton.outlined(
+              onPressed: uid == null
+                  ? null
+                  : () async {
+                      if (!await requireAccount(context, ref)) return;
+                      await ref
+                          .read(recipeRepositoryProvider)
+                          .setSaved(
+                            recipeId: recipe.id,
+                            uid: uid,
+                            saved: !isSaved,
+                          );
+                    },
+              icon: Icon(isSaved ? Icons.bookmark : Icons.bookmark_border),
+              tooltip: l10n.actionSave,
+            ),
+            const SizedBox(width: Gap.sm),
+            OutlinedButton(
+              onPressed: () =>
+                  showCookedSheet(context, ref, recipeId: recipe.id),
+              child: Text(l10n.recipeCookedThis),
+            ),
+            const SizedBox(width: Gap.sm),
+            Expanded(
+              child: FilledButton.icon(
+                onPressed: recipe.steps.isEmpty
+                    ? null
+                    : () => context.push('/cook/${recipe.id}'),
+                icon: const Icon(Icons.play_arrow),
+                label: Text(l10n.recipeCookMode),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

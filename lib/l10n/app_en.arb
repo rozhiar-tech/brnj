@@ -229,5 +229,34 @@
   "recipeScalingWarning": "Salt, spice and cooking time don't scale like the rest — taste as you go.",
   "feedEmpty": "No recipes yet. Be the first — tap + and write one.",
   "recipeDrafts": "Drafts",
-  "recipePublished": "Published"
+  "recipePublished": "Published",
+  "adminTitle": "Moderation",
+  "adminVerification": "Verification",
+  "adminReports": "Reports",
+  "adminUsers": "Users",
+  "adminQueueEmpty": "Nothing waiting",
+  "adminApprove": "Verify",
+  "adminDecline": "Decline",
+  "adminDismiss": "Dismiss",
+  "adminHide": "Hide content",
+  "adminMakeModerator": "Make moderator",
+  "adminNoAccess": "This screen is for moderators",
+  "adminNoAccessHint": "If you were just made one, sign out and back in — or tap retry to refresh.",
+  "cookModeDone": "Done",
+  "searchHint": "Search recipes",
+  "searchPrompt": "Type a dish, an ingredient, or a region.",
+  "searchNoResults": "Nothing found. Try fewer words.",
+  "cookedSheetBody": "Show how yours turned out. A photo is optional — plenty of good dinners are not photogenic.",
+  "cookedAddPhoto": "Add your photo",
+  "cookedNoteLabel": "Anything to add?",
+  "cookedNoteHelp": "What you changed, what worked, what to watch for.",
+  "cookedPost": "Post",
+  "recipeCookedBy": "{count, plural, =0{Nobody has cooked this yet} =1{1 person cooked this} other{{count} people cooked this}}",
+  "@recipeCookedBy": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
