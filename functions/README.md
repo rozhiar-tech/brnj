@@ -56,8 +56,11 @@ hand, once. Everything after that happens in the app under Me → Moderation.
    ```bash
    cd functions
    npm install                                    # once
-   node scripts/grant-admin.js <uid> --key=/path/to/key.json
+   node scripts/grant-admin.js <uid> --key=~/Downloads/brnj-54249-firebase-adminsdk-*.json
    ```
+
+   Substitute the real path — the script refuses a placeholder, a key for
+   another project, and a `google-services.json` mistaken for a key.
 
 4. **Sign out and back in** in the app. Custom claims only reach a device when
    its ID token is reissued, so an already-signed-in session won't see it.

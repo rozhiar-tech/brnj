@@ -19,6 +19,8 @@
  */
 
 const admin = require('firebase-admin');
+const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
 
 const args = process.argv.slice(2);
@@ -37,13 +39,48 @@ const keyPath = keyArg ?? process.env.GOOGLE_APPLICATION_CREDENTIALS;
 if (!keyPath) {
   console.error('No service-account key. Pass --key=/path/key.json or set');
   console.error('GOOGLE_APPLICATION_CREDENTIALS. Generate one at:');
-  console.error('  Firebase Console → Project settings → Service accounts');
+  console.error('  https://console.firebase.google.com/project/brnj-54249/settings/serviceaccounts/adminsdk');
   process.exit(1);
 }
 
-admin.initializeApp({
-  credential: admin.credential.cert(require(path.resolve(keyPath))),
-});
+const resolvedKey = path.resolve(keyPath.replace(/^~/, os.homedir()));
+
+if (!fs.existsSync(resolvedKey)) {
+  console.error(`No file at: ${resolvedKey}`);
+  if (keyPath.includes('/path/to/')) {
+    console.error('\nThat looks like the placeholder from the instructions.');
+    console.error('Replace it with where the key actually downloaded, usually:');
+    console.error('  ~/Downloads/brnj-54249-firebase-adminsdk-*.json');
+  }
+  console.error('\nDownload one at:');
+  console.error('  https://console.firebase.google.com/project/brnj-54249/settings/serviceaccounts/adminsdk');
+  console.error('  → Generate new private key');
+  process.exit(1);
+}
+
+let serviceAccount;
+try {
+  serviceAccount = JSON.parse(fs.readFileSync(resolvedKey, 'utf8'));
+} catch (error) {
+  console.error(`That file is not valid JSON: ${resolvedKey}`);
+  process.exit(1);
+}
+
+// A key for the wrong project authenticates fine and then fails to find the
+// user, which reads as "bad uid" and sends you looking in the wrong place.
+if (!serviceAccount.private_key || !serviceAccount.project_id) {
+  console.error('That JSON is not a service-account key — no private_key field.');
+  console.error('Use the file from Project settings → Service accounts,');
+  console.error('not google-services.json or GoogleService-Info.plist.');
+  process.exit(1);
+}
+
+if (serviceAccount.project_id !== 'brnj-54249') {
+  console.error(`That key belongs to project "${serviceAccount.project_id}", not brnj-54249.`);
+  process.exit(1);
+}
+
+admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 
 (async () => {
   const user = await admin.auth().getUser(uid);
@@ -66,6 +103,12 @@ admin.initializeApp({
   console.log('In the app: sign out and back in, or open Me → Moderation and tap retry.');
   process.exit(0);
 })().catch((error) => {
-  console.error(`Failed: ${error.message}`);
+  if (error.code === 'auth/user-not-found') {
+    console.error(`No user with uid "${uid}" in brnj-54249.`);
+    console.error('Check Me → Settings → Account → Your user ID in a debug build,');
+    console.error('or Firebase Console → Authentication → Users.');
+  } else {
+    console.error(`Failed: ${error.message}`);
+  }
   process.exit(1);
 });
