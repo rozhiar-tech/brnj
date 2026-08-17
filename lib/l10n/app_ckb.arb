@@ -260,5 +260,55 @@
     }
   },
   "settingsUserId": "ناسنامەی هەژمارت",
-  "settingsUserIdCopied": "کۆپی کرا"
+  "settingsUserIdCopied": "کۆپی کرا",
+  "cookedGalleryEmpty": "هێشتا کەس هی خۆی بڵاو نەکردووەتەوە. یەکەم کەس بە.",
+  "cookedUpdateMine": "هی خۆم نوێ بکەرەوە",
+  "commentsTitle": "لێدوانەکان",
+  "commentsEmpty": "هێشتا لێدوان نییە. هەرچی دەتەوێت لە چێشتلێنەرەکە بپرسە.",
+  "commentsHint": "لێدوانێک بنووسە…",
+  "commentsAuthorTag": "چێشتلێنەر",
+  "profileFollow": "شوێنی بکەوە",
+  "notificationsTitle": "ئاگادارکردنەوەکان",
+  "notificationsEmpty": "هێشتا هیچ نییە. کاتێک خەڵک ڕێسەتەکانت لێدەنێن، لێرە دەیزانیت.",
+  "notificationLiked": "{who} حەزی لە ڕێسەتەکەت کرد",
+  "@notificationLiked": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationCooked": "{who} ڕێسەتەکەتی لێنا",
+  "@notificationCooked": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationCommented": "{who} لێدوانی لەسەر ڕێسەتەکەت دا",
+  "@notificationCommented": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationFollowed": "{who} شوێنت کەوت",
+  "@notificationFollowed": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationCopiedWeek": "{who} هەفتەکەتی کۆپی کرد",
+  "@notificationCopiedWeek": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "feedFollowingEmpty": "هێشتا شوێن کەس نەکەوتوویت. شوێن چێشتلێنەرێک بکەوە و ڕێسەتەکانی لێرە دەردەکەون."
 }

@@ -260,5 +260,55 @@
     }
   },
   "settingsUserId": "Your user ID",
-  "settingsUserIdCopied": "Copied"
+  "settingsUserIdCopied": "Copied",
+  "cookedGalleryEmpty": "Nobody has posted theirs yet. Be the first.",
+  "cookedUpdateMine": "Update mine",
+  "commentsTitle": "Comments",
+  "commentsEmpty": "No comments yet. Ask the cook anything.",
+  "commentsHint": "Write a comment…",
+  "commentsAuthorTag": "Cook",
+  "profileFollow": "Follow",
+  "notificationsTitle": "Notifications",
+  "notificationsEmpty": "Nothing yet. When people cook your recipes, you will hear about it here.",
+  "notificationLiked": "{who} liked your recipe",
+  "@notificationLiked": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationCooked": "{who} cooked your recipe",
+  "@notificationCooked": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationCommented": "{who} commented on your recipe",
+  "@notificationCommented": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationFollowed": "{who} followed you",
+  "@notificationFollowed": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationCopiedWeek": "{who} copied your week",
+  "@notificationCopiedWeek": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "feedFollowingEmpty": "You're not following anyone yet. Follow a cook and their recipes land here."
 }

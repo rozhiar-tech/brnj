@@ -42,6 +42,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             floating: true,
             title: Text(l10n.appName),
             actions: [
+              const _NotificationBell(),
               IconButton(
                 onPressed: () => context.push('/search'),
                 icon: const Icon(Icons.search),
@@ -76,7 +77,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
           SliverToBoxAdapter(child: _ThisWeekRail(numerals: numerals)),
 
-          _FeedSliver(numerals: numerals),
+          _FeedSliver(numerals: numerals, feed: _feed),
         ],
       ),
     );
@@ -289,15 +290,21 @@ class _PlanCard extends StatelessWidget {
 /// piece of fiction on the main screen, and an honest empty state is more use
 /// than a fake full one.
 class _FeedSliver extends ConsumerWidget {
-  const _FeedSliver({required this.numerals});
+  const _FeedSliver({required this.numerals, required this.feed});
 
   final NumeralStyle numerals;
+  final _Feed feed;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final feedAsync = ref.watch(discoverFeedProvider);
+    // Following is strictly chronological and Discover is ranked. Keeping them
+    // as separate providers is what stops the boost leaking into the one feed
+    // that has to be trustworthy.
+    final feedAsync = feed == _Feed.following
+        ? ref.watch(followingFeedProvider)
+        : ref.watch(discoverFeedProvider);
 
     return feedAsync.when(
       loading: () => const SliverToBoxAdapter(
@@ -311,7 +318,9 @@ class _FeedSliver extends ConsumerWidget {
           height: 260,
           child: ErrorView(
             error: error,
-            onRetry: () => ref.invalidate(discoverFeedProvider),
+            onRetry: () => ref.invalidate(
+            feed == _Feed.following ? followingFeedProvider : discoverFeedProvider,
+          ),
           ),
         ),
       ),
@@ -329,7 +338,9 @@ class _FeedSliver extends ConsumerWidget {
                   ),
                   const SizedBox(height: Gap.md),
                   Text(
-                    l10n.feedEmpty,
+                    feed == _Feed.following
+                        ? l10n.feedFollowingEmpty
+                        : l10n.feedEmpty,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
@@ -351,6 +362,47 @@ class _FeedSliver extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+}
+
+
+/// Unread notifications, as a dot rather than a number.
+///
+/// A count invites the reflex of clearing it; a dot just says "something
+/// happened", which is all this needs to say.
+class _NotificationBell extends ConsumerWidget {
+  const _NotificationBell();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final unread = ref.watch(unreadNotificationsProvider).value ?? 0;
+
+    return IconButton(
+      onPressed: () => context.push('/notifications'),
+      tooltip: l10n.notificationsTitle,
+      icon: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          const Icon(Icons.notifications_none),
+          if (unread > 0)
+            PositionedDirectional(
+              end: -1,
+              top: -1,
+              child: Container(
+                width: 9,
+                height: 9,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.error,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: theme.colorScheme.surface, width: 1.5),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

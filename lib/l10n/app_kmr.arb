@@ -260,5 +260,55 @@
     }
   },
   "settingsUserId": "ناسنامەیا هەژمارا تە",
-  "settingsUserIdCopied": "هاتە کۆپیکرن"
+  "settingsUserIdCopied": "هاتە کۆپیکرن",
+  "cookedGalleryEmpty": "هێشتا چو کەسی یا خۆ بەلاڤ نەکریە. یێ ئێکێ بە.",
+  "cookedUpdateMine": "یا خۆ نوکە بکە",
+  "commentsTitle": "شرۆڤە",
+  "commentsEmpty": "هێشتا شرۆڤە نینن. هەرچی دخوازی ژ چێکەری بپرسە.",
+  "commentsHint": "شرۆڤەیەکێ بنڤیسە…",
+  "commentsAuthorTag": "چێکەر",
+  "profileFollow": "پەیڕەوی بکە",
+  "notificationsTitle": "ئاگەهدارکرن",
+  "notificationsEmpty": "هێشتا چو نینن. دەمێ خەلک ڕەچەتێن تە چێدکەن، ل ڤێرێ دێ زانی.",
+  "notificationLiked": "{who} ژ ڕەچەتا تە حەز کر",
+  "@notificationLiked": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationCooked": "{who} ڕەچەتا تە چێکر",
+  "@notificationCooked": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationCommented": "{who} شرۆڤە ل سەر ڕەچەتا تە کر",
+  "@notificationCommented": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationFollowed": "{who} بوو پەیڕەوکەرێ تە",
+  "@notificationFollowed": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationCopiedWeek": "{who} هەفتا تە کۆپی کر",
+  "@notificationCopiedWeek": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "feedFollowingEmpty": "هێشتا تو پەیڕەوی چو کەسی ناکەی. پەیڕەویا چێکەرەکێ بکە و ڕەچەتێن وی ل ڤێرێ دەردکەڤن."
 }

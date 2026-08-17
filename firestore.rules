@@ -86,7 +86,12 @@ service cloud.firestore {
         allow read, write: if isSelf(uid);
       }
       match /notifications/{id} {
-        allow read, update, delete: if isSelf(uid);
+        allow read, delete: if isSelf(uid);
+        // Only the read flag is the owner's to change — the rest is what the
+        // Function said happened.
+        allow update: if isSelf(uid)
+                      && request.resource.data.diff(resource.data)
+                         .affectedKeys().hasOnly(['read']);
         allow create: if false; // Functions only
       }
       match /stats/{day} {
@@ -189,13 +194,23 @@ service cloud.firestore {
 
       match /cooked/{uid} {
         allow read: if signedIn();
-        allow write: if isSelf(uid) && isRegistered();
+        // The author stub is denormalised so the gallery renders without a
+        // lookup per entry — which means its verified flag has to be checked
+        // against the token, exactly as it is on a recipe.
+        allow create, update: if isSelf(uid)
+                              && isRegistered()
+                              && request.resource.data.author.uid == request.auth.uid
+                              && request.resource.data.author.verified == isVerified();
+        allow delete: if isSelf(uid) || isModerator();
       }
 
       match /comments/{commentId} {
         allow read: if signedIn();
         allow create: if isRegistered()
                       && request.resource.data.author.uid == request.auth.uid
+                      && request.resource.data.author.verified == isVerified()
+                      && request.resource.data.text is string
+                      && request.resource.data.text.size() > 0
                       && request.resource.data.text.size() <= 2000;
         allow update: if signedIn()
                       && resource.data.author.uid == request.auth.uid

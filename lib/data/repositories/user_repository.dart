@@ -158,6 +158,42 @@ class UserRepository {
     }
   }
 
+  // --- following -----------------------------------------------------------
+
+  /// Writes only the caller's own `following` edge.
+  ///
+  /// The mirrored `followers` edge and both counters are maintained by a
+  /// Function — otherwise anyone could add themselves to someone else's
+  /// follower list, and the counts would be a client's word.
+  Future<void> setFollowing({
+    required String uid,
+    required String targetUid,
+    required bool following,
+  }) {
+    final doc = _users.doc(uid).collection('following').doc(targetUid);
+    return following
+        ? doc.set({'at': FieldValue.serverTimestamp()})
+        : doc.delete();
+  }
+
+  Stream<bool> watchIsFollowing({
+    required String uid,
+    required String targetUid,
+  }) => _users
+      .doc(uid)
+      .collection('following')
+      .doc(targetUid)
+      .snapshots()
+      .map((d) => d.exists);
+
+  /// Everyone this person follows. Drives the Following feed, which is capped
+  /// at what a `whereIn` can carry per page.
+  Stream<List<String>> watchFollowingIds(String uid) => _users
+      .doc(uid)
+      .collection('following')
+      .snapshots()
+      .map((s) => s.docs.map((d) => d.id).toList());
+
   // --- verification --------------------------------------------------------
 
   /// Applications are reviewed by a human. Nothing here grants anything —

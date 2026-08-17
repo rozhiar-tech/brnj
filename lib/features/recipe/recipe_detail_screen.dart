@@ -15,6 +15,7 @@ import '../../shared/verified_tick.dart';
 import '../auth/sign_in_sheet.dart';
 import 'composer/composer_labels.dart';
 import 'cooked_sheet.dart';
+import 'recipe_social.dart';
 
 final _recipeProvider = StreamProvider.family<Recipe?, String>(
   (ref, id) => ref.watch(recipeRepositoryProvider).watchRecipe(id),
@@ -135,23 +136,32 @@ class _Body extends ConsumerWidget {
             children: [
               Text(recipe.title, style: theme.textTheme.headlineSmall),
               const SizedBox(height: Gap.md),
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 14,
-                    backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                    child: Text(
-                      recipe.author.name.characters.first,
-                      style: theme.textTheme.labelSmall,
+              InkWell(
+                onTap: () => context.push('/user/\${recipe.author.uid}'),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 14,
+                      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                      child: Text(
+                        recipe.author.name.characters.first,
+                        style: theme.textTheme.labelSmall,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: Gap.sm),
-                  Text(recipe.author.name, style: theme.textTheme.labelLarge),
-                  if (recipe.author.verified) ...[
+                    const SizedBox(width: Gap.sm),
+                    Text(recipe.author.name, style: theme.textTheme.labelLarge),
+                    if (recipe.author.verified) ...[
+                      const SizedBox(width: Gap.xs),
+                      const VerifiedTick(size: 14),
+                    ],
                     const SizedBox(width: Gap.xs),
-                    const VerifiedTick(size: 14),
+                    Icon(
+                      Icons.chevron_right,
+                      size: 16,
+                      color: theme.colorScheme.outline,
+                    ),
                   ],
-                ],
+                ),
               ),
               if (recipe.description != null) ...[
                 const SizedBox(height: Gap.md),
@@ -198,6 +208,15 @@ class _Body extends ConsumerWidget {
               for (var i = 0; i < recipe.steps.length; i++)
                 _StepTile(index: i, step: recipe.steps[i], numerals: numerals),
 
+              const SizedBox(height: Gap.xxl),
+              const Divider(),
+              const SizedBox(height: Gap.lg),
+              CookedGallery(recipeId: recipe.id),
+              const SizedBox(height: Gap.xxl),
+              CommentThread(
+                recipeId: recipe.id,
+                recipeAuthorUid: recipe.author.uid,
+              ),
               const SizedBox(height: Gap.xxl),
             ],
           ),

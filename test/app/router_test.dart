@@ -79,6 +79,8 @@ void main() {
       '/admin',
       '/search',
       '/cook/abc123',
+      '/notifications',
+      '/user/someuid',
     ]) {
       GoRouter.of(context).go(location);
       await tester.pump();

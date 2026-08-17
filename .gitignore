@@ -59,3 +59,8 @@ test_rules/package-lock.json
 firebase-debug.log
 firestore-debug.log
 ui-debug.log
+
+# CocoaPods is gone — iOS plugins resolve through Swift Package Manager
+ios/Podfile
+ios/Podfile.lock
+ios/Pods/

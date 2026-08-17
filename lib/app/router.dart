@@ -5,7 +5,9 @@ import '../features/home/home_screen.dart';
 import '../features/plan/my_week_screen.dart';
 import '../features/plan/plan_detail_screen.dart';
 import '../features/profile/edit_profile_screen.dart';
+import '../features/notifications/notifications_screen.dart';
 import '../features/profile/profile_screen.dart';
+import '../features/profile/public_profile_screen.dart';
 import '../features/profile/settings_screen.dart';
 import '../features/admin/admin_screen.dart';
 import '../features/profile/verification_screen.dart';
@@ -29,7 +31,7 @@ abstract final class Routes {
   static const me = '/me';
 
   static const recipe = '/recipe/:id';
-  static const profile = '/user/:handle';
+  static const profile = '/user/:uid';
 
   static String recipeFor(String id) => '/recipe/$id';
   static String planFor(String id) => '/plan/$id';
@@ -80,6 +82,17 @@ GoRouter createRouter() => GoRouter(
     GoRoute(
       path: '/search',
       builder: (context, state) => const SearchScreen(),
+    ),
+    GoRoute(
+      path: '/notifications',
+      builder: (context, state) => const NotificationsScreen(),
+    ),
+    // Keyed by uid rather than handle: not everyone has a handle, and a
+    // notification or a comment tap only ever knows the uid.
+    GoRoute(
+      path: '/user/:uid',
+      builder: (context, state) =>
+          PublicProfileScreen(uid: state.pathParameters['uid']!),
     ),
     GoRoute(
       path: '/cook/:id',

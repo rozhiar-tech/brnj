@@ -5,7 +5,14 @@ import {
   assertSucceeds,
   initializeTestEnvironment,
 } from '@firebase/rules-unit-testing';
-import { doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  setDoc,
+} from 'firebase/firestore';
 
 let env;
 
@@ -261,6 +268,143 @@ describe('recipes', () => {
     // A stale share link should land on "not there", not on a permission error
     // the UI cannot distinguish from a real failure.
     await assertSucceeds(getDoc(doc(user().firestore(), 'recipes/gone')));
+  });
+});
+
+describe('social', () => {
+  const stub = (uid, isVerified = false) => authorStub(uid, isVerified);
+
+  it('lets a registered user post their own cooked entry', async () => {
+    await assertSucceeds(
+      setDoc(doc(user('user1').firestore(), 'recipes/r1/cooked/user1'), {
+        author: stub('user1'),
+        note: 'came out great',
+      }),
+    );
+  });
+
+  it('refuses a cooked entry under someone else\'s uid', async () => {
+    await assertFails(
+      setDoc(doc(user('user1').firestore(), 'recipes/r1/cooked/user2'), {
+        author: stub('user2'),
+      }),
+    );
+  });
+
+  it('refuses a cooked entry claiming a verified badge it lacks', async () => {
+    // The gallery renders this stub directly, so a forged tick would appear
+    // next to a name with no lookup to contradict it.
+    await assertFails(
+      setDoc(doc(user('user1').firestore(), 'recipes/r1/cooked/user1'), {
+        author: stub('user1', true),
+      }),
+    );
+  });
+
+  it('lets a registered user comment', async () => {
+    await assertSucceeds(
+      addDoc(collection(user('user1').firestore(), 'recipes/r1/comments'), {
+        author: stub('user1'),
+        text: 'شنو نوع الرز؟',
+      }),
+    );
+  });
+
+  it('refuses an empty comment', async () => {
+    await assertFails(
+      addDoc(collection(user('user1').firestore(), 'recipes/r1/comments'), {
+        author: stub('user1'),
+        text: '',
+      }),
+    );
+  });
+
+  it('refuses a guest commenting', async () => {
+    await assertFails(
+      addDoc(collection(guest().firestore(), 'recipes/r1/comments'), {
+        author: stub('guest1'),
+        text: 'hello',
+      }),
+    );
+  });
+
+  it('lets a user follow someone', async () => {
+    await assertSucceeds(
+      setDoc(doc(user('user1').firestore(), 'users/user1/following/user2'), {}),
+    );
+  });
+
+  it('refuses writing a follow edge into someone else\'s account', async () => {
+    await assertFails(
+      setDoc(doc(user('user1').firestore(), 'users/user2/following/user3'), {}),
+    );
+  });
+
+  it('refuses adding yourself to another person\'s follower list', async () => {
+    // The mirrored edge is the Function's to write; a client that could write
+    // it could manufacture followers.
+    await assertFails(
+      setDoc(doc(user('user1').firestore(), 'users/user2/followers/user1'), {}),
+    );
+  });
+});
+
+describe('notifications', () => {
+  it('refuses a client creating one', async () => {
+    await assertFails(
+      setDoc(doc(user('user1').firestore(), 'users/user1/notifications/n1'), {
+        type: 'like',
+        actorUid: 'user2',
+        read: false,
+      }),
+    );
+  });
+
+  it('lets the owner mark one read', async () => {
+    await env.withSecurityRulesDisabled(async (admin) => {
+      await setDoc(doc(admin.firestore(), 'users/user1/notifications/n1'), {
+        type: 'like',
+        actorUid: 'user2',
+        read: false,
+      });
+    });
+    await assertSucceeds(
+      setDoc(
+        doc(user('user1').firestore(), 'users/user1/notifications/n1'),
+        { read: true },
+        { merge: true },
+      ),
+    );
+  });
+
+  it('refuses rewriting what the notification says', async () => {
+    await env.withSecurityRulesDisabled(async (admin) => {
+      await setDoc(doc(admin.firestore(), 'users/user1/notifications/n1'), {
+        type: 'like',
+        actorUid: 'user2',
+        read: false,
+      });
+    });
+    await assertFails(
+      setDoc(
+        doc(user('user1').firestore(), 'users/user1/notifications/n1'),
+        { read: true, actorUid: 'someone-else' },
+        { merge: true },
+      ),
+    );
+  });
+
+  it('hides notifications from everyone else', async () => {
+    await env.withSecurityRulesDisabled(async (admin) => {
+      await setDoc(doc(admin.firestore(), 'users/user1/notifications/n1'), {
+        type: 'like',
+        actorUid: 'user2',
+        read: false,
+      });
+    });
+    await assertFails(
+      getDoc(doc(user('user2').firestore(), 'users/user1/notifications/n1')),
+    );
   });
 });
 

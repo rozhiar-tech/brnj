@@ -6,11 +6,13 @@ import '../app/bootstrap.dart';
 import '../app/settings.dart';
 import '../core/iraqi_week.dart';
 import 'models/recipe.dart';
+import 'models/social.dart';
 import 'models/user_profile.dart';
 import 'models/weekly_plan.dart';
 import 'repositories/admin_repository.dart';
 import 'repositories/auth_repository.dart';
 import 'repositories/media_repository.dart';
+import 'repositories/notification_repository.dart';
 import 'repositories/messaging_repository.dart';
 import 'repositories/plan_repository.dart';
 import 'repositories/recipe_repository.dart';
@@ -31,6 +33,9 @@ final adminRepositoryProvider = Provider<AdminRepository>(
 );
 final messagingRepositoryProvider = Provider<MessagingRepository>(
   (ref) => MessagingRepository(),
+);
+final notificationRepositoryProvider = Provider<NotificationRepository>(
+  (ref) => NotificationRepository(),
 );
 
 /// Moderation powers, read from the Auth token.
@@ -175,4 +180,78 @@ final savedRecipeIdsProvider = StreamProvider<List<String>>((ref) {
   final uid = ref.watch(currentUidProvider);
   if (uid == null) return Stream.value(const []);
   return ref.watch(recipeRepositoryProvider).watchSavedIds(uid);
+});
+
+
+// --- social surfaces -------------------------------------------------------
+
+/// The "I cooked this" gallery for one recipe.
+final cookedPostsProvider = StreamProvider.family<List<CookedPost>, String>(
+  (ref, recipeId) =>
+      ref.watch(recipeRepositoryProvider).watchCooked(recipeId),
+);
+
+/// Whether the signed-in person has already posted a "cooked this" here.
+final hasCookedProvider = StreamProvider.family<bool, String>((ref, recipeId) {
+  final uid = ref.watch(currentUidProvider);
+  if (uid == null || ref.watch(isGuestProvider)) return Stream.value(false);
+  return ref
+      .watch(recipeRepositoryProvider)
+      .watchHasCooked(recipeId: recipeId, uid: uid);
+});
+
+final commentsProvider = StreamProvider.family<List<Comment>, String>(
+  (ref, recipeId) =>
+      ref.watch(recipeRepositoryProvider).watchComments(recipeId),
+);
+
+final likedProvider = StreamProvider.family<bool, String>((ref, recipeId) {
+  final uid = ref.watch(currentUidProvider);
+  if (uid == null || ref.watch(isGuestProvider)) return Stream.value(false);
+  return ref
+      .watch(recipeRepositoryProvider)
+      .watchLiked(recipeId: recipeId, uid: uid);
+});
+
+/// Someone else's profile, by uid.
+final userProfileProvider = StreamProvider.family<UserProfile?, String>(
+  (ref, uid) => ref.watch(userRepositoryProvider).watchProfile(uid),
+);
+
+final userRecipesProvider = StreamProvider.family<List<Recipe>, String>(
+  (ref, uid) => ref.watch(recipeRepositoryProvider).watchUserRecipes(uid),
+);
+
+final isFollowingProvider = StreamProvider.family<bool, String>((ref, targetUid) {
+  final uid = ref.watch(currentUidProvider);
+  if (uid == null || ref.watch(isGuestProvider)) return Stream.value(false);
+  return ref
+      .watch(userRepositoryProvider)
+      .watchIsFollowing(uid: uid, targetUid: targetUid);
+});
+
+final followingIdsProvider = StreamProvider<List<String>>((ref) {
+  final uid = ref.watch(currentUidProvider);
+  if (uid == null || ref.watch(isGuestProvider)) return Stream.value(const []);
+  return ref.watch(userRepositoryProvider).watchFollowingIds(uid);
+});
+
+/// The Following feed: strictly chronological, no ranking and no verified
+/// boost. One feed has to be trustworthy or following means nothing.
+final followingFeedProvider = FutureProvider<List<Recipe>>((ref) async {
+  final ids = ref.watch(followingIdsProvider).value ?? const [];
+  if (ids.isEmpty) return const [];
+  return ref.watch(recipeRepositoryProvider).followingPage(authorIds: ids);
+});
+
+final notificationsProvider = StreamProvider<List<AppNotification>>((ref) {
+  final uid = ref.watch(currentUidProvider);
+  if (uid == null || ref.watch(isGuestProvider)) return Stream.value(const []);
+  return ref.watch(notificationRepositoryProvider).watch(uid);
+});
+
+final unreadNotificationsProvider = StreamProvider<int>((ref) {
+  final uid = ref.watch(currentUidProvider);
+  if (uid == null || ref.watch(isGuestProvider)) return Stream.value(0);
+  return ref.watch(notificationRepositoryProvider).watchUnreadCount(uid);
 });

@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../core/search_text.dart';
 import '../models/recipe.dart';
+import '../models/social.dart';
+import '../models/user_profile.dart';
 
 class RecipeRepository {
   RecipeRepository({FirebaseFirestore? firestore})
@@ -204,16 +206,71 @@ class RecipeRepository {
 
   /// "I cooked this" — proof rather than intent, and weighted highest in
   /// ranking because of it.
+  ///
+  /// The author stub is stored alongside so the gallery can render a name and
+  /// face without a lookup per entry.
   Future<void> markCooked({
     required String recipeId,
-    required String uid,
+    required AuthorStub author,
     String? photoUrl,
     String? note,
   }) {
-    return _recipes.doc(recipeId).collection('cooked').doc(uid).set({
+    return _recipes.doc(recipeId).collection('cooked').doc(author.uid).set({
+      'author': author.toMap(),
       if (photoUrl != null) 'photoUrl': photoUrl,
       if (note != null) 'note': note,
       'at': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
   }
+
+  /// The "I cooked this" gallery. Photos first — a wall of text is not what
+  /// makes someone else want to cook the dish.
+  Stream<List<CookedPost>> watchCooked(String recipeId, {int limit = 30}) {
+    return _recipes
+        .doc(recipeId)
+        .collection('cooked')
+        .orderBy('at', descending: true)
+        .limit(limit)
+        .snapshots()
+        .map((s) => s.docs.map(CookedPost.fromDoc).toList());
+  }
+
+  Stream<bool> watchHasCooked({required String recipeId, required String uid}) =>
+      _recipes
+          .doc(recipeId)
+          .collection('cooked')
+          .doc(uid)
+          .snapshots()
+          .map((d) => d.exists);
+
+  // --- comments ------------------------------------------------------------
+
+  /// Oldest first: a recipe thread is a conversation, and reading it backwards
+  /// makes no sense. Feeds are the opposite, which is why this differs.
+  Stream<List<Comment>> watchComments(String recipeId, {int limit = 100}) {
+    return _recipes
+        .doc(recipeId)
+        .collection('comments')
+        .orderBy('createdAt')
+        .limit(limit)
+        .snapshots()
+        .map((s) => s.docs.map(Comment.fromDoc).toList());
+  }
+
+  Future<void> addComment({
+    required String recipeId,
+    required AuthorStub author,
+    required String text,
+    String? replyToUid,
+  }) {
+    return _recipes.doc(recipeId).collection('comments').add(
+      Comment(id: '', author: author, text: text, replyToUid: replyToUid)
+          .toMap(),
+    );
+  }
+
+  Future<void> deleteComment({
+    required String recipeId,
+    required String commentId,
+  }) => _recipes.doc(recipeId).collection('comments').doc(commentId).delete();
 }

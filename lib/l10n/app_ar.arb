@@ -260,5 +260,55 @@
     }
   },
   "settingsUserId": "معرّف حسابك",
-  "settingsUserIdCopied": "انتسخ"
+  "settingsUserIdCopied": "انتسخ",
+  "cookedGalleryEmpty": "ماكو أحد نشر مالته بعد. كون الأول.",
+  "cookedUpdateMine": "عدّل مالتي",
+  "commentsTitle": "التعليقات",
+  "commentsEmpty": "ماكو تعليقات بعد. اسأل الطباخ أي شي.",
+  "commentsHint": "اكتب تعليق…",
+  "commentsAuthorTag": "الطباخ",
+  "profileFollow": "تابع",
+  "notificationsTitle": "الإشعارات",
+  "notificationsEmpty": "ماكو شي بعد. لمن الناس يطبخون وصفاتك، راح تعرف من هنا.",
+  "notificationLiked": "{who} أعجب بوصفتك",
+  "@notificationLiked": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationCooked": "{who} طبخ وصفتك",
+  "@notificationCooked": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationCommented": "{who} علّق على وصفتك",
+  "@notificationCommented": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationFollowed": "{who} صار يتابعك",
+  "@notificationFollowed": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationCopiedWeek": "{who} نسخ جدول أسبوعك",
+  "@notificationCopiedWeek": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "feedFollowingEmpty": "ما تتابع أحد بعد. تابع طباخ وراح توصلك وصفاته هنا."
 }

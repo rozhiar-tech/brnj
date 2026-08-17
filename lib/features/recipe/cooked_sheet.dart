@@ -59,8 +59,9 @@ class _CookedSheetState extends ConsumerState<_CookedSheet> {
   }
 
   Future<void> _post() async {
-    final uid = ref.read(currentUidProvider);
-    if (uid == null) return;
+    final author = ref.read(myAuthorStubProvider);
+    if (author == null) return;
+    final uid = author.uid;
 
     setState(() => _posting = true);
     try {
@@ -81,7 +82,7 @@ class _CookedSheetState extends ConsumerState<_CookedSheet> {
           .read(recipeRepositoryProvider)
           .markCooked(
             recipeId: widget.recipeId,
-            uid: uid,
+            author: author,
             photoUrl: photoUrl,
             note: _note.text.trim().isEmpty ? null : _note.text.trim(),
           );
