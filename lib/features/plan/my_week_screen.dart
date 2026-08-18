@@ -37,7 +37,8 @@ class MyWeekScreen extends ConsumerWidget {
         children: [
           WeekHeader(
             week: week,
-            onPrevious: () => ref.read(selectedWeekProvider.notifier).previous(),
+            onPrevious: () =>
+                ref.read(selectedWeekProvider.notifier).previous(),
             onNext: () => ref.read(selectedWeekProvider.notifier).next(),
           ),
           const Divider(),
@@ -45,7 +46,8 @@ class MyWeekScreen extends ConsumerWidget {
             child: isGuest
                 ? _GuestPrompt(week: week)
                 : planAsync.when(
-                    loading: () => const Center(child: CircularProgressIndicator()),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
                     error: (error, _) => _ErrorState(
                       error: error,
                       onRetry: () => ref.invalidate(myWeekProvider),
@@ -82,7 +84,11 @@ class _GuestPrompt extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.calendar_month_outlined, size: 48, color: theme.colorScheme.outline),
+            Icon(
+              Icons.calendar_month_outlined,
+              size: 48,
+              color: theme.colorScheme.outline,
+            ),
             const SizedBox(height: Gap.lg),
             Text(l10n.planGuestTitle, style: theme.textTheme.titleMedium),
             const SizedBox(height: Gap.sm),
@@ -113,7 +119,11 @@ class _WeekList extends ConsumerWidget {
 
   final WeeklyPlan plan;
 
-  Future<void> _addDish(BuildContext context, WidgetRef ref, int dayIndex) async {
+  Future<void> _addDish(
+    BuildContext context,
+    WidgetRef ref,
+    int dayIndex,
+  ) async {
     final entry = await showAddDishSheet(context, ref);
     if (entry == null) return;
 
@@ -126,9 +136,9 @@ class _WeekList extends ConsumerWidget {
 
   Future<void> _removeDish(WidgetRef ref, int dayIndex, int entryIndex) async {
     final entries = [...plan.days[dayIndex].entries]..removeAt(entryIndex);
-    await ref.read(planRepositoryProvider).save(
-      plan.withDayEntries(dayIndex, entries),
-    );
+    await ref
+        .read(planRepositoryProvider)
+        .save(plan.withDayEntries(dayIndex, entries));
   }
 
   @override
@@ -182,8 +192,12 @@ class _DayRow extends ConsumerWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: tinted ? theme.colorScheme.secondaryContainer.withValues(alpha: 0.35) : null,
-        border: Border(bottom: BorderSide(color: theme.colorScheme.outlineVariant)),
+        color: tinted
+            ? theme.colorScheme.secondaryContainer.withValues(alpha: 0.35)
+            : null,
+        border: Border(
+          bottom: BorderSide(color: theme.colorScheme.outlineVariant),
+        ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: Gap.lg, vertical: Gap.md),
       child: Row(
@@ -198,7 +212,9 @@ class _DayRow extends ConsumerWidget {
                   _weekdayLabel(l10n, labelKey),
                   style: theme.textTheme.labelLarge?.copyWith(
                     color: isToday ? theme.colorScheme.primary : null,
-                    fontWeight: tinted || isToday ? FontWeight.w700 : FontWeight.w600,
+                    fontWeight: tinted || isToday
+                        ? FontWeight.w700
+                        : FontWeight.w600,
                   ),
                 ),
                 Text(
@@ -281,9 +297,7 @@ class _EntryChip extends StatelessWidget {
                 : theme.colorScheme.outline,
           ),
           const SizedBox(width: Gap.sm),
-          Expanded(
-            child: Text(entry.title, style: theme.textTheme.bodyMedium),
-          ),
+          Expanded(child: Text(entry.title, style: theme.textTheme.bodyMedium)),
           InkWell(
             onTap: onRemove,
             borderRadius: BorderRadius.circular(999),
@@ -337,9 +351,7 @@ class _PublishBar extends ConsumerWidget {
             FilledButton(
               // Nothing to publish is a real state, not an error — an empty
               // week just isn't worth anyone's time to open.
-              onPressed: plan.isEmpty
-                  ? null
-                  : () => _publish(context, ref),
+              onPressed: plan.isEmpty ? null : () => _publish(context, ref),
               child: Text(l10n.planPublish),
             ),
           ],
@@ -365,7 +377,9 @@ class _PublishBar extends ConsumerWidget {
     );
     if (visibility == null) return;
 
-    await ref.read(planRepositoryProvider).publish(plan, visibility: visibility);
+    await ref
+        .read(planRepositoryProvider)
+        .publish(plan, visibility: visibility);
   }
 
   static IconData _visibilityIcon(PlanVisibility v) => switch (v) {

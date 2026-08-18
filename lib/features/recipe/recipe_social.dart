@@ -188,11 +188,9 @@ class _CommentThreadState extends ConsumerState<CommentThread> {
 
     setState(() => _sending = true);
     try {
-      await ref.read(recipeRepositoryProvider).addComment(
-        recipeId: widget.recipeId,
-        author: author,
-        text: text,
-      );
+      await ref
+          .read(recipeRepositoryProvider)
+          .addComment(recipeId: widget.recipeId, author: author, text: text);
       _controller.clear();
     } catch (error) {
       if (mounted) {
@@ -209,7 +207,8 @@ class _CommentThreadState extends ConsumerState<CommentThread> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final comments = ref.watch(commentsProvider(widget.recipeId)).value ?? const [];
+    final comments =
+        ref.watch(commentsProvider(widget.recipeId)).value ?? const [];
     final myUid = ref.watch(currentUidProvider);
 
     return Column(
@@ -234,11 +233,14 @@ class _CommentThreadState extends ConsumerState<CommentThread> {
               comment: comment,
               isRecipeAuthor: comment.author.uid == widget.recipeAuthorUid,
               canDelete:
-                  comment.author.uid == myUid || myUid == widget.recipeAuthorUid,
-              onDelete: () => ref.read(recipeRepositoryProvider).deleteComment(
-                recipeId: widget.recipeId,
-                commentId: comment.id,
-              ),
+                  comment.author.uid == myUid ||
+                  myUid == widget.recipeAuthorUid,
+              onDelete: () => ref
+                  .read(recipeRepositoryProvider)
+                  .deleteComment(
+                    recipeId: widget.recipeId,
+                    commentId: comment.id,
+                  ),
             ),
 
         const SizedBox(height: Gap.md),

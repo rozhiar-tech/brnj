@@ -43,6 +43,7 @@ class ProfileScreen extends ConsumerWidget {
           : profileAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, _) => ErrorView(
+                where: 'my profile',
                 error: error,
                 onRetry: () => ref.invalidate(myProfileProvider),
               ),
@@ -120,7 +121,10 @@ class _ProfileBody extends ConsumerWidget {
           padding: const EdgeInsets.all(Gap.xl),
           child: Column(
             children: [
-              ProfileAvatar(photoUrl: profile.photoUrl, name: profile.displayName),
+              ProfileAvatar(
+                photoUrl: profile.photoUrl,
+                name: profile.displayName,
+              ),
               const SizedBox(height: Gap.md),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -238,8 +242,16 @@ class _Counts extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _Count(label: l10n.profileRecipes, value: counts.recipes, numerals: numerals),
-        _Count(label: l10n.profilePlans, value: counts.plans, numerals: numerals),
+        _Count(
+          label: l10n.profileRecipes,
+          value: counts.recipes,
+          numerals: numerals,
+        ),
+        _Count(
+          label: l10n.profilePlans,
+          value: counts.plans,
+          numerals: numerals,
+        ),
         _Count(
           label: l10n.profileFollowers,
           value: counts.followers,
@@ -341,4 +353,3 @@ class ProfileAvatar extends StatelessWidget {
     );
   }
 }
-

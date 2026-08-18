@@ -26,7 +26,14 @@ class StepsStep extends ConsumerWidget {
   }
 
   void _add() {
-    onChange((r) => r.copyWith(steps: [...r.steps, const RecipeStep(text: '')]));
+    onChange(
+      (r) => r.copyWith(
+        steps: [
+          ...r.steps,
+          const RecipeStep(text: ''),
+        ],
+      ),
+    );
   }
 
   void _remove(int index) {
@@ -129,7 +136,9 @@ class _StepCardState extends ConsumerState<_StepCard> {
         text: _text.text,
         imageUrl: imageUrl ?? widget.step.imageUrl,
         audioUrl: widget.step.audioUrl,
-        timerSeconds: clearTimer ? null : (timerSeconds ?? widget.step.timerSeconds),
+        timerSeconds: clearTimer
+            ? null
+            : (timerSeconds ?? widget.step.timerSeconds),
       ),
     );
   }
@@ -141,11 +150,13 @@ class _StepCardState extends ConsumerState<_StepCard> {
 
     setState(() => _uploading = true);
     try {
-      final url = await ref.read(mediaRepositoryProvider).uploadRecipeImage(
-        recipeId: widget.recipeId,
-        filePath: picked.path,
-        slot: 'step_${widget.index}',
-      );
+      final url = await ref
+          .read(mediaRepositoryProvider)
+          .uploadRecipeImage(
+            recipeId: widget.recipeId,
+            filePath: picked.path,
+            slot: 'step_${widget.index}',
+          );
       _emit(imageUrl: url);
     } finally {
       if (mounted) setState(() => _uploading = false);

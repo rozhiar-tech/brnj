@@ -32,10 +32,9 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
   Future<void> _submit(String uid) async {
     setState(() => _submitting = true);
     try {
-      await ref.read(userRepositoryProvider).requestVerification(
-        uid: uid,
-        note: _note.text,
-      );
+      await ref
+          .read(userRepositoryProvider)
+          .requestVerification(uid: uid, note: _note.text);
       if (mounted) context.go('/me');
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -55,7 +54,10 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
         children: [
           Text(l10n.verificationIntro, style: theme.textTheme.bodyMedium),
           const SizedBox(height: Gap.xl),
-          Text(l10n.verificationCriteriaTitle, style: theme.textTheme.titleSmall),
+          Text(
+            l10n.verificationCriteriaTitle,
+            style: theme.textTheme.titleSmall,
+          ),
           const SizedBox(height: Gap.sm),
           for (final criterion in [
             l10n.verificationCriterion1,
@@ -68,11 +70,7 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    Icons.check,
-                    size: 16,
-                    color: theme.colorScheme.primary,
-                  ),
+                  Icon(Icons.check, size: 16, color: theme.colorScheme.primary),
                   const SizedBox(width: Gap.sm),
                   Expanded(
                     child: Text(criterion, style: theme.textTheme.bodyMedium),

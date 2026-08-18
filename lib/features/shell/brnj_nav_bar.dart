@@ -57,7 +57,9 @@ class BrnjNavBar extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainer,
-        border: Border(top: BorderSide(color: theme.colorScheme.outlineVariant)),
+        border: Border(
+          top: BorderSide(color: theme.colorScheme.outlineVariant),
+        ),
       ),
       child: SafeArea(
         top: false,
@@ -84,7 +86,11 @@ class BrnjNavBar extends StatelessWidget {
 }
 
 class _Slot extends StatelessWidget {
-  const _Slot({required this.item, required this.selected, required this.onTap});
+  const _Slot({
+    required this.item,
+    required this.selected,
+    required this.onTap,
+  });
 
   final BrnjNavItem item;
   final bool selected;
@@ -109,11 +115,13 @@ class _Slot extends StatelessWidget {
             SizedBox(
               height: BrnjNavBar._iconSlotHeight,
               child: Center(
-                child: item.action ? const _CreateButton() : Icon(
-                  selected ? item.selectedIcon : item.icon,
-                  size: 24,
-                  color: color,
-                ),
+                child: item.action
+                    ? const _CreateButton()
+                    : Icon(
+                        selected ? item.selectedIcon : item.icon,
+                        size: 24,
+                        color: color,
+                      ),
               ),
             ),
             const SizedBox(height: 2),

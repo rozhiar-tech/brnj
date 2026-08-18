@@ -78,10 +78,8 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen> {
                     controller: _controller,
                     itemCount: recipe.steps.length,
                     onPageChanged: (page) => setState(() => _page = page),
-                    itemBuilder: (context, i) => _CookStep(
-                      step: recipe.steps[i],
-                      index: i,
-                    ),
+                    itemBuilder: (context, i) =>
+                        _CookStep(step: recipe.steps[i], index: i),
                   ),
                 ),
                 _CookFooter(

@@ -25,7 +25,8 @@ class RecipeComposerScreen extends ConsumerStatefulWidget {
   final String? draftId;
 
   @override
-  ConsumerState<RecipeComposerScreen> createState() => _RecipeComposerScreenState();
+  ConsumerState<RecipeComposerScreen> createState() =>
+      _RecipeComposerScreenState();
 }
 
 enum SaveState { idle, saving, saved, failed }
@@ -316,21 +317,19 @@ class _ReviewStep extends StatelessWidget {
             value: '${recipe.ingredients.length}',
           ),
           _ReviewRow(label: l10n.recipeSteps, value: '${recipe.steps.length}'),
-          _ReviewRow(
-            label: l10n.recipeServings,
-            value: '${recipe.servings}',
-          ),
+          _ReviewRow(label: l10n.recipeServings, value: '${recipe.servings}'),
         ],
       ],
     );
   }
 
-  static String _blockerLabel(AppLocalizations l10n, String key) => switch (key) {
-    'title' => l10n.composerNeedsTitle,
-    'cover' => l10n.composerNeedsCover,
-    'ingredients' => l10n.composerNeedsIngredients,
-    _ => l10n.composerNeedsSteps,
-  };
+  static String _blockerLabel(AppLocalizations l10n, String key) =>
+      switch (key) {
+        'title' => l10n.composerNeedsTitle,
+        'cover' => l10n.composerNeedsCover,
+        'ingredients' => l10n.composerNeedsIngredients,
+        _ => l10n.composerNeedsSteps,
+      };
 
   static int _pageFor(String key) => switch (key) {
     'title' || 'cover' => 0,

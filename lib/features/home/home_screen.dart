@@ -330,6 +330,7 @@ class _FeedSliver extends ConsumerWidget {
         child: SizedBox(
           height: 260,
           child: ErrorView(
+            where: 'home feed',
             error: error,
             onRetry: () => ref.invalidate(
               feed == _Feed.following

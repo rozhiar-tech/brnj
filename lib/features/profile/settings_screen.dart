@@ -150,10 +150,9 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   void _updatePrivacy(WidgetRef ref, UserProfile profile, UserPrivacy privacy) {
-    ref.read(userRepositoryProvider).updateProfile(
-      uid: profile.uid,
-      privacy: privacy,
-    );
+    ref
+        .read(userRepositoryProvider)
+        .updateProfile(uid: profile.uid, privacy: privacy);
   }
 
   /// Single-choice sheet. Shares the scrollable, height-capped sheet with the

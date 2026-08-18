@@ -35,9 +35,8 @@ class AdminScreen extends ConsumerWidget {
     final claimsAsync = ref.watch(adminClaimsProvider);
 
     return claimsAsync.when(
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      ),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (_, _) => Scaffold(
         appBar: AppBar(),
         body: Center(child: Text(l10n.errorGeneric)),
@@ -97,7 +96,11 @@ class _NoAccess extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.lock_outline, size: 40, color: theme.colorScheme.outline),
+              Icon(
+                Icons.lock_outline,
+                size: 40,
+                color: theme.colorScheme.outline,
+              ),
               const SizedBox(height: Gap.lg),
               Text(l10n.adminNoAccess, textAlign: TextAlign.center),
               const SizedBox(height: Gap.sm),
@@ -173,9 +176,9 @@ class _VerificationCardState extends ConsumerState<_VerificationCard> {
       }
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$error')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('$error')));
       }
     } finally {
       if (mounted) setState(() => _working = false);
@@ -313,7 +316,9 @@ class _ReportsQueue extends ConsumerWidget {
                         // for a second, more deliberate decision.
                         FilledButton.tonal(
                           onPressed: () async {
-                            final repository = ref.read(adminRepositoryProvider);
+                            final repository = ref.read(
+                              adminRepositoryProvider,
+                            );
                             await repository.hideContent(
                               targetType: report.targetType,
                               targetId: report.targetId,

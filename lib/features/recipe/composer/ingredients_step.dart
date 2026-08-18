@@ -30,7 +30,10 @@ class IngredientsStep extends StatelessWidget {
   void _add() {
     onChange(
       (r) => r.copyWith(
-        ingredients: [...r.ingredients, const Ingredient(item: '')],
+        ingredients: [
+          ...r.ingredients,
+          const Ingredient(item: ''),
+        ],
       ),
     );
   }
@@ -66,7 +69,9 @@ class IngredientsStep extends StatelessWidget {
                   itemBuilder: (context, index) => _IngredientRow(
                     // The key must follow the row's identity, not its position,
                     // or reordering rebuilds the wrong text fields.
-                    key: ValueKey('ingredient-$index-${recipe.ingredients.length}'),
+                    key: ValueKey(
+                      'ingredient-$index-${recipe.ingredients.length}',
+                    ),
                     ingredient: recipe.ingredients[index],
                     onChanged: (value) => _update(index, value),
                     onRemove: () => _remove(index),
@@ -128,7 +133,9 @@ class _IngredientRowState extends State<_IngredientRow> {
     text: widget.ingredient.quantity?.toString() ?? '',
   );
   late final _note = TextEditingController(text: widget.ingredient.note ?? '');
-  late final _group = TextEditingController(text: widget.ingredient.group ?? '');
+  late final _group = TextEditingController(
+    text: widget.ingredient.group ?? '',
+  );
   bool _expanded = false;
 
   @override

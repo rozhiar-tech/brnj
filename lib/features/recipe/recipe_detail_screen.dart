@@ -151,7 +151,8 @@ class _Body extends ConsumerWidget {
                   children: [
                     CircleAvatar(
                       radius: 14,
-                      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                      backgroundColor:
+                          theme.colorScheme.surfaceContainerHighest,
                       child: Text(
                         recipe.author.name.characters.first,
                         style: theme.textTheme.labelSmall,

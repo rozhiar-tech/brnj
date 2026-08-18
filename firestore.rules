@@ -68,9 +68,19 @@ service cloud.firestore {
     // ---- users ------------------------------------------------------------
 
     match /users/{uid} {
-      // Profiles are public so guests can browse authors, but a blocked user
-      // sees nothing.
-      allow read: if signedIn() && !isBlockedBy(uid);
+      // Opening one profile can afford the per-document block lookup.
+      allow get: if signedIn() && !isBlockedBy(uid);
+
+      // Listing cannot. Firestore evaluates a query's rule from the query's own
+      // constraints, and an exists() lookup keyed on each result is not
+      // something it can prove safe in advance — people search came back
+      // permission-denied because of it.
+      //
+      // So a listing is limited to accounts that asked to be findable, which is
+      // exactly what `discoverable` promises. Blocked people are filtered on the
+      // client, where the block list already lives.
+      allow list: if signedIn()
+                  && resource.data.privacy.discoverable == true;
 
       allow create: if isSelf(uid)
                     && noProtectedFieldsOnCreate()

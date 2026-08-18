@@ -58,7 +58,8 @@ class _Body extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final numerals = ref.watch(numeralStyleProvider);
-    final recipes = ref.watch(userRecipesProvider(profile.uid)).value ?? const [];
+    final recipes =
+        ref.watch(userRecipesProvider(profile.uid)).value ?? const [];
 
     return CustomScrollView(
       slivers: [
@@ -187,11 +188,9 @@ class _FollowButton extends ConsumerWidget {
 
       // Only this edge is written. The mirrored follower edge and both counts
       // are the Function's job, so nobody can inflate their own following.
-      await ref.read(userRepositoryProvider).setFollowing(
-        uid: uid,
-        targetUid: targetUid,
-        following: !following,
-      );
+      await ref
+          .read(userRepositoryProvider)
+          .setFollowing(uid: uid, targetUid: targetUid, following: !following);
     }
 
     return SizedBox(
@@ -236,7 +235,6 @@ class _Stat extends StatelessWidget {
     );
   }
 }
-
 
 class _ProfileNotFound extends StatelessWidget {
   const _ProfileNotFound();

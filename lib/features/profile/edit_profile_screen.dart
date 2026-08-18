@@ -63,10 +63,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
     setState(() => _uploadingAvatar = true);
     try {
-      await ref.read(userRepositoryProvider).uploadAvatar(
-        uid: _loaded!.uid,
-        filePath: picked.path,
-      );
+      await ref
+          .read(userRepositoryProvider)
+          .uploadAvatar(uid: _loaded!.uid, filePath: picked.path);
     } catch (error) {
       if (mounted) setState(() => _error = '$error');
     } finally {
@@ -79,10 +78,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       setState(() => _handleStatus = null);
       return;
     }
-    final status = await ref.read(userRepositoryProvider).checkHandle(
-      value,
-      currentHandle: _loaded?.handle,
-    );
+    final status = await ref
+        .read(userRepositoryProvider)
+        .checkHandle(value, currentHandle: _loaded?.handle);
     if (mounted) setState(() => _handleStatus = status);
   }
 
@@ -179,7 +177,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         else
                           IconButton.filled(
                             onPressed: _pickAvatar,
-                            icon: const Icon(Icons.photo_camera_outlined, size: 18),
+                            icon: const Icon(
+                              Icons.photo_camera_outlined,
+                              size: 18,
+                            ),
                             tooltip: l10n.profileChangePhoto,
                           ),
                       ],
@@ -223,7 +224,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                       prefixText: '@',
                       helperText: _handleHelper(l10n),
                       helperStyle: TextStyle(
-                        color: _handleStatus == HandleStatus.taken ||
+                        color:
+                            _handleStatus == HandleStatus.taken ||
                                 _handleStatus == HandleStatus.invalid
                             ? theme.colorScheme.error
                             : null,

@@ -54,11 +54,13 @@ class _BasicsStepState extends ConsumerState<BasicsStep> {
 
     setState(() => _uploading = true);
     try {
-      final url = await ref.read(mediaRepositoryProvider).uploadRecipeImage(
-        recipeId: recipeId,
-        filePath: picked.path,
-        slot: 'cover',
-      );
+      final url = await ref
+          .read(mediaRepositoryProvider)
+          .uploadRecipeImage(
+            recipeId: recipeId,
+            filePath: picked.path,
+            slot: 'cover',
+          );
       widget.onChange((r) => r.copyWith(coverUrl: url));
     } finally {
       if (mounted) setState(() => _uploading = false);
@@ -84,7 +86,8 @@ class _BasicsStepState extends ConsumerState<BasicsStep> {
           controller: _title,
           maxLength: 120,
           textInputAction: TextInputAction.next,
-          onChanged: (value) => widget.onChange((r) => r.copyWith(title: value)),
+          onChanged: (value) =>
+              widget.onChange((r) => r.copyWith(title: value)),
           decoration: InputDecoration(labelText: l10n.composerTitleLabel),
         ),
         const SizedBox(height: Gap.lg),
@@ -126,7 +129,8 @@ class _BasicsStepState extends ConsumerState<BasicsStep> {
               child: _NumberField(
                 label: l10n.composerPrepMinutes,
                 value: recipe.prepMinutes,
-                onChanged: (v) => widget.onChange((r) => r.copyWith(prepMinutes: v)),
+                onChanged: (v) =>
+                    widget.onChange((r) => r.copyWith(prepMinutes: v)),
               ),
             ),
             const SizedBox(width: Gap.md),
@@ -134,7 +138,8 @@ class _BasicsStepState extends ConsumerState<BasicsStep> {
               child: _NumberField(
                 label: l10n.composerCookMinutes,
                 value: recipe.cookMinutes,
-                onChanged: (v) => widget.onChange((r) => r.copyWith(cookMinutes: v)),
+                onChanged: (v) =>
+                    widget.onChange((r) => r.copyWith(cookMinutes: v)),
               ),
             ),
           ],

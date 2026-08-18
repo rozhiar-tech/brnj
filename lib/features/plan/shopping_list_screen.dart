@@ -61,7 +61,10 @@ List<ShoppingLine> buildShoppingList(List<Recipe> recipes) {
 }
 
 final _shoppingListProvider =
-    FutureProvider.family<(List<ShoppingLine>, int), String>((ref, planId) async {
+    FutureProvider.family<(List<ShoppingLine>, int), String>((
+      ref,
+      planId,
+    ) async {
       final plan = await ref.watch(planRepositoryProvider).getPlan(planId);
       final ids = plan?.linkedRecipeIds ?? const <String>[];
       if (ids.isEmpty) return (const <ShoppingLine>[], 0);
@@ -116,7 +119,12 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
           return ListView(
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(Gap.lg, Gap.md, Gap.lg, Gap.sm),
+                padding: const EdgeInsets.fromLTRB(
+                  Gap.lg,
+                  Gap.md,
+                  Gap.lg,
+                  Gap.sm,
+                ),
                 child: Text(
                   l10n.shoppingListFrom(recipeCount),
                   style: theme.textTheme.labelMedium?.copyWith(
@@ -152,9 +160,14 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
     );
   }
 
-  String _label(AppLocalizations l10n, ShoppingLine line, NumeralStyle numerals) {
+  String _label(
+    AppLocalizations l10n,
+    ShoppingLine line,
+    NumeralStyle numerals,
+  ) {
     final parts = [
-      if (line.quantity != null) formatQuantity(line.quantity!, style: numerals),
+      if (line.quantity != null)
+        formatQuantity(line.quantity!, style: numerals),
       if (line.unit != Unit.piece && line.unit != Unit.toTaste)
         unitLabel(l10n, line.unit),
       line.item,

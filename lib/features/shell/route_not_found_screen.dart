@@ -39,11 +39,7 @@ class RouteNotFoundScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: Gap.xxl),
-              Icon(
-                Icons.link_off,
-                size: 48,
-                color: theme.colorScheme.outline,
-              ),
+              Icon(Icons.link_off, size: 48, color: theme.colorScheme.outline),
               const SizedBox(height: Gap.lg),
               Text(
                 l10n.routeNotFoundTitle,

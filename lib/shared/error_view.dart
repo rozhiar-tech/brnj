@@ -15,10 +15,15 @@ import '../l10n/gen/app_localizations.dart';
 ///
 /// In release builds only the sentence is shown.
 class ErrorView extends StatelessWidget {
-  const ErrorView({required this.error, this.onRetry, super.key});
+  const ErrorView({required this.error, this.onRetry, this.where, super.key});
 
   final Object? error;
   final VoidCallback? onRetry;
+
+  /// Which screen this is. Logged with the error, because "permission-denied"
+  /// on its own does not say which read was refused, and finding out cost a
+  /// round trip.
+  final String? where;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +31,7 @@ class ErrorView extends StatelessWidget {
     final theme = Theme.of(context);
 
     if (kDebugMode && error != null) {
-      debugPrint('ErrorView: $error');
+      debugPrint('ErrorView${where == null ? '' : ' [$where]'}: $error');
     }
 
     return Center(
@@ -51,9 +56,8 @@ class ErrorView extends StatelessWidget {
               // Selectable and copyable: index errors carry a long URL that is
               // useless if it can't leave the screen.
               InkWell(
-                onTap: () => Clipboard.setData(
-                  ClipboardData(text: error.toString()),
-                ),
+                onTap: () =>
+                    Clipboard.setData(ClipboardData(text: error.toString())),
                 child: Text(
                   '$error',
                   textAlign: TextAlign.center,

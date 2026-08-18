@@ -29,6 +29,7 @@ class MyRecipesScreen extends ConsumerWidget {
       body: recipesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => ErrorView(
+          where: 'my recipes',
           error: error,
           onRetry: () => ref.invalidate(myRecipesProvider),
         ),

@@ -476,6 +476,29 @@ describe('reports and blocking', () => {
     await assertSucceeds(getDoc(doc(user('user1').firestore(), 'users/nobody')));
   });
 
+  it('lets a signed-in user LIST profiles for people search', async () => {
+    // The users read rule calls exists() on a subcollection. That is fine for a
+    // single get; for a query Firestore evaluates it per returned document and
+    // the rule has to be satisfiable by the query itself.
+    await env.withSecurityRulesDisabled(async (admin) => {
+      const db = admin.firestore();
+      await setDoc(doc(db, 'users/p1'), {
+        displayName: 'Rozhyar',
+        privacy: { discoverable: true },
+      });
+    });
+
+    const db = user('user1').firestore();
+    const q = query(
+      collection(db, 'users'),
+      where('privacy.discoverable', '==', true),
+      where('displayName', '>=', 'Ro'),
+      where('displayName', '<', 'Ro\uf8ff'),
+      limit(20),
+    );
+    await assertSucceeds(getDocs(q));
+  });
+
   it('lets a user block someone', async () => {
     await assertSucceeds(
       setDoc(doc(user('user1').firestore(), 'users/user1/blocked/user2'), {}),
@@ -494,6 +517,156 @@ describe('reports and blocking', () => {
       await setDoc(doc(admin.firestore(), 'users/user1/blocked/user2'), {});
     });
     await assertFails(getDoc(doc(user('user2').firestore(), 'users/user1')));
+  });
+});
+
+/// Every query the app actually issues.
+///
+/// Firestore evaluates `list` rules differently from `get`: a query has to be
+/// provably safe from its own constraints, not merely return safe documents.
+/// A rule that passes a single-document test can still refuse the screen that
+/// uses it, which is how a denied read reached a real phone with no clue
+/// attached. These mirror the client queries one for one.
+describe('client queries', () => {
+  const seed = async (fn) => env.withSecurityRulesDisabled((a) => fn(a.firestore()));
+
+  it('notifications list', async () => {
+    await seed((db) =>
+      setDoc(doc(db, 'users/user1/notifications/n1'), { read: false, at: new Date() }),
+    );
+    await assertSucceeds(
+      getDocs(query(
+        collection(user('user1').firestore(), 'users/user1/notifications'),
+        orderBy('at', 'desc'), limit(50),
+      )),
+    );
+  });
+
+  it('unread notification count', async () => {
+    await assertSucceeds(
+      getDocs(query(
+        collection(user('user1').firestore(), 'users/user1/notifications'),
+        where('read', '==', false), limit(50),
+      )),
+    );
+  });
+
+  it('saved recipe ids', async () => {
+    await assertSucceeds(
+      getDocs(query(
+        collection(user('user1').firestore(), 'users/user1/saved'),
+        orderBy('at', 'desc'),
+      )),
+    );
+  });
+
+  it('blocked ids', async () => {
+    await assertSucceeds(
+      getDocs(collection(user('user1').firestore(), 'users/user1/blocked')),
+    );
+  });
+
+  it('following ids', async () => {
+    await assertSucceeds(
+      getDocs(collection(user('user1').firestore(), 'users/user1/following')),
+    );
+  });
+
+  it('comments list', async () => {
+    await assertSucceeds(
+      getDocs(query(
+        collection(guest().firestore(), 'recipes/r1/comments'),
+        orderBy('createdAt'), limit(100),
+      )),
+    );
+  });
+
+  it('cooked gallery list', async () => {
+    await assertSucceeds(
+      getDocs(query(
+        collection(guest().firestore(), 'recipes/r1/cooked'),
+        orderBy('at', 'desc'), limit(30),
+      )),
+    );
+  });
+
+  it('my recipes including drafts', async () => {
+    await assertSucceeds(
+      getDocs(query(
+        collection(user('user1').firestore(), 'recipes'),
+        where('author.uid', '==', 'user1'),
+        orderBy('createdAt', 'desc'),
+      )),
+    );
+  });
+
+  it('another author\'s published recipes', async () => {
+    await assertSucceeds(
+      getDocs(query(
+        collection(user('user1').firestore(), 'recipes'),
+        where('author.uid', '==', 'user2'),
+        where('status', '==', 'published'),
+        orderBy('createdAt', 'desc'),
+      )),
+    );
+  });
+
+  it('this week in Iraqi kitchens', async () => {
+    await assertSucceeds(
+      getDocs(query(
+        collection(guest().firestore(), 'plans'),
+        where('visibility', '==', 'public'),
+        where('weekStart', '==', new Date('2026-08-15')),
+        orderBy('stats.copies', 'desc'), limit(20),
+      )),
+    );
+  });
+
+  it('a user plan archive', async () => {
+    await assertSucceeds(
+      getDocs(query(
+        collection(user('user1').firestore(), 'plans'),
+        where('owner.uid', '==', 'user1'),
+        orderBy('weekStart', 'desc'), limit(12),
+      )),
+    );
+  });
+
+  it('moderation: open reports', async () => {
+    const mod = env.authenticatedContext('mod1', {
+      moderator: true,
+      firebase: { sign_in_provider: 'phone' },
+    });
+    await assertSucceeds(
+      getDocs(query(
+        collection(mod.firestore(), 'reports'),
+        where('status', '==', 'open'), orderBy('createdAt'),
+      )),
+    );
+  });
+
+  it('moderation: pending verification requests', async () => {
+    const mod = env.authenticatedContext('mod1', {
+      moderator: true,
+      firebase: { sign_in_provider: 'phone' },
+    });
+    await assertSucceeds(
+      getDocs(query(
+        collection(mod.firestore(), 'verificationRequests'),
+        where('status', '==', 'pending'),
+      )),
+    );
+  });
+
+  it('search by keyword', async () => {
+    await assertSucceeds(
+      getDocs(query(
+        collection(guest().firestore(), 'recipes'),
+        where('status', '==', 'published'),
+        where('keywords', 'array-contains-any', ['دولمه']),
+        orderBy('score', 'desc'), limit(30),
+      )),
+    );
   });
 });
 
