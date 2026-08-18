@@ -10,6 +10,7 @@ import '../../data/models/weekly_plan.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/view_tracker.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../../shared/profile_avatar.dart';
 import '../../shared/error_view.dart';
 import '../../shared/verified_tick.dart';
 import '../recipe/recipe_social.dart';
@@ -103,13 +104,10 @@ class _PlanBody extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                  CircleAvatar(
+                  ProfileAvatar(
+                    photoUrl: plan.owner.photoUrl,
+                    name: plan.owner.name,
                     radius: 18,
-                    backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                    child: Text(
-                      plan.owner.name.characters.first,
-                      style: theme.textTheme.titleMedium,
-                    ),
                   ),
                   const SizedBox(width: Gap.md),
                   Expanded(

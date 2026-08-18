@@ -16,6 +16,7 @@ import '../../data/repositories/safety_repository.dart';
 import '../../shared/safety_actions.dart';
 import '../../shared/verified_tick.dart';
 import '../auth/sign_in_sheet.dart';
+import '../../shared/profile_avatar.dart';
 import 'profile_screen.dart';
 
 /// Someone else's profile.

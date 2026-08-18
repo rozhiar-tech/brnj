@@ -8,7 +8,7 @@ import '../../data/models/user_profile.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/user_repository.dart';
 import '../../l10n/gen/app_localizations.dart';
-import 'profile_screen.dart';
+import '../../shared/profile_avatar.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});

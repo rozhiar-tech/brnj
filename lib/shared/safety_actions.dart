@@ -104,11 +104,9 @@ class SafetyMenu extends ConsumerWidget {
     final uid = ref.read(currentUidProvider);
     if (uid == null) return;
 
-    await ref.read(safetyRepositoryProvider).setBlocked(
-      uid: uid,
-      targetUid: targetUid,
-      blocked: block,
-    );
+    await ref
+        .read(safetyRepositoryProvider)
+        .setBlocked(uid: uid, targetUid: targetUid, blocked: block);
 
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -177,14 +175,16 @@ class _ReportSheetState extends ConsumerState<_ReportSheet> {
 
     setState(() => _sending = true);
     try {
-      await ref.read(safetyRepositoryProvider).report(
-        reporterId: uid,
-        targetType: widget.targetType,
-        targetId: widget.targetId,
-        targetOwner: widget.targetOwner,
-        reason: _reason!,
-        note: _note.text,
-      );
+      await ref
+          .read(safetyRepositoryProvider)
+          .report(
+            reporterId: uid,
+            targetType: widget.targetType,
+            targetId: widget.targetId,
+            targetOwner: widget.targetOwner,
+            reason: _reason!,
+            note: _note.text,
+          );
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(

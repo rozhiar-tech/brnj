@@ -8,7 +8,7 @@ import '../../data/providers.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../shared/error_view.dart';
 import '../../shared/verified_tick.dart';
-import 'profile_screen.dart';
+import '../../shared/profile_avatar.dart';
 
 enum FollowListKind { followers, following }
 

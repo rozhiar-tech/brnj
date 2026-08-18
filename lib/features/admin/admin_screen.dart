@@ -8,7 +8,7 @@ import '../../data/providers.dart';
 import '../../data/repositories/admin_repository.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../shared/error_view.dart';
-import '../profile/profile_screen.dart';
+import '../../shared/profile_avatar.dart';
 
 final _verificationQueueProvider = StreamProvider<List<VerificationRequest>>(
   (ref) => ref.watch(adminRepositoryProvider).watchVerificationRequests(),

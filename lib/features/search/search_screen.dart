@@ -14,7 +14,7 @@ import '../../l10n/gen/app_localizations.dart';
 import '../../shared/error_view.dart';
 import '../../shared/recipe_card.dart';
 import '../../shared/verified_tick.dart';
-import '../profile/profile_screen.dart';
+import '../../shared/profile_avatar.dart';
 import '../recipe/composer/composer_labels.dart';
 
 /// Recipe search.

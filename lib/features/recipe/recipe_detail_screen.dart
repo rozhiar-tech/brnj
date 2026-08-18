@@ -12,6 +12,7 @@ import '../../data/models/recipe.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/view_tracker.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../../shared/profile_avatar.dart';
 import '../../shared/error_view.dart';
 import '../../data/repositories/safety_repository.dart';
 import '../../shared/safety_actions.dart';
@@ -157,14 +158,10 @@ class _Body extends ConsumerWidget {
                 onTap: () => context.push('/user/${recipe.author.uid}'),
                 child: Row(
                   children: [
-                    CircleAvatar(
+                    ProfileAvatar(
+                      photoUrl: recipe.author.photoUrl,
+                      name: recipe.author.name,
                       radius: 14,
-                      backgroundColor:
-                          theme.colorScheme.surfaceContainerHighest,
-                      child: Text(
-                        recipe.author.name.characters.first,
-                        style: theme.textTheme.labelSmall,
-                      ),
                     ),
                     const SizedBox(width: Gap.sm),
                     Text(recipe.author.name, style: theme.textTheme.labelLarge),
@@ -589,7 +586,6 @@ class _ActionBar extends ConsumerWidget {
   }
 }
 
-
 /// Edit and delete, for the author.
 ///
 /// Editing reopens the composer on the published recipe — the same screen that
@@ -621,7 +617,9 @@ class _OwnerMenu extends ConsumerWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
+                child: Text(
+                  MaterialLocalizations.of(context).cancelButtonLabel,
+                ),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),

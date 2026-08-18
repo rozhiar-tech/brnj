@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -11,6 +10,7 @@ import '../../data/providers.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../shared/verified_tick.dart';
 import '../../shared/error_view.dart';
+import '../../shared/profile_avatar.dart';
 import '../auth/sign_in_sheet.dart';
 
 /// The Me tab.
@@ -316,60 +316,6 @@ class _Count extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Avatar with an initial fallback.
-///
-/// Illustrated and letter avatars are normal here, not a placeholder for a
-/// missing photo — plenty of people will never upload a face, and the default
-/// should not look like something is missing.
-class ProfileAvatar extends StatelessWidget {
-  const ProfileAvatar({
-    required this.photoUrl,
-    required this.name,
-    this.radius = 44,
-    super.key,
-  });
-
-  final String? photoUrl;
-  final String name;
-  final double radius;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    if (photoUrl == null) {
-      return CircleAvatar(
-        radius: radius,
-        backgroundColor: theme.colorScheme.primaryContainer,
-        child: Text(
-          name.isEmpty ? '?' : name.characters.first,
-          style: theme.textTheme.headlineMedium?.copyWith(
-            color: theme.colorScheme.onPrimaryContainer,
-          ),
-        ),
-      );
-    }
-
-    return ClipOval(
-      child: CachedNetworkImage(
-        imageUrl: photoUrl!,
-        width: radius * 2,
-        height: radius * 2,
-        fit: BoxFit.cover,
-        placeholder: (_, _) => CircleAvatar(
-          radius: radius,
-          backgroundColor: theme.colorScheme.surfaceContainerHighest,
-        ),
-        errorWidget: (_, _, _) => CircleAvatar(
-          radius: radius,
-          backgroundColor: theme.colorScheme.primaryContainer,
-          child: Text(name.isEmpty ? '?' : name.characters.first),
         ),
       ),
     );

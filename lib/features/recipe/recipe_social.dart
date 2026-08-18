@@ -14,7 +14,7 @@ import '../../data/repositories/safety_repository.dart';
 import '../../shared/safety_actions.dart';
 import '../../shared/verified_tick.dart';
 import '../auth/sign_in_sheet.dart';
-import '../profile/profile_screen.dart';
+import '../../shared/profile_avatar.dart';
 import 'cooked_sheet.dart';
 
 /// The "I cooked this" gallery.
