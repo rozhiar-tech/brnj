@@ -1,0 +1,288 @@
+[
+  {
+    "title": "دولمة عراقية",
+    "description": "دولمة بيت، تنطبخ بقدر واحد وتنكب على صينية. الصحن اللي فوكها هو السر — بدونه تتفكك.",
+    "language": "ar",
+    "region": "baghdadi",
+    "servings": 8,
+    "prepMinutes": 45,
+    "cookMinutes": 90,
+    "difficulty": "medium",
+    "costBand": "medium",
+    "tags": ["غداء", "مناسبات", "خضار محشي"],
+    "ingredients": [
+      { "item": "تمن عنبر", "quantity": 3, "unit": "istikan", "group": "الحشوة" },
+      { "item": "لحم مفروم", "quantity": 300, "unit": "gram", "group": "الحشوة" },
+      { "item": "بقدونس مفروم", "quantity": 1, "unit": "cup", "group": "الحشوة" },
+      { "item": "دبس رمان", "quantity": 2, "unit": "tablespoon", "group": "الحشوة", "note": "بدونه تنفع، بس الحموضة تنقص — بدله معجون تمر هندي" },
+      { "item": "بهارات دولمة", "quantity": 1, "unit": "tablespoon", "group": "الحشوة" },
+      { "item": "ورق عنب", "quantity": 250, "unit": "gram", "group": "الخضار" },
+      { "item": "باذنجان", "quantity": 4, "unit": "piece", "group": "الخضار" },
+      { "item": "فلفل حلو", "quantity": 4, "unit": "piece", "group": "الخضار" },
+      { "item": "بصل كبير", "quantity": 2, "unit": "piece", "group": "الخضار" },
+      { "item": "ملح", "unit": "toTaste" }
+    ],
+    "steps": [
+      { "text": "انقع التمن بماي دافي نص ساعة، بعدين صفّيه زين.", "timerMinutes": 30 },
+      "اخلط التمن مع اللحم والبقدونس والبهارات ودبس الرمان. ذوق الملح من الحشوة نيّة — هي اللي تحدد طعم الدولمة كلها.",
+      "فرّغ الباذنجان والفلفل والبصل. لا تفرغهم زيادة حتى ما ينشقون بالطبخ.",
+      "احشي الخضار وورق العنب، خلي ربع فراغ بكل وحدة لأن التمن يكبر.",
+      "رصّ الدولمة بالقدر: الثقيل تحت، ورق العنب فوق. حط صحن ثقيل فوكها حتى تثبت.",
+      { "text": "صب ماي مغلي لين يغطي، ونص استكان دبس رمان مذوّب. غطّي واطبخ على نار هادية.", "timerMinutes": 90 },
+      "خلّيها ترتاح ربع ساعة قبل ما تكبّها، وإلا تتفكك."
+    ]
+  },
+  {
+    "title": "تشريب فاصوليا",
+    "description": "غداء جمعة. الخبز اليابس تحت والمرك فوكه — كل ما جلس أطيب.",
+    "language": "ar",
+    "region": "baghdadi",
+    "servings": 6,
+    "prepMinutes": 20,
+    "cookMinutes": 120,
+    "difficulty": "easy",
+    "costBand": "cheap",
+    "tags": ["غداء", "اقتصادي"],
+    "ingredients": [
+      { "item": "فاصوليا بيضاء", "quantity": 2, "unit": "istikan", "note": "انقعها من الليل" },
+      { "item": "لحم غنم مع العظم", "quantity": 500, "unit": "gram" },
+      { "item": "بصل", "quantity": 1, "unit": "piece" },
+      { "item": "معجون طماطم", "quantity": 2, "unit": "tablespoon" },
+      { "item": "ثوم", "quantity": 4, "unit": "piece" },
+      { "item": "بهارات عراقية", "quantity": 1, "unit": "teaspoon" },
+      { "item": "خبز تنور يابس", "quantity": 3, "unit": "piece" },
+      { "item": "ملح", "unit": "toTaste" }
+    ],
+    "steps": [
+      "انقع الفاصوليا من الليل. هاي مو خطوة تنلغى — بدونها تحتاج ساعتين زيادة.",
+      "شوّح اللحم مع البصل لين يحمرّ من كل جهة.",
+      { "text": "ضيف المعجون والبهارات وقلّب دقيقتين حتى يفوح.", "timerMinutes": 2 },
+      { "text": "ضيف الفاصوليا وماي مغلي يغطي بأصبعين. غطّي واطبخ على نار هادية.", "timerMinutes": 120 },
+      "كسّر الخبز اليابس بالصحن، صب عليه المرك لين ينقع، وحط اللحم فوك."
+    ]
+  },
+  {
+    "title": "مسكوف",
+    "description": "سمك مفتوح على النار، مو بالفرن. الحطب هو نص الطعم.",
+    "language": "ar",
+    "region": "baghdadi",
+    "servings": 4,
+    "prepMinutes": 30,
+    "cookMinutes": 120,
+    "difficulty": "hard",
+    "costBand": "occasion",
+    "tags": ["عشاء", "مناسبات", "سمك"],
+    "ingredients": [
+      { "item": "سمك كارب", "quantity": 1, "unit": "piece", "note": "٢-٣ كيلو، ينفتح من الظهر مو من البطن" },
+      { "item": "زيت", "quantity": 3, "unit": "tablespoon" },
+      { "item": "معجون طماطم", "quantity": 2, "unit": "tablespoon" },
+      { "item": "كركم", "quantity": 1, "unit": "teaspoon" },
+      { "item": "تمر هندي", "quantity": 2, "unit": "tablespoon" },
+      { "item": "ملح", "unit": "toTaste" }
+    ],
+    "steps": [
+      "افتح السمكة من الظهر وافردها. نظّفها زين وجفّفها.",
+      "اخلط الزيت والمعجون والكركم والملح، وادهن السمكة من الجهتين.",
+      { "text": "ثبّتها على أوتاد حول النار — مو فوكها. تنشوي بالحرارة الجانبية.", "timerMinutes": 90 },
+      { "text": "بالربع ساعة الأخير حطّها أفقي على الجمر حتى تاخذ لون.", "timerMinutes": 15 },
+      "قدّمها مع بصل ولومي وخبز."
+    ]
+  },
+  {
+    "title": "كبة موصلية",
+    "description": "قرصة كبيرة تنقسم بالصحن، مو كرات. الفرق كله بسمك القشرة.",
+    "language": "ar",
+    "region": "mosuli",
+    "servings": 6,
+    "prepMinutes": 60,
+    "cookMinutes": 45,
+    "difficulty": "hard",
+    "costBand": "medium",
+    "tags": ["غداء", "موصلي"],
+    "ingredients": [
+      { "item": "برغل ناعم", "quantity": 3, "unit": "istikan", "group": "القشرة" },
+      { "item": "لحم مفروم ناعم", "quantity": 250, "unit": "gram", "group": "القشرة" },
+      { "item": "لحم مفروم", "quantity": 400, "unit": "gram", "group": "الحشوة" },
+      { "item": "بصل مفروم", "quantity": 2, "unit": "piece", "group": "الحشوة" },
+      { "item": "لوز مقشر", "quantity": 0.5, "unit": "cup", "group": "الحشوة" },
+      { "item": "بهارات", "quantity": 1, "unit": "tablespoon" },
+      { "item": "ملح", "unit": "toTaste" }
+    ],
+    "steps": [
+      { "text": "انقع البرغل بماي دافي ربع ساعة وعصره زين.", "timerMinutes": 15 },
+      "اعجن البرغل مع اللحم الناعم لين يصير عجين متماسك. لو تفكك، ضيف شوية ماي مثلج مو دقيق.",
+      "حضّر الحشوة: شوّح البصل، ضيف اللحم والبهارات واللوز.",
+      "افرد نص العجين بصينية مدهونة، حط الحشوة، وافرد النص الثاني فوكها.",
+      { "text": "قطّعها مربعات وادهنها بزيت، واخبزها لين تحمرّ.", "timerMinutes": 45 }
+    ]
+  },
+  {
+    "title": "برياني عراقي",
+    "description": "مو برياني هندي. تمن أصفر، ومكسرات وشعرية فوك، والدجاج جنب.",
+    "language": "ar",
+    "region": "general",
+    "servings": 8,
+    "prepMinutes": 40,
+    "cookMinutes": 60,
+    "difficulty": "medium",
+    "costBand": "medium",
+    "tags": ["غداء", "مناسبات"],
+    "occasions": ["eid"],
+    "ingredients": [
+      { "item": "تمن بسمتي", "quantity": 4, "unit": "istikan" },
+      { "item": "دجاج مقطع", "quantity": 1, "unit": "piece" },
+      { "item": "شعرية", "quantity": 1, "unit": "cup" },
+      { "item": "بزاليا وجزر", "quantity": 2, "unit": "cup" },
+      { "item": "لوز وزبيب", "quantity": 1, "unit": "cup" },
+      { "item": "كركم", "quantity": 1, "unit": "teaspoon" },
+      { "item": "بهارات برياني", "quantity": 1, "unit": "tablespoon" },
+      { "item": "ملح", "unit": "toTaste" }
+    ],
+    "steps": [
+      "اسلق الدجاج مع بصل وهيل ولومي. احتفظ بالمرك — هو اللي يطبخ التمن.",
+      "قلي البزاليا والجزر والشعرية كل وحدة لحال.",
+      { "text": "اطبخ التمن بمرك الدجاج مع الكركم لين ينشف.", "timerMinutes": 25 },
+      "افرد التمن بالصينية، وزّع الخضار والشعرية والمكسرات فوكه.",
+      "حمّر الدجاج بالفرن وقدّمه جنب التمن مو فوكه."
+    ]
+  },
+  {
+    "title": "تمن وقيمة",
+    "description": "قيمة كربلاء. اللحم ينهرس لين يذوب — إذا تشوف قطع، لسه ما استوت.",
+    "language": "ar",
+    "region": "general",
+    "servings": 10,
+    "prepMinutes": 30,
+    "cookMinutes": 180,
+    "difficulty": "medium",
+    "costBand": "cheap",
+    "tags": ["غداء", "مناسبات"],
+    "occasions": ["ashura"],
+    "ingredients": [
+      { "item": "لحم غنم", "quantity": 1, "unit": "kilo" },
+      { "item": "حمص", "quantity": 2, "unit": "istikan", "note": "منقوع من الليل" },
+      { "item": "معجون طماطم", "quantity": 3, "unit": "tablespoon" },
+      { "item": "دهن حر", "quantity": 3, "unit": "tablespoon" },
+      { "item": "بهارات", "quantity": 1, "unit": "tablespoon" },
+      { "item": "تمن عنبر", "quantity": 5, "unit": "istikan" },
+      { "item": "ملح", "unit": "toTaste" }
+    ],
+    "steps": [
+      { "text": "اسلق اللحم مع الحمص لين يصير طري جداً.", "timerMinutes": 120 },
+      "اهرس اللحم والحمص بالمهراس — مو بالخلاط. الخلاط يخليها معجون.",
+      { "text": "شوّح المعجون بالدهن الحر، ضيفه للقيمة واطبخها على نار هادية.", "timerMinutes": 60 },
+      "اطبخ التمن منفصل وقدّم القيمة فوكه."
+    ]
+  },
+  {
+    "title": "مرقة باميا",
+    "description": "أكلة يومية. لا تحرّك الباميا وايد وإلا تصير لزجة.",
+    "language": "ar",
+    "region": "general",
+    "servings": 5,
+    "prepMinutes": 15,
+    "cookMinutes": 60,
+    "difficulty": "easy",
+    "costBand": "cheap",
+    "tags": ["غداء", "يومي", "اقتصادي"],
+    "ingredients": [
+      { "item": "باميا صغيرة", "quantity": 500, "unit": "gram" },
+      { "item": "لحم مقطع", "quantity": 400, "unit": "gram" },
+      { "item": "معجون طماطم", "quantity": 2, "unit": "tablespoon" },
+      { "item": "ثوم", "quantity": 5, "unit": "piece" },
+      { "item": "دبس رمان", "quantity": 1, "unit": "tablespoon" },
+      { "item": "ملح", "unit": "toTaste" }
+    ],
+    "steps": [
+      "شوّح اللحم لين يحمرّ، ضيف المعجون وقلّب.",
+      { "text": "ضيف ماي مغلي واطبخ اللحم لين يطرى.", "timerMinutes": 45 },
+      "ضيف الباميا والثوم ودبس الرمان. من هنا لا تحرّك بالملعقة — هزّ القدر بس.",
+      { "text": "اطبخ لين تستوي الباميا.", "timerMinutes": 15 }
+    ]
+  },
+  {
+    "title": "شفتة عراقية",
+    "description": "أسرع عشاء بالبيت. عجينة وحدة وتقلى.",
+    "language": "ar",
+    "region": "general",
+    "servings": 4,
+    "prepMinutes": 15,
+    "cookMinutes": 20,
+    "difficulty": "easy",
+    "costBand": "cheap",
+    "tags": ["عشاء", "سريع", "اقتصادي"],
+    "ingredients": [
+      { "item": "لحم مفروم", "quantity": 500, "unit": "gram" },
+      { "item": "بطاطا مبشورة", "quantity": 2, "unit": "piece" },
+      { "item": "بصل مبشور", "quantity": 1, "unit": "piece" },
+      { "item": "بقدونس", "quantity": 0.5, "unit": "cup" },
+      { "item": "بهارات", "quantity": 1, "unit": "teaspoon" },
+      { "item": "ملح", "unit": "toTaste" }
+    ],
+    "steps": [
+      "اعصر البطاطا والبصل من الماي زين — هاي الخطوة اللي تخلي الشفتة ما تتفكك.",
+      "اخلط كل شي واعجن باليد لين يتماسك.",
+      "شكّلها أقراص مفلطحة.",
+      { "text": "اقليها بزيت متوسط الحرارة لين تحمرّ من الجهتين.", "timerMinutes": 20 }
+    ]
+  },
+  {
+    "title": "دۆلمەی کوردی",
+    "description": "دۆلمەی سلێمانی. بەرخ و ترشی لیمۆ، بێ دبس ڕمان.",
+    "language": "ckb",
+    "region": "kurdishSulaymaniyah",
+    "servings": 8,
+    "prepMinutes": 50,
+    "cookMinutes": 90,
+    "difficulty": "medium",
+    "costBand": "medium",
+    "tags": ["نانی نیوەڕۆ", "کوردی"],
+    "ingredients": [
+      { "item": "برنج", "quantity": 3, "unit": "istikan", "group": "پڕکردنەوە" },
+      { "item": "گۆشتی بەرخ", "quantity": 300, "unit": "gram", "group": "پڕکردنەوە" },
+      { "item": "جەعدە", "quantity": 1, "unit": "cup", "group": "پڕکردنەوە" },
+      { "item": "شیری لیمۆ", "quantity": 3, "unit": "tablespoon", "note": "لە جیاتی دبسی ڕمان — کوردی بە ترشی لیمۆ دەکرێت" },
+      { "item": "گەڵای مێو", "quantity": 250, "unit": "gram", "group": "سەوزە" },
+      { "item": "باینجانی ڕەش", "quantity": 4, "unit": "piece", "group": "سەوزە" },
+      { "item": "پیاز", "quantity": 2, "unit": "piece", "group": "سەوزە" },
+      { "item": "خوێ", "unit": "toTaste" }
+    ],
+    "steps": [
+      { "text": "برنجەکە نیو کاتژمێر بخەرە ناو ئاوی شل، پاشان بیپاڵێوە.", "timerMinutes": 30 },
+      "برنج و گۆشت و جەعدە و شیری لیمۆ تێکەڵ بکە.",
+      "سەوزەکان بەتاڵ بکەرەوە و پڕیان بکەرەوە — چارەکێک بەتاڵ بهێڵەرەوە.",
+      "لە مەنجەڵدا ڕیزیان بکە و قاپێکی قورس بخە سەریان.",
+      { "text": "ئاوی کوڵاو بکە سەری و بە ئاگری هێمن لێبنێ.", "timerMinutes": 90 },
+      "پێش هەڵگێڕانەوە چارەک کاتژمێر بیهێڵەرەوە."
+    ]
+  },
+  {
+    "title": "کلێچە",
+    "description": "کلێچەی جەژن. بە خورما یان بە گوێز — هەردووکی ڕاستە.",
+    "language": "ckb",
+    "region": "kurdishErbil",
+    "servings": 12,
+    "prepMinutes": 60,
+    "cookMinutes": 25,
+    "difficulty": "medium",
+    "costBand": "medium",
+    "tags": ["شیرینی", "جەژن"],
+    "occasions": ["eid"],
+    "ingredients": [
+      { "item": "ئارد", "quantity": 4, "unit": "cup", "group": "هەویر" },
+      { "item": "ڕۆنی نێچیر", "quantity": 1, "unit": "cup", "group": "هەویر" },
+      { "item": "شیر", "quantity": 1, "unit": "cup", "group": "هەویر" },
+      { "item": "هەویرترشی وشک", "quantity": 1, "unit": "tablespoon", "group": "هەویر" },
+      { "item": "هەل", "quantity": 1, "unit": "teaspoon", "group": "هەویر" },
+      { "item": "خورمای هاڕاو", "quantity": 400, "unit": "gram", "group": "ناوەڕۆک" },
+      { "item": "کونجی", "quantity": 2, "unit": "tablespoon" }
+    ],
+    "steps": [
+      "ئارد و ڕۆن بە دەست تێکەڵ بکە تا وەک لم لێبێت.",
+      { "text": "شیری گەرم و هەویرترش زیاد بکە و هەویرەکە بهێڵەرەوە هەڵبێت.", "timerMinutes": 60 },
+      "خورماکە لەگەڵ هەل تێکەڵ بکە و ببە بە گڵۆپی بچووک.",
+      "هەویرەکە باز بکەرەوە، خورما بخە ناوی و ببەستەوە.",
+      { "text": "لە فڕنی ١٨٠ پلە بیبرژێنە تا زەرد دەبێت — نەک قاوەیی.", "timerMinutes": 25 }
+    ]
+  }
+]

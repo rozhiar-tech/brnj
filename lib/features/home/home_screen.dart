@@ -36,49 +36,62 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final firebase = ref.watch(firebaseStatusProvider);
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            floating: true,
-            title: Text(l10n.appName),
-            actions: [
-              const _NotificationBell(),
-              IconButton(
-                onPressed: () => context.push('/search'),
-                icon: const Icon(Icons.search),
-                tooltip: MaterialLocalizations.of(context).searchFieldLabel,
-              ),
-            ],
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(52),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(Gap.lg, 0, Gap.lg, Gap.sm),
-                child: SegmentedButton<_Feed>(
-                  segments: [
-                    ButtonSegment(
-                      value: _Feed.following,
-                      label: Text(l10n.feedFollowing),
-                    ),
-                    ButtonSegment(
-                      value: _Feed.discover,
-                      label: Text(l10n.feedDiscover),
-                    ),
-                  ],
-                  selected: {_feed},
-                  showSelectedIcon: false,
-                  onSelectionChanged: (s) => setState(() => _feed = s.first),
+      body: RefreshIndicator(
+        // A feed with no way to refresh means the only fix for stale content
+        // is killing the app, which is what people will actually do.
+        onRefresh: () async {
+          ref.invalidate(discoverFeedProvider);
+          ref.invalidate(followingFeedProvider);
+          ref.invalidate(publicWeekPlansProvider);
+          await ref.read(discoverFeedProvider.future);
+        },
+        child: CustomScrollView(
+          // Always scrollable, or the gesture does nothing on a short feed —
+          // which is exactly when someone reaches for it.
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverAppBar(
+              floating: true,
+              title: Text(l10n.appName),
+              actions: [
+                const _NotificationBell(),
+                IconButton(
+                  onPressed: () => context.push('/search'),
+                  icon: const Icon(Icons.search),
+                  tooltip: MaterialLocalizations.of(context).searchFieldLabel,
+                ),
+              ],
+              bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(52),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(Gap.lg, 0, Gap.lg, Gap.sm),
+                  child: SegmentedButton<_Feed>(
+                    segments: [
+                      ButtonSegment(
+                        value: _Feed.following,
+                        label: Text(l10n.feedFollowing),
+                      ),
+                      ButtonSegment(
+                        value: _Feed.discover,
+                        label: Text(l10n.feedDiscover),
+                      ),
+                    ],
+                    selected: {_feed},
+                    showSelectedIcon: false,
+                    onSelectionChanged: (s) => setState(() => _feed = s.first),
+                  ),
                 ),
               ),
             ),
-          ),
 
-          if (firebase != FirebaseStatus.ready)
-            SliverToBoxAdapter(child: _SetupBanner(status: firebase)),
+            if (firebase != FirebaseStatus.ready)
+              SliverToBoxAdapter(child: _SetupBanner(status: firebase)),
 
-          SliverToBoxAdapter(child: _ThisWeekRail(numerals: numerals)),
+            SliverToBoxAdapter(child: _ThisWeekRail(numerals: numerals)),
 
-          _FeedSliver(numerals: numerals, feed: _feed),
-        ],
+            _FeedSliver(numerals: numerals, feed: _feed),
+          ],
+        ),
       ),
     );
   }
@@ -319,8 +332,10 @@ class _FeedSliver extends ConsumerWidget {
           child: ErrorView(
             error: error,
             onRetry: () => ref.invalidate(
-            feed == _Feed.following ? followingFeedProvider : discoverFeedProvider,
-          ),
+              feed == _Feed.following
+                  ? followingFeedProvider
+                  : discoverFeedProvider,
+            ),
           ),
         ),
       ),
@@ -366,7 +381,6 @@ class _FeedSliver extends ConsumerWidget {
   }
 }
 
-
 /// Unread notifications, as a dot rather than a number.
 ///
 /// A count invites the reflex of clearing it; a dot just says "something
@@ -397,7 +411,10 @@ class _NotificationBell extends ConsumerWidget {
                 decoration: BoxDecoration(
                   color: theme.colorScheme.error,
                   shape: BoxShape.circle,
-                  border: Border.all(color: theme.colorScheme.surface, width: 1.5),
+                  border: Border.all(
+                    color: theme.colorScheme.surface,
+                    width: 1.5,
+                  ),
                 ),
               ),
             ),

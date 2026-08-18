@@ -167,15 +167,21 @@ final publicWeekPlansProvider = StreamProvider<List<WeeklyPlan>>((ref) {
 /// corpus is small, and wrong the moment it isn't.
 final discoverFeedProvider = FutureProvider<List<Recipe>>((ref) async {
   if (ref.watch(firebaseStatusProvider) != FirebaseStatus.ready) return const [];
-  final recipes = await ref.watch(recipeRepositoryProvider).discoverPage();
-  return _withoutBlocked(ref, recipes);
+
+  // Every watch happens before the await. Reading ref after an await is
+  // unsafe in Riverpod — the provider may already have been disposed or
+  // rebuilt — and it silently cost the whole feed.
+  final repository = ref.watch(recipeRepositoryProvider);
+  final blocked = ref.watch(blockedIdsProvider).value ?? const <String>[];
+
+  final recipes = await repository.discoverPage();
+  return _withoutBlocked(blocked, recipes);
 });
 
 /// Firestore cannot express "author not in this list", so blocking is applied
 /// after the query. The list is small by nature — and a block that still shows
 /// you their recipes is not a block.
-List<Recipe> _withoutBlocked(Ref ref, List<Recipe> recipes) {
-  final blocked = ref.watch(blockedIdsProvider).value ?? const [];
+List<Recipe> _withoutBlocked(List<String> blocked, List<Recipe> recipes) {
   if (blocked.isEmpty) return recipes;
   return recipes.where((r) => !blocked.contains(r.author.uid)).toList();
 }
@@ -264,9 +270,12 @@ final followingIdsProvider = StreamProvider<List<String>>((ref) {
 final followingFeedProvider = FutureProvider<List<Recipe>>((ref) async {
   final ids = ref.watch(followingIdsProvider).value ?? const [];
   if (ids.isEmpty) return const [];
-  final recipes =
-      await ref.watch(recipeRepositoryProvider).followingPage(authorIds: ids);
-  return _withoutBlocked(ref, recipes);
+
+  final repository = ref.watch(recipeRepositoryProvider);
+  final blocked = ref.watch(blockedIdsProvider).value ?? const <String>[];
+
+  final recipes = await repository.followingPage(authorIds: ids);
+  return _withoutBlocked(blocked, recipes);
 });
 
 final notificationsProvider = StreamProvider<List<AppNotification>>((ref) {

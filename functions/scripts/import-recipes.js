@@ -91,12 +91,29 @@ function validate(recipe, index) {
     }
   }
   if (publish) {
-    if (!recipe.coverImage && !recipe.coverUrl) errors.push('publishing needs a cover image');
     if (!(recipe.ingredients ?? []).length) errors.push('publishing needs ingredients');
     if (!(recipe.steps ?? []).length) errors.push('publishing needs steps');
   }
 
   return errors.map((e) => `${where}: ${e}`);
+}
+
+/// Not fatal, but worth saying out loud.
+function warn(recipe, index) {
+  const where = `recipe[${index}] "${recipe.title ?? ''}"`;
+  const warnings = [];
+
+  // The server does not require a cover, but ranking's quality floor does:
+  // a recipe with its own photo and three or more steps scores above one
+  // without, so a coverless recipe starts near the bottom of Discover.
+  if (publish && !recipe.coverImage && !recipe.coverUrl) {
+    warnings.push('no cover image — it will rank low and look empty in the feed');
+  }
+  if ((recipe.steps ?? []).length < 3) {
+    warnings.push('fewer than 3 steps — misses the ranking quality floor');
+  }
+
+  return warnings.map((w) => `${where}: ${w}`);
 }
 
 const GRAMS = {
@@ -124,6 +141,13 @@ async function uploadCover(recipeId, localPath) {
   if (!Array.isArray(recipes)) {
     console.error('Expected a JSON array of recipes.');
     process.exit(1);
+  }
+
+  const warnings = recipes.flatMap(warn);
+  if (warnings.length) {
+    console.warn(`${warnings.length} warning(s):\n`);
+    for (const w of warnings) console.warn(`  ${w}`);
+    console.warn('');
   }
 
   const errors = recipes.flatMap(validate);

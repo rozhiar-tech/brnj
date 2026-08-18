@@ -1,5 +1,8 @@
 import { initializeApp } from 'firebase-admin/app';
-import { onDocumentUpdated } from 'firebase-functions/v2/firestore';
+import {
+  onDocumentCreated,
+  onDocumentUpdated,
+} from 'firebase-functions/v2/firestore';
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 
 import { REGION } from './config';
@@ -72,6 +75,33 @@ export const onRecipePublished = onDocumentUpdated(
         .set({ counts: { recipes: FieldValue.increment(-1) } }, { merge: true })
         .catch(() => undefined);
     }
+  },
+);
+
+/**
+ * Content that arrives already published.
+ *
+ * onRecipePublished watches the draft → published transition, which is what
+ * the composer produces. The seed importer writes published documents
+ * directly, and so would any future admin tool — those never transition, so
+ * they were landing with score 0 and never counted toward their author.
+ *
+ * The two paths are mutually exclusive: a document cannot both be created
+ * published and later become published, so there is no double count.
+ */
+export const onRecipeCreated = onDocumentCreated(
+  { document: 'recipes/{recipeId}', region: REGION },
+  async (event) => {
+    const data = event.data?.data();
+    if (!data || data.status !== 'published') return;
+
+    await Promise.all([
+      scoreOnPublish(event.data!.ref, data),
+      getFirestore()
+        .doc(`users/${data.author?.uid}`)
+        .set({ counts: { recipes: FieldValue.increment(1) } }, { merge: true })
+        .catch(() => undefined),
+    ]);
   },
 );
 

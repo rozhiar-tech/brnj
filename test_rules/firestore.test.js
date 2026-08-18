@@ -11,7 +11,12 @@ import {
   deleteDoc,
   doc,
   getDoc,
+  getDocs,
+  limit,
+  orderBy,
+  query,
   setDoc,
+  where,
 } from 'firebase/firestore';
 
 let env;
@@ -262,6 +267,34 @@ describe('recipes', () => {
       });
     });
     await assertSucceeds(getDoc(doc(guest().firestore(), 'recipes/r1')));
+  });
+
+  it('lets anyone signed in LIST published recipes', async () => {
+    // The feed is a query, not a get, and Firestore evaluates list rules
+    // differently: the query has to be provably safe, not merely return safe
+    // documents. A rule that passes for a single get can still refuse a feed.
+    await env.withSecurityRulesDisabled(async (admin) => {
+      const db = admin.firestore();
+      await setDoc(doc(db, 'recipes/pub1'), {
+        ...recipe('user9'), status: 'published', score: 1,
+      });
+      await setDoc(doc(db, 'recipes/draft1'), recipe('user9'));
+    });
+
+    const db = guest().firestore();
+    const q = query(
+      collection(db, 'recipes'),
+      where('status', '==', 'published'),
+      orderBy('score', 'desc'),
+      limit(20),
+    );
+    const snap = await assertSucceeds(getDocs(q));
+    if (snap.size !== 1) throw new Error(`expected 1 published, got ${snap.size}`);
+  });
+
+  it('refuses a feed query that would include drafts', async () => {
+    const db = guest().firestore();
+    await assertFails(getDocs(query(collection(db, 'recipes'), limit(20))));
   });
 
   it('resolves a missing recipe as absent rather than denied', async () => {

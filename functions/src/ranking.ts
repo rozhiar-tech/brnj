@@ -20,6 +20,14 @@ const WEIGHTS = {
   likes: 1,
   uniqueViewers: 0.05,
   qualityFloor: 5,
+  // Freshness has to survive on its own.
+  //
+  // The formula multiplies freshness by engagement, so a recipe with no
+  // engagement and no cover scored exactly zero — every new recipe tied at
+  // zero and Discover fell back to arbitrary order. Ten seeded recipes made
+  // that obvious; it would have been invisible in tests, where nothing is
+  // ever genuinely new and unengaged.
+  base: 1,
   verifiedMultiplier: 1.6,
 };
 
@@ -56,7 +64,7 @@ function scoreOf(data: FirebaseFirestore.DocumentData, verifiedMultiplier: numbe
 
   const multiplier = data.author?.verified === true ? verifiedMultiplier : 1;
 
-  return freshness * (engagement + qualityFloor) * multiplier;
+  return freshness * (WEIGHTS.base + engagement + qualityFloor) * multiplier;
 }
 
 /**
@@ -70,6 +78,21 @@ function scoreOf(data: FirebaseFirestore.DocumentData, verifiedMultiplier: numbe
 export const nightlyRankAndReconcile = onSchedule(
   { schedule: '0 3 * * *', timeZone: 'Asia/Baghdad', timeoutSeconds: 540, region: REGION },
   async () => {
+    await reconcileAndScoreAll();
+  },
+);
+
+/**
+ * The reconcile-and-rescore pass, exported so it can be run on demand.
+ *
+ * Content that arrives already published — a bulk import, a future admin
+ * tool — has no draft-to-published transition to hang scoring off, so there
+ * has to be a way to run this without waiting for 3am. Reusing the function
+ * rather than reimplementing the formula in a script is the whole point: two
+ * copies of a ranking formula drift, and the drift is invisible.
+ */
+export async function reconcileAndScoreAll(): Promise<number> {
+  {
     const firestore = db();
 
     const config = await firestore.doc('config/app').get();
@@ -117,9 +140,46 @@ export const nightlyRankAndReconcile = onSchedule(
       updated += 1;
     }
 
-    logger.info('Nightly rank and reconcile complete', { recipes: updated });
-  },
-);
+    // Author counts drift for the same reason recipe stats do — an
+    // at-least-once trigger, or content that arrived without one at all.
+    // Recounting here makes them self-healing rather than permanently wrong.
+    const byAuthor = new Map<string, number>();
+    for (const doc of recipes.docs) {
+      const uid = doc.get('author.uid') as string | undefined;
+      if (uid) byAuthor.set(uid, (byAuthor.get(uid) ?? 0) + 1);
+    }
+
+    const plans = await firestore
+      .collection('plans')
+      .where('visibility', '!=', 'private')
+      .get()
+      .catch(() => null);
+
+    const planCounts = new Map<string, number>();
+    for (const doc of plans?.docs ?? []) {
+      const uid = doc.get('owner.uid') as string | undefined;
+      if (uid) planCounts.set(uid, (planCounts.get(uid) ?? 0) + 1);
+    }
+
+    for (const uid of new Set([...byAuthor.keys(), ...planCounts.keys()])) {
+      await firestore.doc(`users/${uid}`).set(
+        {
+          counts: {
+            recipes: byAuthor.get(uid) ?? 0,
+            plans: planCounts.get(uid) ?? 0,
+          },
+        },
+        { merge: true },
+      );
+    }
+
+    logger.info('Rank and reconcile complete', {
+      recipes: updated,
+      authors: byAuthor.size,
+    });
+    return updated;
+  }
+}
 
 /**
  * Scores a recipe the moment it is published, so a new post is rankable
