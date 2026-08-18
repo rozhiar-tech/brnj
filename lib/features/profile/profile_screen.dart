@@ -181,7 +181,11 @@ class _ProfileBody extends ConsumerWidget {
                 ),
               ],
               const SizedBox(height: Gap.lg),
-              _Counts(counts: profile.counts, numerals: numerals),
+              _Counts(
+                counts: profile.counts,
+                numerals: numerals,
+                uid: profile.uid,
+              ),
               const SizedBox(height: Gap.lg),
               OutlinedButton(
                 onPressed: () => context.go('/me/edit'),
@@ -231,10 +235,15 @@ class _ProfileBody extends ConsumerWidget {
 }
 
 class _Counts extends StatelessWidget {
-  const _Counts({required this.counts, required this.numerals});
+  const _Counts({
+    required this.counts,
+    required this.numerals,
+    required this.uid,
+  });
 
   final UserCounts counts;
   final NumeralStyle numerals;
+  final String uid;
 
   @override
   Widget build(BuildContext context) {
@@ -256,11 +265,13 @@ class _Counts extends StatelessWidget {
           label: l10n.profileFollowers,
           value: counts.followers,
           numerals: numerals,
+          onTap: () => context.push('/user/$uid/followers'),
         ),
         _Count(
           label: l10n.profileFollowing,
           value: counts.following,
           numerals: numerals,
+          onTap: () => context.push('/user/$uid/following'),
         ),
       ],
     );
@@ -272,30 +283,41 @@ class _Count extends StatelessWidget {
     required this.label,
     required this.value,
     required this.numerals,
+    this.onTap,
   });
 
   final String label;
   final int value;
   final NumeralStyle numerals;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Column(
-      children: [
-        Text(
-          formatCount(value, style: numerals),
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontFeatures: const [FontFeature.tabularFigures()],
-          ),
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: Gap.md,
+          vertical: Gap.xs,
         ),
-        Text(
-          label,
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
+        child: Column(
+          children: [
+            Text(
+              formatCount(value, style: numerals),
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
+            Text(
+              label,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

@@ -268,6 +268,29 @@
           "order": "ASCENDING"
         }
       ]
+    },
+    {
+      "_comment": "Search narrowed by region. The keyword+score index does not serve it: adding an equality field to a query needs that field in the index too.",
+      "collectionGroup": "recipes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "keywords",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "region",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "score",
+          "order": "DESCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": [

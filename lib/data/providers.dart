@@ -374,3 +374,21 @@ final planCommentsProvider = StreamProvider.family<List<Comment>, String>(
 final userPlansProvider = StreamProvider.family<List<WeeklyPlan>, String>(
   (ref, uid) => ref.watch(planRepositoryProvider).watchUserPlans(uid),
 );
+
+
+/// Who follows [uid], and who [uid] follows, as profiles rather than ids.
+final followersProvider = FutureProvider.family<List<UserProfile>, String>(
+  (ref, uid) async {
+    final repository = ref.watch(userRepositoryProvider);
+    final ids = await repository.watchFollowerIds(uid).first;
+    return repository.profilesByIds(ids);
+  },
+);
+
+final followingProvider = FutureProvider.family<List<UserProfile>, String>(
+  (ref, uid) async {
+    final repository = ref.watch(userRepositoryProvider);
+    final ids = await repository.watchFollowingIds(uid).first;
+    return repository.profilesByIds(ids);
+  },
+);

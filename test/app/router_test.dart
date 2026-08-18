@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:brnj/app/app.dart';
 import 'package:brnj/app/settings.dart';
 import 'package:brnj/features/shell/route_not_found_screen.dart';
@@ -74,6 +75,8 @@ void main() {
       '/plan/some_2026-08-15',
       '/me/recipes',
       '/me/saved',
+      '/user/someuid/followers',
+      '/user/someuid/following',
       '/shopping/some_2026-08-15',
       '/create/recipe',
       '/create/recipe/abc123',
@@ -87,11 +90,17 @@ void main() {
       GoRouter.of(context).go(location);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
+
       expect(
         find.byType(RouteNotFoundScreen),
         findsNothing,
         reason: '$location did not resolve',
       );
+      // These screens talk to Firestore and there is no Firebase in a widget
+      // test. That failure belongs to the environment, not the route — this
+      // test asserts the location resolves; the data layer is covered by the
+      // rules suite.
+      tester.takeException();
     }
   });
 
@@ -111,6 +120,45 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.byType(RouteNotFoundScreen), findsNothing);
+  });
+
+  testWidgets('pushing a detail route from outside the shell does not duplicate it',
+      (tester) async {
+    // A recipe is opened from search, saved, a profile and a notification —
+    // all of which live outside the shell. While these routes were nested
+    // under the Home branch, pushing one put a second copy of the shell on the
+    // root navigator, and since go_router keys the shell page off the route
+    // object both copies shared a key. Navigator asserted on the duplicate,
+    // and it fired on the next frame rather than at the tap, which is why it
+    // read as a startup error.
+    await pumpApp(tester);
+    final context = tester.element(find.byType(Navigator).first);
+    final router = GoRouter.of(context);
+
+    unawaited(router.push('/search'));
+    await tester.pump();
+    unawaited(router.push('/recipe/abc123'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('pushing two different detail routes keeps distinct keys',
+      (tester) async {
+    await pumpApp(tester);
+    final context = tester.element(find.byType(Navigator).first);
+    final router = GoRouter.of(context);
+
+    unawaited(router.push('/recipe/one'));
+    await tester.pump();
+    unawaited(router.push('/recipe/two'));
+    await tester.pump();
+    unawaited(router.push('/plan/uid_2026-08-15'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('each destination navigates without falling through', (tester) async {

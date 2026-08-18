@@ -7,6 +7,7 @@ import '../features/plan/plan_detail_screen.dart';
 import '../features/plan/shopping_list_screen.dart';
 import '../features/profile/edit_profile_screen.dart';
 import '../features/notifications/notifications_screen.dart';
+import '../features/profile/follow_list_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/profile/public_profile_screen.dart';
 import '../features/profile/settings_screen.dart';
@@ -100,6 +101,40 @@ GoRouter createRouter() => GoRouter(
       path: '/user/:uid',
       builder: (context, state) =>
           PublicProfileScreen(uid: state.pathParameters['uid']!),
+      routes: [
+        GoRoute(
+          path: 'followers',
+          builder: (context, state) => FollowListScreen(
+            uid: state.pathParameters['uid']!,
+            initial: FollowListKind.followers,
+          ),
+        ),
+        GoRoute(
+          path: 'following',
+          builder: (context, state) => FollowListScreen(
+            uid: state.pathParameters['uid']!,
+            initial: FollowListKind.following,
+          ),
+        ),
+      ],
+    ),
+    // Recipes and weeks are opened from everywhere — the feed, search, saved,
+    // a profile, a notification — so they sit at the top level rather than
+    // inside the Home branch.
+    //
+    // Nesting them under the shell meant pushing one from a screen that is
+    // itself outside the shell put a second copy of the shell on the root
+    // navigator. go_router keys the shell page off the route object, so both
+    // copies carried the same key and Navigator asserted on the duplicate.
+    GoRoute(
+      path: '/recipe/:id',
+      builder: (context, state) =>
+          RecipeDetailScreen(recipeId: state.pathParameters['id']!),
+    ),
+    GoRoute(
+      path: '/plan/:id',
+      builder: (context, state) =>
+          PlanDetailScreen(planId: state.pathParameters['id']!),
     ),
     GoRoute(
       path: '/cook/:id',
@@ -125,21 +160,6 @@ GoRouter createRouter() => GoRouter(
             GoRoute(
               path: Routes.home,
               builder: (context, state) => const HomeScreen(),
-              routes: [
-                // Nested so a plan opens over the Home tab and keeps its back
-                // stack. Also the deep-link target for shared weeks, which
-                // mostly arrive over WhatsApp.
-                GoRoute(
-                  path: 'plan/:id',
-                  builder: (context, state) =>
-                      PlanDetailScreen(planId: state.pathParameters['id']!),
-                ),
-                GoRoute(
-                  path: 'recipe/:id',
-                  builder: (context, state) =>
-                      RecipeDetailScreen(recipeId: state.pathParameters['id']!),
-                ),
-              ],
             ),
           ],
         ),

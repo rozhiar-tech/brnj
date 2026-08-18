@@ -190,18 +190,19 @@ class _CommentThreadState extends ConsumerState<CommentThread> {
     if (!await requireAccount(context, ref)) return;
 
     setState(() => _sending = true);
-    final author = await ref.read(myAuthorStubFuture.future);
-    if (author == null) {
-      if (mounted) {
-        setState(() => _sending = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context).errorGeneric)),
-        );
-      }
-      return;
-    }
-
     try {
+      // Inside the try on purpose: resolving the author can fail, and when it
+      // did the spinner stayed on forever with nothing said.
+      final author = await ref.read(myAuthorStubFuture.future);
+      if (author == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(AppLocalizations.of(context).errorGeneric)),
+          );
+        }
+        return;
+      }
+
       if (widget.isPlan) {
         await ref
             .read(planRepositoryProvider)

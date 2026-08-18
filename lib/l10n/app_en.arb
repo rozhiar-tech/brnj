@@ -350,5 +350,7 @@
   "planArchive": "Past weeks",
   "recipeEdit": "Edit recipe",
   "recipeDelete": "Delete recipe",
-  "recipeDeleteConfirm": "This also removes the photos people posted of their own attempts, and the comments. It cannot be undone."
+  "recipeDeleteConfirm": "This also removes the photos people posted of their own attempts, and the comments. It cannot be undone.",
+  "followersEmpty": "Nobody yet. Recipes are how people find you.",
+  "followingEmpty": "Not following anyone yet. Follow a cook and their recipes reach you."
 }

@@ -144,11 +144,13 @@ class _Body extends ConsumerWidget {
                     label: l10n.profileFollowers,
                     value: profile.counts.followers,
                     numerals: numerals,
+                    onTap: () => context.push('/user/${profile.uid}/followers'),
                   ),
                   _Stat(
                     label: l10n.profileFollowing,
                     value: profile.counts.following,
                     numerals: numerals,
+                    onTap: () => context.push('/user/${profile.uid}/following'),
                   ),
                 ],
               ),
@@ -214,28 +216,39 @@ class _Stat extends StatelessWidget {
     required this.label,
     required this.value,
     required this.numerals,
+    this.onTap,
   });
 
   final String label;
   final int value;
   final NumeralStyle numerals;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Column(
-      children: [
-        Text(
-          formatCount(value, style: numerals),
-          style: theme.textTheme.titleMedium,
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: Gap.md,
+          vertical: Gap.xs,
         ),
-        Text(
-          label,
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
+        child: Column(
+          children: [
+            Text(
+              formatCount(value, style: numerals),
+              style: theme.textTheme.titleMedium,
+            ),
+            Text(
+              label,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

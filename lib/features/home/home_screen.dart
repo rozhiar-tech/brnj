@@ -242,7 +242,7 @@ class _PlanCard extends StatelessWidget {
       child: Card(
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          onTap: () => context.go('/plan/${plan.id}'),
+          onTap: () => context.push('/plan/${plan.id}'),
           child: Padding(
             padding: const EdgeInsets.all(Gap.md),
             child: Column(

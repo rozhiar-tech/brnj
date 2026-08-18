@@ -234,6 +234,35 @@ class UserRepository {
       .snapshots()
       .map((s) => s.docs.map((d) => d.id).toList());
 
+  /// Everyone following [uid].
+  ///
+  /// The mirrored edge is written by a Function, so this list is only as good
+  /// as that trigger — which is the point: a client cannot add itself to
+  /// someone else's followers.
+  Stream<List<String>> watchFollowerIds(String uid) => _users
+      .doc(uid)
+      .collection('followers')
+      .snapshots()
+      .map((s) => s.docs.map((d) => d.id).toList());
+
+  /// Resolves a list of uids to profiles.
+  ///
+  /// Chunked at 30 because that is Firestore's whereIn ceiling, and a popular
+  /// cook will pass it long before anything else here strains.
+  Future<List<UserProfile>> profilesByIds(List<String> uids) async {
+    if (uids.isEmpty) return const [];
+
+    final profiles = <UserProfile>[];
+    for (var i = 0; i < uids.length; i += 30) {
+      final chunk = uids.sublist(i, (i + 30).clamp(0, uids.length));
+      final snapshot = await _users
+          .where(FieldPath.documentId, whereIn: chunk)
+          .get();
+      profiles.addAll(snapshot.docs.map(UserProfile.fromDoc));
+    }
+    return profiles;
+  }
+
   // --- verification --------------------------------------------------------
 
   /// Applications are reviewed by a human. Nothing here grants anything —

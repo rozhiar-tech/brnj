@@ -21,13 +21,30 @@ void showCreateSheet(BuildContext context) {
       // Creating anything needs an account. The gate signs the person in and
       // then completes what they were doing, rather than dropping them back
       // on the feed to find the button again.
-      Future<void> go(WidgetRef ref, String route) async {
+      /// [insideShell] decides push vs go, and it is not cosmetic.
+      ///
+      /// Pushing a route that lives inside the StatefulShellRoute builds a
+      /// *second* shell on the root navigator. Both carry the same GlobalKey,
+      /// which corrupts the widget tree — and the visible symptom is not a
+      /// navigation error but frames that stop updating, which reads as
+      /// "the button spins forever".
+      Future<void> go(
+        WidgetRef ref,
+        String route, {
+        bool insideShell = false,
+      }) async {
         final navigator = Navigator.of(context);
         if (!await requireAccount(context, ref)) return;
         navigator.pop();
-        // Not awaited: the pushed route's result is nothing this sheet needs,
-        // and the sheet is already gone by the time it returns.
-        if (context.mounted) unawaited(context.push(route));
+        if (!context.mounted) return;
+
+        if (insideShell) {
+          context.go(route);
+        } else {
+          // Not awaited: the pushed route's result is nothing this sheet needs,
+          // and the sheet is already gone by the time it returns.
+          unawaited(context.push(route));
+        }
       }
 
       return Consumer(
@@ -51,7 +68,7 @@ void showCreateSheet(BuildContext context) {
               _CreateOption(
                 icon: Icons.calendar_month_outlined,
                 label: l10n.createPlan,
-                onTap: () => go(ref, '/me/week'),
+                onTap: () => go(ref, '/me/week', insideShell: true),
               ),
               const SizedBox(height: Gap.sm),
             ],
