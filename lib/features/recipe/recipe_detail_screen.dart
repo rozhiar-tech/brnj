@@ -11,10 +11,11 @@ import '../../data/providers.dart';
 import '../../data/repositories/view_tracker.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../shared/error_view.dart';
+import '../../data/repositories/safety_repository.dart';
+import '../../shared/safety_actions.dart';
 import '../../shared/verified_tick.dart';
 import '../auth/sign_in_sheet.dart';
 import 'composer/composer_labels.dart';
-import 'cooked_sheet.dart';
 import 'recipe_social.dart';
 
 final _recipeProvider = StreamProvider.family<Recipe?, String>(
@@ -120,6 +121,14 @@ class _Body extends ConsumerWidget {
         SliverAppBar(
           expandedHeight: 260,
           pinned: true,
+          actions: [
+            SafetyMenu(
+              targetType: ReportTarget.recipe,
+              targetId: recipe.id,
+              targetOwner: recipe.author.uid,
+              iconColor: Colors.white,
+            ),
+          ],
           flexibleSpace: FlexibleSpaceBar(
             background: recipe.coverUrl == null
                 ? ColoredBox(color: theme.colorScheme.surfaceContainerHighest)
@@ -513,6 +522,7 @@ class _ActionBar extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final saved = ref.watch(savedRecipeIdsProvider).value ?? const [];
     final isSaved = saved.contains(recipe.id);
+    final isLiked = ref.watch(likedProvider(recipe.id)).value ?? false;
     final uid = ref.watch(currentUidProvider);
 
     return SafeArea(
@@ -520,6 +530,23 @@ class _ActionBar extends ConsumerWidget {
         padding: const EdgeInsets.all(Gap.lg),
         child: Row(
           children: [
+            IconButton.outlined(
+              onPressed: uid == null
+                  ? null
+                  : () async {
+                      if (!await requireAccount(context, ref)) return;
+                      await ref
+                          .read(recipeRepositoryProvider)
+                          .setLiked(
+                            recipeId: recipe.id,
+                            uid: uid,
+                            liked: !isLiked,
+                          );
+                    },
+              icon: Icon(isLiked ? Icons.favorite : Icons.favorite_border),
+              tooltip: l10n.recipeLike,
+            ),
+            const SizedBox(width: Gap.sm),
             IconButton.outlined(
               onPressed: uid == null
                   ? null
@@ -535,12 +562,6 @@ class _ActionBar extends ConsumerWidget {
                     },
               icon: Icon(isSaved ? Icons.bookmark : Icons.bookmark_border),
               tooltip: l10n.actionSave,
-            ),
-            const SizedBox(width: Gap.sm),
-            OutlinedButton(
-              onPressed: () =>
-                  showCookedSheet(context, ref, recipeId: recipe.id),
-              child: Text(l10n.recipeCookedThis),
             ),
             const SizedBox(width: Gap.sm),
             Expanded(

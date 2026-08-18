@@ -349,6 +349,65 @@ describe('social', () => {
   });
 });
 
+describe('reports and blocking', () => {
+  it('lets a registered user file a report', async () => {
+    await assertSucceeds(
+      setDoc(doc(user('user1').firestore(), 'reports/r1_user1'), {
+        targetType: 'recipe',
+        targetId: 'r1',
+        reporterId: 'user1',
+        reason: 'harassment',
+        status: 'open',
+      }),
+    );
+  });
+
+  it('refuses a report filed under someone else\'s name', async () => {
+    await assertFails(
+      setDoc(doc(user('user1').firestore(), 'reports/r1_user2'), {
+        targetType: 'recipe',
+        targetId: 'r1',
+        reporterId: 'user2',
+        reason: 'spam',
+        status: 'open',
+      }),
+    );
+  });
+
+  it('keeps reports out of ordinary users\' hands', async () => {
+    // A reporter who could read the queue could work out who else reported,
+    // and being seen to report is exactly what stops people doing it.
+    await env.withSecurityRulesDisabled(async (admin) => {
+      await setDoc(doc(admin.firestore(), 'reports/r1_user1'), {
+        reporterId: 'user1',
+        targetId: 'r1',
+        status: 'open',
+      });
+    });
+    await assertFails(getDoc(doc(user('user1').firestore(), 'reports/r1_user1')));
+  });
+
+  it('lets a user block someone', async () => {
+    await assertSucceeds(
+      setDoc(doc(user('user1').firestore(), 'users/user1/blocked/user2'), {}),
+    );
+  });
+
+  it('refuses writing a block into someone else\'s account', async () => {
+    await assertFails(
+      setDoc(doc(user('user1').firestore(), 'users/user2/blocked/user3'), {}),
+    );
+  });
+
+  it('hides a blocker\'s profile from the blocked user', async () => {
+    await env.withSecurityRulesDisabled(async (admin) => {
+      await setDoc(doc(admin.firestore(), 'users/user1'), { displayName: 'A' });
+      await setDoc(doc(admin.firestore(), 'users/user1/blocked/user2'), {});
+    });
+    await assertFails(getDoc(doc(user('user2').firestore(), 'users/user1')));
+  });
+});
+
 describe('notifications', () => {
   it('refuses a client creating one', async () => {
     await assertFails(

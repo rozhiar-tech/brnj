@@ -10,6 +10,7 @@ initializeApp();
 export { aggregateViewEvents } from './views';
 export { nightlyRankAndReconcile } from './ranking';
 export { setVerified, setModerator } from './admin';
+export { keywordsOnRecipeWrite, onReportCreated } from './moderation';
 export {
   notifyOnLike,
   notifyOnCooked,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/settings.dart';
 import '../../app/theme/brnj_theme.dart';
@@ -42,12 +43,14 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
     // person per day, and batched — see ViewTracker for why all three matter.
     final uid = ref.read(currentUidProvider);
     if (uid != null) {
-      _endView = ref.read(viewTrackerProvider).trackScreen(
-        type: ViewTargetType.plan,
-        targetId: widget.planId,
-        viewerUid: uid,
-        isGuest: ref.read(isGuestProvider),
-      );
+      _endView = ref
+          .read(viewTrackerProvider)
+          .trackScreen(
+            type: ViewTargetType.plan,
+            targetId: widget.planId,
+            viewerUid: uid,
+            isGuest: ref.read(isGuestProvider),
+          );
     }
   }
 
@@ -144,9 +147,7 @@ class _PlanBody extends ConsumerWidget {
               Wrap(
                 spacing: Gap.sm,
                 runSpacing: Gap.sm,
-                children: [
-                  for (final tag in plan.tags) Chip(label: Text(tag)),
-                ],
+                children: [for (final tag in plan.tags) Chip(label: Text(tag))],
               ),
               const SizedBox(height: Gap.md),
               // Counts are public; names are not. The viewer list is readable
@@ -195,7 +196,9 @@ class _ReadOnlyDay extends StatelessWidget {
         color: day.isFamilyDay
             ? theme.colorScheme.secondaryContainer.withValues(alpha: 0.35)
             : null,
-        border: Border(bottom: BorderSide(color: theme.colorScheme.outlineVariant)),
+        border: Border(
+          bottom: BorderSide(color: theme.colorScheme.outlineVariant),
+        ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: Gap.lg, vertical: Gap.md),
       child: Row(
@@ -271,11 +274,9 @@ class _ActionBarState extends ConsumerState<_ActionBar> {
       // Copies land in the *coming* week, not the current one — cloning
       // someone's Monday when it's already Thursday helps nobody.
       final target = IraqiWeek.current().next;
-      await ref.read(planRepositoryProvider).copyWeek(
-        source: widget.plan,
-        newOwner: owner,
-        target: target,
-      );
+      await ref
+          .read(planRepositoryProvider)
+          .copyWeek(source: widget.plan, newOwner: owner, target: target);
 
       if (!mounted) return;
       // Move the editor to the week the copy landed in, so "go look at it"
@@ -283,9 +284,9 @@ class _ActionBarState extends ConsumerState<_ActionBar> {
       ref.read(selectedWeekProvider.notifier).set(target);
 
       final l10n = AppLocalizations.of(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.planCopiedConfirmation)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.planCopiedConfirmation)));
     } finally {
       if (mounted) setState(() => _copying = false);
     }
@@ -301,19 +302,30 @@ class _ActionBarState extends ConsumerState<_ActionBar> {
         padding: const EdgeInsets.all(Gap.lg),
         // Full width is a deliberate choice here, not an accident of the
         // theme: copying a week is the one action this screen exists for.
-        child: SizedBox(
-          width: double.infinity,
-          child: FilledButton.icon(
-            onPressed: _copying || isMine ? null : _copy,
-            icon: _copying
-                ? const SizedBox(
-                    height: 18,
-                    width: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.copy_all_outlined),
-            label: Text(l10n.planCopyToMine),
-          ),
+        child: Row(
+          children: [
+            IconButton.outlined(
+              onPressed: widget.plan.linkedRecipeIds.isEmpty
+                  ? null
+                  : () => context.push('/shopping/${widget.plan.id}'),
+              icon: const Icon(Icons.shopping_basket_outlined),
+              tooltip: l10n.planShoppingList,
+            ),
+            const SizedBox(width: Gap.sm),
+            Expanded(
+              child: FilledButton.icon(
+                onPressed: _copying || isMine ? null : _copy,
+                icon: _copying
+                    ? const SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.copy_all_outlined),
+                label: Text(l10n.planCopyToMine),
+              ),
+            ),
+          ],
         ),
       ),
     );

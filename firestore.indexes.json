@@ -238,6 +238,21 @@
           "order": "DESCENDING"
         }
       ]
+    },
+    {
+      "_comment": "Auto-hide counts distinct reporters for one target, so the threshold is about people rather than clicks.",
+      "collectionGroup": "reports",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "targetId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": [

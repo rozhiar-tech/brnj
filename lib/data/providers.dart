@@ -16,6 +16,7 @@ import 'repositories/notification_repository.dart';
 import 'repositories/messaging_repository.dart';
 import 'repositories/plan_repository.dart';
 import 'repositories/recipe_repository.dart';
+import 'repositories/safety_repository.dart';
 import 'repositories/user_repository.dart';
 import 'repositories/view_tracker.dart';
 
@@ -36,6 +37,9 @@ final messagingRepositoryProvider = Provider<MessagingRepository>(
 );
 final notificationRepositoryProvider = Provider<NotificationRepository>(
   (ref) => NotificationRepository(),
+);
+final safetyRepositoryProvider = Provider<SafetyRepository>(
+  (ref) => SafetyRepository(),
 );
 
 /// Moderation powers, read from the Auth token.
@@ -163,8 +167,18 @@ final publicWeekPlansProvider = StreamProvider<List<WeeklyPlan>>((ref) {
 /// corpus is small, and wrong the moment it isn't.
 final discoverFeedProvider = FutureProvider<List<Recipe>>((ref) async {
   if (ref.watch(firebaseStatusProvider) != FirebaseStatus.ready) return const [];
-  return ref.watch(recipeRepositoryProvider).discoverPage();
+  final recipes = await ref.watch(recipeRepositoryProvider).discoverPage();
+  return _withoutBlocked(ref, recipes);
 });
+
+/// Firestore cannot express "author not in this list", so blocking is applied
+/// after the query. The list is small by nature — and a block that still shows
+/// you their recipes is not a block.
+List<Recipe> _withoutBlocked(Ref ref, List<Recipe> recipes) {
+  final blocked = ref.watch(blockedIdsProvider).value ?? const [];
+  if (blocked.isEmpty) return recipes;
+  return recipes.where((r) => !blocked.contains(r.author.uid)).toList();
+}
 
 /// Recipes written by the signed-in user, drafts included.
 final myRecipesProvider = StreamProvider<List<Recipe>>((ref) {
@@ -201,8 +215,17 @@ final hasCookedProvider = StreamProvider.family<bool, String>((ref, recipeId) {
 });
 
 final commentsProvider = StreamProvider.family<List<Comment>, String>(
-  (ref, recipeId) =>
-      ref.watch(recipeRepositoryProvider).watchComments(recipeId),
+  (ref, recipeId) {
+    final blocked = ref.watch(blockedIdsProvider).value ?? const [];
+    return ref
+        .watch(recipeRepositoryProvider)
+        .watchComments(recipeId)
+        .map((comments) => blocked.isEmpty
+            ? comments
+            : comments
+                  .where((c) => !blocked.contains(c.author.uid))
+                  .toList());
+  },
 );
 
 final likedProvider = StreamProvider.family<bool, String>((ref, recipeId) {
@@ -241,7 +264,9 @@ final followingIdsProvider = StreamProvider<List<String>>((ref) {
 final followingFeedProvider = FutureProvider<List<Recipe>>((ref) async {
   final ids = ref.watch(followingIdsProvider).value ?? const [];
   if (ids.isEmpty) return const [];
-  return ref.watch(recipeRepositoryProvider).followingPage(authorIds: ids);
+  final recipes =
+      await ref.watch(recipeRepositoryProvider).followingPage(authorIds: ids);
+  return _withoutBlocked(ref, recipes);
 });
 
 final notificationsProvider = StreamProvider<List<AppNotification>>((ref) {
@@ -254,4 +279,25 @@ final unreadNotificationsProvider = StreamProvider<int>((ref) {
   final uid = ref.watch(currentUidProvider);
   if (uid == null || ref.watch(isGuestProvider)) return Stream.value(0);
   return ref.watch(notificationRepositoryProvider).watchUnreadCount(uid);
+});
+
+
+/// Everyone the signed-in person has blocked.
+///
+/// Filtering happens on the client because Firestore cannot express "not in
+/// this list" in a query. The list is small by nature, and the rules already
+/// stop a blocked person reading the blocker's profile — this is the other
+/// half, keeping their content out of feeds.
+final blockedIdsProvider = StreamProvider<List<String>>((ref) {
+  final uid = ref.watch(currentUidProvider);
+  if (uid == null || ref.watch(isGuestProvider)) return Stream.value(const []);
+  return ref.watch(safetyRepositoryProvider).watchBlockedIds(uid);
+});
+
+final isBlockedProvider = StreamProvider.family<bool, String>((ref, targetUid) {
+  final uid = ref.watch(currentUidProvider);
+  if (uid == null || ref.watch(isGuestProvider)) return Stream.value(false);
+  return ref
+      .watch(safetyRepositoryProvider)
+      .watchIsBlocked(uid: uid, targetUid: targetUid);
 });

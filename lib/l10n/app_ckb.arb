@@ -310,5 +310,29 @@
       }
     }
   },
-  "feedFollowingEmpty": "هێشتا شوێن کەس نەکەوتوویت. شوێن چێشتلێنەرێک بکەوە و ڕێسەتەکانی لێرە دەردەکەون."
+  "feedFollowingEmpty": "هێشتا شوێن کەس نەکەوتوویت. شوێن چێشتلێنەرێک بکەوە و ڕێسەتەکانی لێرە دەردەکەون.",
+  "actionUnblock": "لابردنی بلۆک",
+  "blockConfirm": "ڕێسەت و لێدوانەکانی نابینیت، و ئەویش پرۆفایلەکەت نابینێت. هەر کاتێک بتەوێت دەیگەڕێنیتەوە.",
+  "blockDone": "بلۆک کرا",
+  "unblockDone": "بلۆکەکە لابرا",
+  "reportBody": "چاودێرێک هەموو ڕاپۆرتێک دەخوێنێتەوە. کەس نازانێت کێ ڕاپۆرتی کردووە.",
+  "reportHarassment": "ئازاردان یان سووکایەتی",
+  "reportSpam": "سپام یان ڕیکلام",
+  "reportStolen": "ڕێسەتەکە هی ئەو نییە",
+  "reportInappropriate": "ناوەڕۆکی نەشیاو",
+  "reportOther": "شتێکی تر",
+  "reportNote": "زیاترمان پێ بڵێ",
+  "reportSend": "ڕاپۆرت بنێرە",
+  "reportDone": "ڕاپۆرت کرا. سوپاس — چاودێرێک سەیری دەکات.",
+  "recipeLike": "حەز",
+  "shoppingListTitle": "لیستی کڕین",
+  "shoppingListEmpty": "ڕێسەت بە ڕۆژەکانی هەفتەکەتەوە ببەستە و پێکهاتەکانیان لێرە کۆدەبنەوە.",
+  "shoppingListFrom": "{count, plural, =1{لە ١ ڕێسەت} other{لە {count} ڕێسەت}}",
+  "@shoppingListFrom": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

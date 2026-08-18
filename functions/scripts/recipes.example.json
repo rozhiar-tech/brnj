@@ -1,0 +1,26 @@
+[
+  {
+    "title": "دولمة بغدادية",
+    "description": "وصفة أم علي، تنطبخ كل جمعة.",
+    "language": "ar",
+    "region": "baghdadi",
+    "coverImage": "~/Pictures/brnj/dolma.jpg",
+    "servings": 8,
+    "prepMinutes": 45,
+    "cookMinutes": 90,
+    "difficulty": "medium",
+    "costBand": "medium",
+    "tags": ["غداء", "مناسبات"],
+    "occasions": ["ramadan"],
+    "ingredients": [
+      { "item": "تمن عنبر", "quantity": 3, "unit": "istikan", "group": "للحشوة" },
+      { "item": "دبس رمان", "quantity": 2, "unit": "tablespoon", "note": "بدون دبس تنفع، بس الطعم يتغير" },
+      { "item": "ملح", "unit": "toTaste" }
+    ],
+    "steps": [
+      "اغسل التمن ونقعه نص ساعة.",
+      { "text": "سوّي الحشوة وخلّيها ترتاح.", "timerMinutes": 15 },
+      { "text": "رصّ الدولمة بالقدر وحطّ صحن فوقها.", "timerMinutes": 90 }
+    ]
+  }
+]

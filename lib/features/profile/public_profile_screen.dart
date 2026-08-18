@@ -9,6 +9,8 @@ import '../../data/providers.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../shared/error_view.dart';
 import '../../shared/recipe_card.dart';
+import '../../data/repositories/safety_repository.dart';
+import '../../shared/safety_actions.dart';
 import '../../shared/verified_tick.dart';
 import '../auth/sign_in_sheet.dart';
 import 'profile_screen.dart';
@@ -58,7 +60,17 @@ class _Body extends ConsumerWidget {
 
     return CustomScrollView(
       slivers: [
-        SliverAppBar(pinned: true, title: Text(profile.displayName)),
+        SliverAppBar(
+          pinned: true,
+          title: Text(profile.displayName),
+          actions: [
+            SafetyMenu(
+              targetType: ReportTarget.profile,
+              targetId: profile.uid,
+              targetOwner: profile.uid,
+            ),
+          ],
+        ),
         SliverPadding(
           padding: const EdgeInsets.all(Gap.xl),
           sliver: SliverList.list(

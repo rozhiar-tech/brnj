@@ -310,5 +310,29 @@
       }
     }
   },
-  "feedFollowingEmpty": "You're not following anyone yet. Follow a cook and their recipes land here."
+  "feedFollowingEmpty": "You're not following anyone yet. Follow a cook and their recipes land here.",
+  "actionUnblock": "Unblock",
+  "blockConfirm": "You won't see their recipes or comments, and they can't see your profile. You can undo this any time.",
+  "blockDone": "Blocked",
+  "unblockDone": "Unblocked",
+  "reportBody": "A moderator reads every report. Nobody is told who reported them.",
+  "reportHarassment": "Harassment or abuse",
+  "reportSpam": "Spam or advertising",
+  "reportStolen": "Not their recipe",
+  "reportInappropriate": "Inappropriate content",
+  "reportOther": "Something else",
+  "reportNote": "Tell us more",
+  "reportSend": "Send report",
+  "reportDone": "Reported. Thank you — a moderator will look.",
+  "recipeLike": "Like",
+  "shoppingListTitle": "Shopping list",
+  "shoppingListEmpty": "Link recipes to days in your week and their ingredients gather here.",
+  "shoppingListFrom": "{count, plural, =1{From 1 recipe} other{From {count} recipes}}",
+  "@shoppingListFrom": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -310,5 +310,29 @@
       }
     }
   },
-  "feedFollowingEmpty": "هێشتا تو پەیڕەوی چو کەسی ناکەی. پەیڕەویا چێکەرەکێ بکە و ڕەچەتێن وی ل ڤێرێ دەردکەڤن."
+  "feedFollowingEmpty": "هێشتا تو پەیڕەوی چو کەسی ناکەی. پەیڕەویا چێکەرەکێ بکە و ڕەچەتێن وی ل ڤێرێ دەردکەڤن.",
+  "actionUnblock": "ڕاکرنا بلۆکی",
+  "blockConfirm": "تو دێ ڕەچەتە و شرۆڤێن وی نەبینی، و ئەو ژی پرۆفایلا تە نابینیت. هەر دەمێ بخوازی ڤەدگەڕینی.",
+  "blockDone": "هاتە بلۆککرن",
+  "unblockDone": "بلۆک هاتە ڕاکرن",
+  "reportBody": "چاڤدێرەک هەمی ڕاپۆرتان دخوینیت. چو کەس نزانیت کێ ڕاپۆرت کریە.",
+  "reportHarassment": "ئێشاندن یان سویکایەتی",
+  "reportSpam": "سپام یان ڕەکلام",
+  "reportStolen": "ڕەچەتە یا وی نینە",
+  "reportInappropriate": "ناڤەڕۆکا نەگونجای",
+  "reportOther": "تشتەکێ دی",
+  "reportNote": "زێدەتر بۆ مە بێژە",
+  "reportSend": "ڕاپۆرتێ بشینە",
+  "reportDone": "ڕاپۆرت هاتە کرن. سوپاس — چاڤدێرەک دێ بینیت.",
+  "recipeLike": "حەز",
+  "shoppingListTitle": "لیستا کڕینێ",
+  "shoppingListEmpty": "ڕەچەتان ب ڕۆژێن هەفتا خۆ ڤە گرێبدە و پێکهاتێن وان ل ڤێرێ کۆم دبن.",
+  "shoppingListFrom": "{count, plural, =1{ژ ١ ڕەچەتەی} other{ژ {count} ڕەچەتان}}",
+  "@shoppingListFrom": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

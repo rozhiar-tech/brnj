@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../features/home/home_screen.dart';
 import '../features/plan/my_week_screen.dart';
 import '../features/plan/plan_detail_screen.dart';
+import '../features/plan/shopping_list_screen.dart';
 import '../features/profile/edit_profile_screen.dart';
 import '../features/notifications/notifications_screen.dart';
 import '../features/profile/profile_screen.dart';
@@ -82,6 +83,11 @@ GoRouter createRouter() => GoRouter(
     GoRoute(
       path: '/search',
       builder: (context, state) => const SearchScreen(),
+    ),
+    GoRoute(
+      path: '/shopping/:planId',
+      builder: (context, state) =>
+          ShoppingListScreen(planId: state.pathParameters['planId']!),
     ),
     GoRoute(
       path: '/notifications',

@@ -310,5 +310,29 @@
       }
     }
   },
-  "feedFollowingEmpty": "ما تتابع أحد بعد. تابع طباخ وراح توصلك وصفاته هنا."
+  "feedFollowingEmpty": "ما تتابع أحد بعد. تابع طباخ وراح توصلك وصفاته هنا.",
+  "actionUnblock": "إلغاء الحظر",
+  "blockConfirm": "ما راح تشوف وصفاته ولا تعليقاته، وهو ما يشوف ملفك. تكدر تلغيه أي وقت.",
+  "blockDone": "انحظر",
+  "unblockDone": "انلغى الحظر",
+  "reportBody": "مشرف يقرا كل بلاغ. ماكو أحد يعرف منو بلّغ.",
+  "reportHarassment": "تحرش أو إساءة",
+  "reportSpam": "سبام أو إعلانات",
+  "reportStolen": "الوصفة مو مالته",
+  "reportInappropriate": "محتوى غير لائق",
+  "reportOther": "شي ثاني",
+  "reportNote": "كلنا أكثر",
+  "reportSend": "أرسل البلاغ",
+  "reportDone": "انبلّغ. شكراً — مشرف راح يشوفه.",
+  "recipeLike": "إعجاب",
+  "shoppingListTitle": "قائمة المشتريات",
+  "shoppingListEmpty": "اربط وصفات بأيام أسبوعك وتتجمع مقاديرها هنا.",
+  "shoppingListFrom": "{count, plural, =1{من وصفة وحدة} =2{من وصفتين} few{من {count} وصفات} other{من {count} وصفة}}",
+  "@shoppingListFrom": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

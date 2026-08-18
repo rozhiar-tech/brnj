@@ -10,6 +10,8 @@ import '../../core/numerals.dart';
 import '../../data/models/social.dart';
 import '../../data/providers.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../../data/repositories/safety_repository.dart';
+import '../../shared/safety_actions.dart';
 import '../../shared/verified_tick.dart';
 import '../auth/sign_in_sheet.dart';
 import '../profile/profile_screen.dart';
@@ -348,6 +350,12 @@ class _CommentTile extends ConsumerWidget {
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
+                ),
+              if (!canDelete)
+                SafetyMenu(
+                  targetType: ReportTarget.comment,
+                  targetId: comment.id,
+                  targetOwner: comment.author.uid,
                 ),
               if (canDelete)
                 InkWell(

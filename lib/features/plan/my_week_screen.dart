@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/settings.dart';
 import '../../app/theme/brnj_theme.dart';
@@ -326,7 +327,13 @@ class _PublishBar extends ConsumerWidget {
                 ),
               ),
             ),
-            const SizedBox(width: Gap.md),
+            if (plan.linkedRecipeIds.isNotEmpty)
+              IconButton(
+                onPressed: () => context.push('/shopping/${plan.id}'),
+                icon: const Icon(Icons.shopping_basket_outlined),
+                tooltip: l10n.planShoppingList,
+              ),
+            const SizedBox(width: Gap.sm),
             FilledButton(
               // Nothing to publish is a real state, not an error — an empty
               // week just isn't worth anyone's time to open.
