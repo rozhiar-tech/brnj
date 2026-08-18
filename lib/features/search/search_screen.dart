@@ -280,11 +280,11 @@ class _PersonTile extends StatelessWidget {
         ],
       ),
       subtitle: Text(
-        profile.handle != null ? '@\${profile.handle}' : l10n.profileRecipes,
+        profile.handle != null ? '@${profile.handle}' : l10n.profileRecipes,
         textDirection: profile.handle != null ? TextDirection.ltr : null,
         style: theme.textTheme.labelSmall,
       ),
-      onTap: () => context.push('/user/\${profile.uid}'),
+      onTap: () => context.push('/user/${profile.uid}'),
     );
   }
 }

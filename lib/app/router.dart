@@ -15,6 +15,7 @@ import '../features/profile/verification_screen.dart';
 import '../features/recipe/composer/recipe_composer_screen.dart';
 import '../features/recipe/cook_mode_screen.dart';
 import '../features/recipe/my_recipes_screen.dart';
+import '../features/recipe/saved_recipes_screen.dart';
 import '../features/recipe/recipe_detail_screen.dart';
 import '../features/search/search_screen.dart';
 import '../features/shell/placeholder_screen.dart';
@@ -194,6 +195,10 @@ GoRouter createRouter() => GoRouter(
                 GoRoute(
                   path: 'recipes',
                   builder: (context, state) => const MyRecipesScreen(),
+                ),
+                GoRoute(
+                  path: 'saved',
+                  builder: (context, state) => const SavedRecipesScreen(),
                 ),
               ],
             ),

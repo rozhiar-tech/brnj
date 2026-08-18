@@ -40,25 +40,18 @@ void showCreateSheet(BuildContext context) {
                 label: l10n.createRecipe,
                 onTap: () => go(ref, '/create/recipe'),
               ),
+              // "I cooked this" attaches to a specific recipe, so it starts
+              // from the recipe rather than from here — this sends you to find
+              // one instead of asking which.
               _CreateOption(
                 icon: Icons.local_fire_department_outlined,
                 label: l10n.createCooked,
-                onTap: () => Navigator.pop(context),
+                onTap: () => go(ref, '/search'),
               ),
               _CreateOption(
                 icon: Icons.calendar_month_outlined,
                 label: l10n.createPlan,
                 onTap: () => go(ref, '/me/week'),
-              ),
-              _CreateOption(
-                icon: Icons.help_outline,
-                label: l10n.createQuestion,
-                onTap: () => Navigator.pop(context),
-              ),
-              _CreateOption(
-                icon: Icons.photo_outlined,
-                label: l10n.createPhoto,
-                onTap: () => Navigator.pop(context),
               ),
               const SizedBox(height: Gap.sm),
             ],

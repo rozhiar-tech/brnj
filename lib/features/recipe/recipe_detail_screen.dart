@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -122,12 +124,18 @@ class _Body extends ConsumerWidget {
           expandedHeight: 260,
           pinned: true,
           actions: [
-            SafetyMenu(
-              targetType: ReportTarget.recipe,
-              targetId: recipe.id,
-              targetOwner: recipe.author.uid,
-              iconColor: Colors.white,
-            ),
+            // Your own recipe gets edit and delete; someone else's gets report
+            // and block. SafetyMenu already hides itself on your own content,
+            // so the two never both appear.
+            if (recipe.author.uid == ref.watch(currentUidProvider))
+              _OwnerMenu(recipe: recipe)
+            else
+              SafetyMenu(
+                targetType: ReportTarget.recipe,
+                targetId: recipe.id,
+                targetOwner: recipe.author.uid,
+                iconColor: Colors.white,
+              ),
           ],
           flexibleSpace: FlexibleSpaceBar(
             background: recipe.coverUrl == null
@@ -146,7 +154,7 @@ class _Body extends ConsumerWidget {
               Text(recipe.title, style: theme.textTheme.headlineSmall),
               const SizedBox(height: Gap.md),
               InkWell(
-                onTap: () => context.push('/user/\${recipe.author.uid}'),
+                onTap: () => context.push('/user/${recipe.author.uid}'),
                 child: Row(
                   children: [
                     CircleAvatar(
@@ -577,6 +585,63 @@ class _ActionBar extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+
+/// Edit and delete, for the author.
+///
+/// Editing reopens the composer on the published recipe — the same screen that
+/// wrote it, so there is no second, diverging editor to keep in step. Deleting
+/// asks first, because it takes the "I cooked this" photos and the conversation
+/// underneath with it.
+class _OwnerMenu extends ConsumerWidget {
+  const _OwnerMenu({required this.recipe});
+
+  final Recipe recipe;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.more_horiz, color: Colors.white),
+      onSelected: (value) async {
+        if (value == 'edit') {
+          unawaited(context.push('/create/recipe/${recipe.id}'));
+          return;
+        }
+
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(l10n.recipeDelete),
+            content: Text(l10n.recipeDeleteConfirm),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.error,
+                ),
+                child: Text(l10n.recipeDelete),
+              ),
+            ],
+          ),
+        );
+        if (confirmed != true) return;
+
+        await ref.read(recipeRepositoryProvider).delete(recipe.id);
+        if (context.mounted) context.go('/');
+      },
+      itemBuilder: (context) => [
+        PopupMenuItem(value: 'edit', child: Text(l10n.recipeEdit)),
+        PopupMenuItem(value: 'delete', child: Text(l10n.recipeDelete)),
+      ],
     );
   }
 }

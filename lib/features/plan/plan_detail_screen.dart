@@ -12,6 +12,7 @@ import '../../data/repositories/view_tracker.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../shared/error_view.dart';
 import '../../shared/verified_tick.dart';
+import '../recipe/recipe_social.dart';
 import '../auth/sign_in_sheet.dart';
 
 final _planProvider = StreamProvider.family<WeeklyPlan?, String>(
@@ -170,6 +171,14 @@ class _PlanBody extends ConsumerWidget {
             labelKey: iraqiWeekdayKeys[i],
             numerals: numerals,
           ),
+        Padding(
+          padding: const EdgeInsets.all(Gap.xl),
+          child: CommentThread(
+            recipeId: plan.id,
+            recipeAuthorUid: plan.owner.uid,
+            isPlan: true,
+          ),
+        ),
       ],
     );
   }
@@ -266,10 +275,13 @@ class _ActionBarState extends ConsumerState<_ActionBar> {
   Future<void> _copy() async {
     if (!await requireAccount(context, ref)) return;
 
-    final owner = ref.read(myAuthorStubProvider);
-    if (owner == null) return;
-
     setState(() => _copying = true);
+    final owner = await ref.read(myAuthorStubFuture.future);
+    if (owner == null) {
+      if (mounted) setState(() => _copying = false);
+      return;
+    }
+
     try {
       // Copies land in the *coming* week, not the current one — cloning
       // someone's Monday when it's already Thursday helps nobody.

@@ -158,11 +158,17 @@ class CommentThread extends ConsumerStatefulWidget {
   const CommentThread({
     required this.recipeId,
     required this.recipeAuthorUid,
+    this.isPlan = false,
     super.key,
   });
 
   final String recipeId;
   final String recipeAuthorUid;
+
+  /// Weeks get the same thread as recipes. The only difference is which
+  /// collection it lives in, so the widget takes a flag rather than being
+  /// copied.
+  final bool isPlan;
 
   @override
   ConsumerState<CommentThread> createState() => _CommentThreadState();
@@ -183,14 +189,28 @@ class _CommentThreadState extends ConsumerState<CommentThread> {
     if (text.isEmpty) return;
     if (!await requireAccount(context, ref)) return;
 
-    final author = ref.read(myAuthorStubProvider);
-    if (author == null) return;
-
     setState(() => _sending = true);
+    final author = await ref.read(myAuthorStubFuture.future);
+    if (author == null) {
+      if (mounted) {
+        setState(() => _sending = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context).errorGeneric)),
+        );
+      }
+      return;
+    }
+
     try {
-      await ref
-          .read(recipeRepositoryProvider)
-          .addComment(recipeId: widget.recipeId, author: author, text: text);
+      if (widget.isPlan) {
+        await ref
+            .read(planRepositoryProvider)
+            .addComment(planId: widget.recipeId, author: author, text: text);
+      } else {
+        await ref
+            .read(recipeRepositoryProvider)
+            .addComment(recipeId: widget.recipeId, author: author, text: text);
+      }
       _controller.clear();
     } catch (error) {
       if (mounted) {
@@ -208,7 +228,10 @@ class _CommentThreadState extends ConsumerState<CommentThread> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final comments =
-        ref.watch(commentsProvider(widget.recipeId)).value ?? const [];
+        (widget.isPlan
+            ? ref.watch(planCommentsProvider(widget.recipeId)).value
+            : ref.watch(commentsProvider(widget.recipeId)).value) ??
+        const [];
     final myUid = ref.watch(currentUidProvider);
 
     return Column(
@@ -235,12 +258,19 @@ class _CommentThreadState extends ConsumerState<CommentThread> {
               canDelete:
                   comment.author.uid == myUid ||
                   myUid == widget.recipeAuthorUid,
-              onDelete: () => ref
-                  .read(recipeRepositoryProvider)
-                  .deleteComment(
-                    recipeId: widget.recipeId,
-                    commentId: comment.id,
-                  ),
+              onDelete: () => widget.isPlan
+                  ? ref
+                        .read(planRepositoryProvider)
+                        .deleteComment(
+                          planId: widget.recipeId,
+                          commentId: comment.id,
+                        )
+                  : ref
+                        .read(recipeRepositoryProvider)
+                        .deleteComment(
+                          recipeId: widget.recipeId,
+                          commentId: comment.id,
+                        ),
             ),
 
         const SizedBox(height: Gap.md),

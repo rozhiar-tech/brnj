@@ -8,6 +8,9 @@ import '../../data/models/user_profile.dart';
 import '../../data/providers.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../shared/error_view.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../core/iraqi_week.dart';
 import '../../shared/recipe_card.dart';
 import '../../data/repositories/safety_repository.dart';
 import '../../shared/safety_actions.dart';
@@ -152,6 +155,7 @@ class _Body extends ConsumerWidget {
               const SizedBox(height: Gap.lg),
               _FollowButton(targetUid: profile.uid),
               const SizedBox(height: Gap.xl),
+              _PlanArchive(uid: profile.uid),
               if (recipes.isNotEmpty)
                 Text(l10n.profileRecipes, style: theme.textTheme.titleMedium),
             ],
@@ -265,6 +269,76 @@ class _ProfileNotFound extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Published weeks, newest first.
+///
+/// Only public ones come back — the rules see to that — so this is safe to show
+/// on anyone's profile without filtering here.
+class _PlanArchive extends ConsumerWidget {
+  const _PlanArchive({required this.uid});
+
+  final String uid;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final plans = ref.watch(userPlansProvider(uid)).value ?? const [];
+    final published = plans.where((p) => p.isPublished).toList();
+
+    if (published.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(l10n.planArchive, style: theme.textTheme.titleMedium),
+        const SizedBox(height: Gap.sm),
+        SizedBox(
+          height: 96,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: published.length,
+            separatorBuilder: (_, _) => const SizedBox(width: Gap.md),
+            itemBuilder: (context, i) {
+              final plan = published[i];
+              return SizedBox(
+                width: 170,
+                child: Card(
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    onTap: () => context.push('/plan/${plan.id}'),
+                    child: Padding(
+                      padding: const EdgeInsets.all(Gap.md),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            plan.title ?? l10n.myWeek,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.titleSmall,
+                          ),
+                          const Spacer(),
+                          Text(
+                            IraqiWeek(plan.week.start).id,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: Gap.xl),
+      ],
     );
   }
 }

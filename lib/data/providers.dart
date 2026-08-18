@@ -130,6 +130,32 @@ final activeContentLanguageProvider = Provider<String>((ref) {
   return preferred ?? ref.watch(activeLocaleProvider).locale.languageCode;
 });
 
+/// The author stub, awaited.
+///
+/// [myAuthorStubProvider] is synchronous, so reading it from a callback on a
+/// screen that never watched it returns null: Riverpod builds the chain cold,
+/// the profile stream has not emitted yet, and there is no value. Callers then
+/// gave up silently — which is exactly what "I can't comment" looked like.
+///
+/// Anything writing on behalf of the signed-in person should await this.
+final myAuthorStubFuture = FutureProvider<AuthorStub?>((ref) async {
+  if (ref.watch(isGuestProvider)) return null;
+
+  final profile = await ref.watch(myProfileProvider.future);
+  if (profile == null) return null;
+
+  // The token, not the document — the rules check the token, and the two
+  // disagree for as long as it takes an ID token to be reissued.
+  final claims = await ref.watch(adminClaimsProvider.future);
+
+  return AuthorStub(
+    uid: profile.uid,
+    name: profile.displayName,
+    photoUrl: profile.photoUrl,
+    verified: claims.verified,
+  );
+});
+
 /// Which week the plan screens are showing. Saturday-based, defaults to now.
 class SelectedWeek extends Notifier<IraqiWeek> {
   @override
@@ -324,4 +350,27 @@ final isBlockedProvider = StreamProvider.family<bool, String>((ref, targetUid) {
 /// and a stale one cannot overwrite a newer result.
 final peopleSearchProvider = FutureProvider.family<List<UserProfile>, String>(
   (ref, query) => ref.watch(userRepositoryProvider).searchPeople(query),
+);
+
+
+/// Comments under a published week.
+final planCommentsProvider = StreamProvider.family<List<Comment>, String>(
+  (ref, planId) {
+    final blocked = ref.watch(blockedIdsProvider).value ?? const [];
+    return ref
+        .watch(planRepositoryProvider)
+        .watchComments(planId)
+        .map(
+          (comments) => blocked.isEmpty
+              ? comments
+              : comments
+                    .where((c) => !blocked.contains(c.author.uid))
+                    .toList(),
+        );
+  },
+);
+
+/// Someone's published weeks, for the archive on their profile.
+final userPlansProvider = StreamProvider.family<List<WeeklyPlan>, String>(
+  (ref, uid) => ref.watch(planRepositoryProvider).watchUserPlans(uid),
 );

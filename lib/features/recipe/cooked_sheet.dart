@@ -59,11 +59,14 @@ class _CookedSheetState extends ConsumerState<_CookedSheet> {
   }
 
   Future<void> _post() async {
-    final author = ref.read(myAuthorStubProvider);
-    if (author == null) return;
+    setState(() => _posting = true);
+    final author = await ref.read(myAuthorStubFuture.future);
+    if (author == null) {
+      if (mounted) setState(() => _posting = false);
+      return;
+    }
     final uid = author.uid;
 
-    setState(() => _posting = true);
     try {
       String? photoUrl;
       if (_photo != null) {

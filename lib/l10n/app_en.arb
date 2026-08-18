@@ -339,5 +339,16 @@
   "searchTabRecipes": "Recipes",
   "searchTabPeople": "People",
   "searchPeopleHint": "Search by name or @username",
-  "searchNoPeople": "Nobody found. Try their @username."
+  "searchNoPeople": "Nobody found. Try their @username.",
+  "savedEmpty": "Nothing saved yet. Tap the bookmark on a recipe you mean to cook.",
+  "planDetailsTitle": "About this week",
+  "planTitleLabel": "Give it a name",
+  "planTitleHelp": "\"Economical week\", \"Ramadan\", \"kids' favourites\" — this is what makes someone open it.",
+  "planNoteLabel": "A line about it",
+  "planTagsLabel": "Tags",
+  "planTagAdd": "Add your own",
+  "planArchive": "Past weeks",
+  "recipeEdit": "Edit recipe",
+  "recipeDelete": "Delete recipe",
+  "recipeDeleteConfirm": "This also removes the photos people posted of their own attempts, and the comments. It cannot be undone."
 }

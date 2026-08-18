@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../core/iraqi_week.dart';
+import '../models/social.dart';
 import '../models/user_profile.dart';
 import '../models/weekly_plan.dart';
 
@@ -143,6 +144,32 @@ class PlanRepository {
 
     return copy;
   }
+
+  // --- comments ------------------------------------------------------------
+
+  /// A week gets a conversation too. Same shape as a recipe thread, oldest
+  /// first, because "why rice twice?" and its answer only make sense in order.
+  Stream<List<Comment>> watchComments(String planId, {int limit = 100}) => _plans
+      .doc(planId)
+      .collection('comments')
+      .orderBy('createdAt')
+      .limit(limit)
+      .snapshots()
+      .map((s) => s.docs.map(Comment.fromDoc).toList());
+
+  Future<void> addComment({
+    required String planId,
+    required AuthorStub author,
+    required String text,
+  }) => _plans
+      .doc(planId)
+      .collection('comments')
+      .add(Comment(id: '', author: author, text: text).toMap());
+
+  Future<void> deleteComment({
+    required String planId,
+    required String commentId,
+  }) => _plans.doc(planId).collection('comments').doc(commentId).delete();
 
   Future<void> delete(String planId) => _plans.doc(planId).delete();
 }

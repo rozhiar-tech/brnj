@@ -339,5 +339,16 @@
   "searchTabRecipes": "وصفات",
   "searchTabPeople": "أشخاص",
   "searchPeopleHint": "دور بالاسم أو @اسم المستخدم",
-  "searchNoPeople": "ماكو أحد. جرّب @اسم المستخدم."
+  "searchNoPeople": "ماكو أحد. جرّب @اسم المستخدم.",
+  "savedEmpty": "ماكو شي محفوظ. اضغط العلامة على وصفة تنوي تطبخها.",
+  "planDetailsTitle": "عن هالأسبوع",
+  "planTitleLabel": "سمّه",
+  "planTitleHelp": "\"أسبوع اقتصادي\"، \"رمضان\"، \"أكل الأطفال\" — هذا اللي يخلي أحد يفتحه.",
+  "planNoteLabel": "سطر عنه",
+  "planTagsLabel": "وسوم",
+  "planTagAdd": "أضف وسم",
+  "planArchive": "الأسابيع السابقة",
+  "recipeEdit": "تعديل الوصفة",
+  "recipeDelete": "حذف الوصفة",
+  "recipeDeleteConfirm": "هذا يحذف صور الناس اللي طبخوها والتعليقات هم. ما تكدر ترجعه."
 }

@@ -73,6 +73,8 @@ void main() {
       '/me/verification',
       '/plan/some_2026-08-15',
       '/me/recipes',
+      '/me/saved',
+      '/shopping/some_2026-08-15',
       '/create/recipe',
       '/create/recipe/abc123',
       '/recipe/abc123',

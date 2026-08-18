@@ -201,7 +201,7 @@ class _ProfileBody extends ConsumerWidget {
           leading: const Icon(Icons.bookmark_border),
           title: Text(l10n.profileSaved),
           trailing: const Icon(Icons.chevron_right),
-          onTap: () {},
+          onTap: () => context.go('/me/saved'),
         ),
         ListTile(
           leading: const Icon(Icons.menu_book_outlined),

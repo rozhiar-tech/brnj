@@ -13,6 +13,7 @@ import '../../l10n/gen/app_localizations.dart';
 import '../../shared/option_sheet.dart';
 import '../auth/sign_in_sheet.dart';
 import 'add_dish_sheet.dart';
+import 'plan_details_sheet.dart';
 import 'week_header.dart';
 
 /// The seven-day plan editor.
@@ -32,7 +33,18 @@ class MyWeekScreen extends ConsumerWidget {
     final isGuest = ref.watch(isGuestProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.myWeek)),
+      appBar: AppBar(
+        title: Text(l10n.myWeek),
+        actions: [
+          if (planAsync.value != null && !isGuest)
+            IconButton(
+              onPressed: () =>
+                  showPlanDetailsSheet(context, ref, plan: planAsync.value!),
+              icon: const Icon(Icons.edit_note),
+              tooltip: l10n.planDetailsTitle,
+            ),
+        ],
+      ),
       body: Column(
         children: [
           WeekHeader(
@@ -41,6 +53,14 @@ class MyWeekScreen extends ConsumerWidget {
                 ref.read(selectedWeekProvider.notifier).previous(),
             onNext: () => ref.read(selectedWeekProvider.notifier).next(),
           ),
+          if ((planAsync.value?.title ?? '').isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(Gap.lg, 0, Gap.lg, Gap.sm),
+              child: Text(
+                planAsync.value!.title!,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
           const Divider(),
           Expanded(
             child: isGuest

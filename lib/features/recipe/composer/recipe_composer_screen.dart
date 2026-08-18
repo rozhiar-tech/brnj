@@ -59,7 +59,7 @@ class _RecipeComposerScreenState extends ConsumerState<RecipeComposerScreen> {
   }
 
   Future<void> _load() async {
-    final author = ref.read(myAuthorStubProvider);
+    final author = await ref.read(myAuthorStubFuture.future);
     if (author == null) {
       setState(() => _loading = false);
       return;
@@ -216,7 +216,11 @@ class _RecipeComposerScreenState extends ConsumerState<RecipeComposerScreen> {
                 else
                   FilledButton(
                     onPressed: recipe.canPublish ? _publish : null,
-                    child: Text(l10n.composerPublish),
+                    child: Text(
+                      recipe.status == RecipeStatus.published
+                          ? l10n.actionSave
+                          : l10n.composerPublish,
+                    ),
                   ),
               ],
             ),
