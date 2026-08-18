@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../app/bootstrap.dart';
 import '../app/settings.dart';
 import '../core/iraqi_week.dart';
+import 'models/chat.dart';
 import 'models/community.dart';
 import 'models/recipe.dart';
 import 'models/social.dart';
@@ -12,6 +13,7 @@ import 'models/user_profile.dart';
 import 'models/weekly_plan.dart';
 import 'repositories/admin_repository.dart';
 import 'repositories/auth_repository.dart';
+import 'repositories/chat_repository.dart';
 import 'repositories/community_repository.dart';
 import 'repositories/media_repository.dart';
 import 'repositories/notification_repository.dart';
@@ -30,6 +32,7 @@ final planRepositoryProvider = Provider<PlanRepository>((ref) => PlanRepository(
 final communityRepositoryProvider = Provider<CommunityRepository>(
   (ref) => CommunityRepository(),
 );
+final chatRepositoryProvider = Provider<ChatRepository>((ref) => ChatRepository());
 final userRepositoryProvider = Provider<UserRepository>((ref) => UserRepository());
 final mediaRepositoryProvider = Provider<MediaRepository>(
   (ref) => MediaRepository(),
@@ -507,4 +510,109 @@ final myJoinRequestProvider = StreamProvider.family<bool, String>((
   final uid = ref.watch(currentUidProvider);
   if (uid == null) return Stream.value(false);
   return repository.watchMyRequest(communityId: communityId, uid: uid);
+});
+
+// ---- chats ----------------------------------------------------------------
+
+/// Every conversation, accepted or not. One query; the split happens below.
+///
+/// Empty for guests, who have no conversations and whose anonymous uid would
+/// otherwise attach a listener that can never return anything.
+final allChatsProvider = StreamProvider<List<Chat>>((ref) {
+  final repository = ref.watch(chatRepositoryProvider);
+  final uid = ref.watch(currentUidProvider);
+  final guest = ref.watch(isGuestProvider);
+  if (uid == null || guest) return Stream.value(const <Chat>[]);
+  return repository.watchChats(uid);
+});
+
+/// Conversations this person has accepted, with blocked senders dropped.
+///
+/// Blocking is applied here rather than in the query for the same reason it is
+/// everywhere else: Firestore cannot express "not in this list". A blocked
+/// person's conversation staying in the inbox is not a block.
+final inboxProvider = Provider<AsyncValue<List<Chat>>>((ref) {
+  final uid = ref.watch(currentUidProvider);
+  final blocked = ref.watch(blockedIdsProvider).value ?? const <String>[];
+
+  return ref
+      .watch(allChatsProvider)
+      .whenData(
+        (chats) => chats
+            .where(
+              (chat) =>
+                  chat.hasAccepted(uid) &&
+                  !chat.memberIds.any(
+                    (member) => member != uid && blocked.contains(member),
+                  ),
+            )
+            .toList(),
+      );
+});
+
+/// Conversations waiting on this person's answer.
+final chatRequestsProvider = Provider<AsyncValue<List<Chat>>>((ref) {
+  final uid = ref.watch(currentUidProvider);
+  final blocked = ref.watch(blockedIdsProvider).value ?? const <String>[];
+
+  return ref
+      .watch(allChatsProvider)
+      .whenData(
+        (chats) => chats
+            .where(
+              (chat) =>
+                  !chat.hasAccepted(uid) &&
+                  !chat.memberIds.any(
+                    (member) => member != uid && blocked.contains(member),
+                  ),
+            )
+            .toList(),
+      );
+});
+
+/// The number on the Chats tab.
+///
+/// Counts only accepted conversations: a request is something to look at, not
+/// something to be chased about, and badging them makes the gate feel like
+/// nagging rather than protection.
+final unreadChatCountProvider = Provider<int>((ref) {
+  final uid = ref.watch(currentUidProvider);
+  final chats = ref.watch(inboxProvider).value ?? const <Chat>[];
+  return chats.fold(0, (total, chat) => total + chat.unreadFor(uid));
+});
+
+final chatProvider = StreamProvider.family<Chat?, String>(
+  (ref, id) => ref.watch(chatRepositoryProvider).watchChat(id),
+);
+
+final messagesProvider = StreamProvider.family<List<Message>, String>((
+  ref,
+  chatId,
+) {
+  final repository = ref.watch(chatRepositoryProvider);
+  final blocked = ref.watch(blockedIdsProvider).value ?? const <String>[];
+
+  return repository
+      .watchMessages(chatId)
+      .map(
+        (messages) => blocked.isEmpty
+            ? messages
+            : messages
+                  .where((m) => !blocked.contains(m.author.uid))
+                  .toList(),
+      );
+});
+
+/// Whether [uid] follows the signed-in person.
+///
+/// The opposite direction from [isFollowingProvider], and the one the DM gate
+/// turns on: `following` mode means they have shown interest in you, which is
+/// something you cannot grant yourself by following them.
+final followsMeProvider = StreamProvider.family<bool, String>((ref, uid) {
+  final me = ref.watch(currentUidProvider);
+  if (me == null || ref.watch(isGuestProvider)) return Stream.value(false);
+  return ref.watch(userRepositoryProvider).watchIsFollowing(
+    uid: uid,
+    targetUid: me,
+  );
 });

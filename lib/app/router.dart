@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/chat/chat_room_screen.dart';
+import '../features/chat/chats_screen.dart';
+import '../features/chat/new_chat_screen.dart';
 import '../features/community/communities_screen.dart';
 import '../features/community/community_form_screen.dart';
 import '../features/community/community_members_screen.dart';
@@ -24,10 +27,8 @@ import '../features/recipe/my_recipes_screen.dart';
 import '../features/recipe/saved_recipes_screen.dart';
 import '../features/recipe/recipe_detail_screen.dart';
 import '../features/search/search_screen.dart';
-import '../features/shell/placeholder_screen.dart';
 import '../features/shell/route_not_found_screen.dart';
 import '../features/shell/shell_screen.dart';
-import '../l10n/gen/app_localizations.dart';
 
 /// Named paths, in one place, so deep links and share cards stay consistent.
 /// Recipe and plan routes are the two that get shared outward — mostly over
@@ -45,6 +46,7 @@ abstract final class Routes {
   static String planFor(String id) => '/plan/$id';
   static String profileFor(String handle) => '/user/$handle';
   static String communityFor(String id) => '/communities/$id';
+  static String chatFor(String id) => '/chats/$id';
 }
 
 final _rootKey = GlobalKey<NavigatorState>();
@@ -165,6 +167,19 @@ GoRouter createRouter() => GoRouter(
         ),
       ],
     ),
+    // Conversations sit outside the shell: a chat room is a full-screen task
+    // with a keyboard up, and the bottom bar has nothing to offer while you
+    // are in one. `/chats/new` before `/chats/:id`, or "new" is read as a
+    // conversation id.
+    GoRoute(
+      path: '/chats/new',
+      builder: (context, state) => const NewChatScreen(),
+    ),
+    GoRoute(
+      path: '/chats/:id',
+      builder: (context, state) =>
+          ChatRoomScreen(chatId: state.pathParameters['id']!),
+    ),
     GoRoute(
       path: '/recipe/:id',
       builder: (context, state) =>
@@ -214,12 +229,7 @@ GoRouter createRouter() => GoRouter(
           routes: [
             GoRoute(
               path: Routes.chats,
-              builder: (context, state) => PlaceholderScreen(
-                title: AppLocalizations.of(context).navChats,
-                icon: Icons.forum_outlined,
-                note: 'Phase 5. DMs, group chats, and community rooms — with '
-                    'the request gate on by default.',
-              ),
+              builder: (context, state) => const ChatsScreen(),
             ),
           ],
         ),

@@ -65,6 +65,32 @@ service cloud.firestore {
       return exists(/databases/$(database)/documents/users/$(ownerUid)/blocked/$(request.auth.uid));
     }
 
+    // The other party in a two-person conversation.
+    function otherIn(members) {
+      return members[0] == request.auth.uid ? members[1] : members[0];
+    }
+
+    // Admin of a chat, read from the chat document. Needed from inside the
+    // messages subcollection, where `resource` is a message and the chat's own
+    // isChatAdmin() has nothing to look at.
+    function isChatAdminOf(chatId) {
+      return signedIn()
+             && exists(/databases/$(database)/documents/chats/$(chatId))
+             && chatAdminCheck(get(/databases/$(database)/documents/chats/$(chatId)).data);
+    }
+
+    // Same rule as the chat's own isChatAdmin(), against a chat document read
+    // from elsewhere. Groups and community rooms have admins; a DM does not,
+    // and giving its creator admin powers would let them delete the other
+    // person's messages.
+    function chatAdminCheck(chat) {
+      return (chat.kind == 'group'
+              && (chat.createdBy == request.auth.uid
+                  || chat.admins.hasAny([request.auth.uid])))
+             || (chat.kind == 'community'
+                 && isCommunityMod(chat.get('communityId', '')));
+    }
+
     // ---- community helpers ------------------------------------------------
     //
     // These take the community id from the *path*, never from a result
@@ -540,6 +566,208 @@ service cloud.firestore {
                            || isCommunityMod(cid)
                            || isModerator();
         }
+      }
+    }
+
+    // ---- chats ------------------------------------------------------------
+
+    match /chats/{chatId} {
+
+      function isChatMember() {
+        return signedIn()
+               && resource != null
+               && request.auth.uid in resource.data.memberIds;
+      }
+
+      // Admin powers exist for groups and for community rooms, and nowhere
+      // else. A DM has a `createdBy` too, and treating that as admin handed
+      // whoever sent the first message the right to accept the conversation on
+      // the other person's behalf and to delete their replies — which is the
+      // request gate inverted.
+      function isChatAdmin() {
+        return signedIn()
+               && resource != null
+               && (
+                 (resource.data.kind == 'group'
+                  && (resource.data.createdBy == request.auth.uid
+                      || resource.data.admins.hasAny([request.auth.uid])))
+                 || (resource.data.kind == 'community'
+                     && isCommunityMod(resource.data.get('communityId', '')))
+               );
+      }
+
+      // Whether `other` accepts a first message from the person asking.
+      //
+      // This is the request gate, and it lives here rather than only in the
+      // client because a gate the client enforces is a gate anyone can skip by
+      // not using the client. `following` means *they* follow *you* — the
+      // direction matters: it says they have shown interest in you, not the
+      // reverse, which anyone can do to anyone.
+      function dmAllowedBy(other) {
+        return get(/databases/$(database)/documents/users/$(other))
+                 .data.get('privacy', {}).get('dmMode', 'following') == 'everyone'
+               || (get(/databases/$(database)/documents/users/$(other))
+                     .data.get('privacy', {}).get('dmMode', 'following') == 'following'
+                   && exists(/databases/$(database)/documents/users/$(other)/following/$(request.auth.uid)));
+      }
+
+      // resource == null so a listener on a declined or deleted conversation
+      // resolves to "gone" rather than to a permission error.
+      allow read: if signedIn() && (resource == null || isChatMember());
+
+      // A DM. The id is derived from the two uids so the conversation is unique
+      // by construction; checking it here is what stops someone creating a
+      // second one under a name of their choosing and slipping past the gate on
+      // the first.
+      function validDm() {
+        return request.resource.data.memberIds.size() == 2
+               && request.auth.uid in request.resource.data.memberIds
+               && chatId == (request.resource.data.memberIds[0] < request.resource.data.memberIds[1]
+                             ? request.resource.data.memberIds[0] + '_' + request.resource.data.memberIds[1]
+                             : request.resource.data.memberIds[1] + '_' + request.resource.data.memberIds[0])
+               // Only the initiator has accepted. Marking both accepted at
+               // creation would drop the conversation straight into the other
+               // person's inbox, which is the gate removed.
+               && request.resource.data.acceptedBy == [request.auth.uid]
+               && !isBlockedBy(otherIn(request.resource.data.memberIds))
+               && dmAllowedBy(otherIn(request.resource.data.memberIds));
+      }
+
+      function validGroup() {
+        return request.auth.uid in request.resource.data.memberIds
+               && request.resource.data.memberIds.size() <= 100
+               && request.resource.data.admins == [request.auth.uid]
+               && request.resource.data.title is string
+               && request.resource.data.title.size() > 0
+               && request.resource.data.title.size() <= 80;
+      }
+
+      // A community room. Anyone in the community may open it, and the first
+      // one to do so creates it.
+      function validCommunityRoom() {
+        return chatId == 'community_' + request.resource.data.get('communityId', '')
+               && isCommunityMember(request.resource.data.get('communityId', ''))
+               && request.resource.data.memberIds == [request.auth.uid];
+      }
+
+      allow create: if isRegistered()
+                    && request.resource.data.createdBy == request.auth.uid
+                    // Counters and the preview line are Function-owned. A chat
+                    // arriving with them pre-filled is a chat lying about its
+                    // own history.
+                    && !request.resource.data.keys()
+                         .hasAny(['unread', 'lastMessage', 'updatedAt'])
+                    && (
+                      (request.resource.data.kind == 'dm' && validDm())
+                      || (request.resource.data.kind == 'group' && validGroup())
+                      || (request.resource.data.kind == 'community'
+                          && validCommunityRoom())
+                    );
+
+      // What a member may change about a conversation.
+      //
+      // Separate cases rather than one permissive rule, because the interesting
+      // failure here is not someone editing a title — it is someone editing
+      // their own unread count, or adding themselves to a group.
+      function onlyChanged(fields) {
+        return request.resource.data.diff(resource.data)
+          .affectedKeys().hasOnly(fields);
+      }
+
+      // Zeroing your own badge. `unread` is a map, and diffing the map itself
+      // is what proves no other person's count was touched.
+      function clearingMyBadge() {
+        return onlyChanged(['unread'])
+               && request.resource.data.unread.diff(resource.data.unread)
+                    .affectedKeys().hasOnly([request.auth.uid])
+               && request.resource.data.unread[request.auth.uid] == 0;
+      }
+
+      // Accepting a request, or replying to one — the same write either way.
+      function acceptingRequest() {
+        return onlyChanged(['acceptedBy'])
+               && request.resource.data.acceptedBy.hasAll(resource.data.acceptedBy)
+               && request.resource.data.acceptedBy
+                    .removeAll(resource.data.acceptedBy) == [request.auth.uid];
+      }
+
+      // Leaving. Removes exactly yourself, from every list you are on.
+      function leaving() {
+        return onlyChanged(['memberIds', 'acceptedBy', 'admins', 'members'])
+               && !(request.auth.uid in request.resource.data.memberIds)
+               && resource.data.memberIds
+                    .removeAll(request.resource.data.memberIds) == [request.auth.uid];
+      }
+
+      // Joining a community room you are entitled to be in.
+      function joiningRoom() {
+        return resource != null
+               && resource.data.kind == 'community'
+               && isCommunityMember(resource.data.get('communityId', ''))
+               && onlyChanged(['memberIds', 'acceptedBy', 'members'])
+               && request.resource.data.memberIds
+                    .removeAll(resource.data.memberIds) == [request.auth.uid];
+      }
+
+      allow update: if isRegistered()
+                    && (
+                      (isChatMember() && clearingMyBadge())
+                      || (isChatMember() && acceptingRequest())
+                      || (isChatMember() && leaving())
+                      || joiningRoom()
+                      // Group housekeeping: the title, the photo, and who is in
+                      // it. Never the counters.
+                      || (isChatAdmin()
+                          && onlyChanged(['title', 'photoUrl', 'memberIds',
+                                          'members', 'admins', 'acceptedBy']))
+                    );
+
+      // Declining a request, or a group's creator closing it. A DM only one
+      // side ever accepted is not a conversation, so either party may remove it
+      // outright rather than leave a delivered-looking message stranded in the
+      // sender's list.
+      allow delete: if signedIn()
+                    && resource != null
+                    && (
+                      (resource.data.kind == 'dm'
+                       && request.auth.uid in resource.data.memberIds
+                       && resource.data.acceptedBy.size() < 2)
+                      || (resource.data.createdBy == request.auth.uid
+                          && resource.data.kind == 'group')
+                      || isModerator()
+                    );
+
+      match /messages/{messageId} {
+        function inThisChat() {
+          return signedIn()
+                 && exists(/databases/$(database)/documents/chats/$(chatId))
+                 && request.auth.uid in
+                      get(/databases/$(database)/documents/chats/$(chatId)).data.memberIds;
+        }
+
+        allow read: if inThisChat() || isModerator();
+
+        allow create: if isRegistered()
+                      && inThisChat()
+                      && request.resource.data.author.uid == request.auth.uid
+                      && (request.resource.data.author.verified == false
+                          || isVerified())
+                      && request.resource.data.text is string
+                      && request.resource.data.text.size() <= 4000
+                      // A system message is written by a Function announcing
+                      // who joined or left. A client claiming to be one could
+                      // put words in the room's mouth.
+                      && request.resource.data.kind != 'system';
+
+        // Messages are not editable. A conversation where what was said can
+        // change after the fact is not a record of anything, and an "edited"
+        // badge is a lot of machinery for something nobody here asked for.
+        allow update: if false;
+
+        allow delete: if signedIn()
+                      && (resource.data.author.uid == request.auth.uid
+                          || isChatAdminOf(chatId)
+                          || isModerator());
       }
     }
 

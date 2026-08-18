@@ -12,6 +12,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/iraqi_week.dart';
 import '../../shared/recipe_card.dart';
+import '../../data/repositories/chat_repository.dart';
 import '../../data/repositories/safety_repository.dart';
 import '../../shared/safety_actions.dart';
 import '../../shared/verified_tick.dart';
@@ -156,7 +157,13 @@ class _Body extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: Gap.lg),
-              _FollowButton(targetUid: profile.uid),
+              Row(
+                children: [
+                  Expanded(child: _FollowButton(targetUid: profile.uid)),
+                  const SizedBox(width: Gap.md),
+                  Expanded(child: _MessageButton(profile: profile)),
+                ],
+              ),
               const SizedBox(height: Gap.xl),
               _PlanArchive(uid: profile.uid),
               if (recipes.isNotEmpty)
@@ -208,6 +215,90 @@ class _FollowButton extends ConsumerWidget {
               child: Text(l10n.profileFollowing),
             )
           : FilledButton(onPressed: toggle, child: Text(l10n.profileFollow)),
+    );
+  }
+}
+
+/// Opens the conversation with this person.
+///
+/// Shown to everyone rather than hidden behind whether the gate would let it
+/// through. Hiding it would mean silently telling people they have been shut
+/// out, which is a different message from the one their setting actually
+/// makes — and the refusal here names which of the three reasons applies.
+class _MessageButton extends ConsumerStatefulWidget {
+  const _MessageButton({required this.profile});
+
+  final UserProfile profile;
+
+  @override
+  ConsumerState<_MessageButton> createState() => _MessageButtonState();
+}
+
+class _MessageButtonState extends ConsumerState<_MessageButton> {
+  bool _busy = false;
+
+  Future<void> _open() async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+
+    if (!await requireAccount(context, ref)) return;
+    if (!mounted) return;
+
+    setState(() => _busy = true);
+    try {
+      final me = await ref.read(myAuthorStubFuture.future);
+      if (me == null) return;
+
+      final followsMe = await ref.read(
+        followsMeProvider(widget.profile.uid).future,
+      );
+
+      final id = await ref
+          .read(chatRepositoryProvider)
+          .openDm(
+            me: me,
+            other: AuthorStub.fromMap(widget.profile.authorStub),
+            theirPrivacy: widget.profile.privacy,
+            theyFollowMe: followsMe,
+          );
+      if (mounted) await context.push('/chats/$id');
+    } on DmNotAllowed catch (error) {
+      final name = widget.profile.displayName;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(switch (error.reason) {
+            DmBlockReason.closed => l10n.chatDmClosed(name),
+            DmBlockReason.followersOnly => l10n.chatDmFollowersOnly(name),
+            DmBlockReason.blocked => l10n.chatDmBlocked,
+          }),
+        ),
+      );
+    } on Exception {
+      // A rules refusal lands here — most often a block, which the client
+      // cannot see and so cannot name any more precisely than this.
+      messenger.showSnackBar(SnackBar(content: Text(l10n.chatDmBlocked)));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final myUid = ref.watch(currentUidProvider);
+
+    // Nothing to message on your own profile.
+    if (myUid == widget.profile.uid) return const SizedBox.shrink();
+
+    return OutlinedButton(
+      onPressed: _busy ? null : _open,
+      child: _busy
+          ? const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : Text(l10n.chatsInbox),
     );
   }
 }

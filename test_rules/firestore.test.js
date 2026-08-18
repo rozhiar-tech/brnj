@@ -1587,3 +1587,620 @@ describe('communities', () => {
     });
   });
 });
+
+describe('chats', () => {
+  const seed = async (fn) => env.withSecurityRulesDisabled((a) => fn(a.firestore()));
+
+  /// Every DM check reads the recipient's profile, so one has to exist. A
+  /// missing profile is its own test further down.
+  const seedProfile = async (uid, dmMode = 'everyone') =>
+    seed((db) =>
+      setDoc(doc(db, `users/${uid}`), {
+        displayName: 'Cook',
+        privacy: { dmMode, discoverable: true },
+      }),
+    );
+
+  /// `following/{me}` under *their* document means they follow me — the
+  /// direction the `following` DM mode turns on.
+  const seedFollows = async (follower, followed) =>
+    seed((db) =>
+      setDoc(doc(db, `users/${follower}/following/${followed}`), { at: new Date() }),
+    );
+
+  const dmId = (a, b) => (a < b ? `${a}_${b}` : `${b}_${a}`);
+
+  const dm = (me, other, overrides = {}) => ({
+    kind: 'dm',
+    memberIds: [me, other].sort(),
+    members: { [me]: authorStub(me), [other]: authorStub(other) },
+    acceptedBy: [me],
+    admins: [],
+    createdBy: me,
+    createdAt: new Date(),
+    ...overrides,
+  });
+
+  const seedChat = async (id, data) =>
+    seed((db) => setDoc(doc(db, `chats/${id}`), { ...data, updatedAt: new Date() }));
+
+  describe('starting a DM', () => {
+    it('lets anyone message someone whose inbox is open', async () => {
+      await seedProfile('user2', 'everyone');
+      await assertSucceeds(
+        setDoc(
+          doc(user('user1').firestore(), `chats/${dmId('user1', 'user2')}`),
+          dm('user1', 'user2'),
+        ),
+      );
+    });
+
+    it('refuses someone who takes no messages at all', async () => {
+      await seedProfile('user2', 'none');
+      await assertFails(
+        setDoc(
+          doc(user('user1').firestore(), `chats/${dmId('user1', 'user2')}`),
+          dm('user1', 'user2'),
+        ),
+      );
+    });
+
+    it('refuses a stranger when the inbox is followers-only', async () => {
+      await seedProfile('user2', 'following');
+      await assertFails(
+        setDoc(
+          doc(user('user1').firestore(), `chats/${dmId('user1', 'user2')}`),
+          dm('user1', 'user2'),
+        ),
+      );
+    });
+
+    it('allows it once they follow you', async () => {
+      // The direction is the point: they follow me, not me them. Anyone can
+      // follow anyone, so the reverse would be no gate at all.
+      await seedProfile('user2', 'following');
+      await seedFollows('user2', 'user1');
+      await assertSucceeds(
+        setDoc(
+          doc(user('user1').firestore(), `chats/${dmId('user1', 'user2')}`),
+          dm('user1', 'user2'),
+        ),
+      );
+    });
+
+    it('refuses when the recipient has blocked you', async () => {
+      await seedProfile('user2', 'everyone');
+      await seed((db) =>
+        setDoc(doc(db, 'users/user2/blocked/user1'), { at: new Date() }),
+      );
+      await assertFails(
+        setDoc(
+          doc(user('user1').firestore(), `chats/${dmId('user1', 'user2')}`),
+          dm('user1', 'user2'),
+        ),
+      );
+    });
+
+    it('refuses a conversation under an id of the sender’s choosing', async () => {
+      // Otherwise the gate is a formality: fail it once, then create the same
+      // conversation again under a different name.
+      await seedProfile('user2', 'everyone');
+      await assertFails(
+        setDoc(
+          doc(user('user1').firestore(), 'chats/whatever-i-like'),
+          dm('user1', 'user2'),
+        ),
+      );
+    });
+
+    it('refuses marking the recipient as having accepted', async () => {
+      await seedProfile('user2', 'everyone');
+      await assertFails(
+        setDoc(
+          doc(user('user1').firestore(), `chats/${dmId('user1', 'user2')}`),
+          dm('user1', 'user2', { acceptedBy: ['user1', 'user2'] }),
+        ),
+      );
+    });
+
+    it('refuses a conversation between two other people', async () => {
+      await seedProfile('user3', 'everyone');
+      await assertFails(
+        setDoc(
+          doc(user('user1').firestore(), `chats/${dmId('user2', 'user3')}`),
+          dm('user2', 'user3'),
+        ),
+      );
+    });
+
+    it('refuses a chat that arrives with unread counts pre-filled', async () => {
+      await seedProfile('user2', 'everyone');
+      await assertFails(
+        setDoc(
+          doc(user('user1').firestore(), `chats/${dmId('user1', 'user2')}`),
+          dm('user1', 'user2', { unread: { user2: 99 } }),
+        ),
+      );
+    });
+
+    it('refuses a guest starting one', async () => {
+      await seedProfile('user2', 'everyone');
+      await assertFails(
+        setDoc(
+          doc(guest().firestore(), `chats/${dmId('guest1', 'user2')}`),
+          dm('guest1', 'user2'),
+        ),
+      );
+    });
+
+    it('refuses messaging an account with no profile document', async () => {
+      // Denying is the safe direction: every real account has a profile, so
+      // this only ever fires on a deleted one or a made-up uid.
+      await assertFails(
+        setDoc(
+          doc(user('user1').firestore(), `chats/${dmId('user1', 'ghost')}`),
+          dm('user1', 'ghost'),
+        ),
+      );
+    });
+  });
+
+  describe('reading a conversation', () => {
+    it('lets a member read it', async () => {
+      await seedChat(dmId('user1', 'user2'), dm('user1', 'user2'));
+      await assertSucceeds(
+        getDoc(doc(user('user1').firestore(), `chats/${dmId('user1', 'user2')}`)),
+      );
+    });
+
+    it('refuses a bystander', async () => {
+      await seedChat(dmId('user1', 'user2'), dm('user1', 'user2'));
+      await assertFails(
+        getDoc(doc(user('user3').firestore(), `chats/${dmId('user1', 'user2')}`)),
+      );
+    });
+
+    it('serves the inbox query', async () => {
+      await seedChat(dmId('user1', 'user2'), dm('user1', 'user2'));
+      await assertSucceeds(
+        getDocs(query(
+          collection(user('user1').firestore(), 'chats'),
+          where('memberIds', 'array-contains', 'user1'),
+          orderBy('updatedAt', 'desc'),
+          limit(100),
+        )),
+      );
+    });
+
+    it('refuses an inbox query for somebody else', async () => {
+      await seedChat(dmId('user1', 'user2'), dm('user1', 'user2'));
+      await assertFails(
+        getDocs(query(
+          collection(user('user3').firestore(), 'chats'),
+          where('memberIds', 'array-contains', 'user1'),
+          orderBy('updatedAt', 'desc'),
+          limit(100),
+        )),
+      );
+    });
+  });
+
+  describe('the unread badge', () => {
+    it('lets you clear your own', async () => {
+      await seedChat(dmId('user1', 'user2'), {
+        ...dm('user1', 'user2'),
+        unread: { user1: 3, user2: 0 },
+      });
+      await assertSucceeds(
+        setDoc(
+          doc(user('user1').firestore(), `chats/${dmId('user1', 'user2')}`),
+          { unread: { user1: 0 } },
+          { merge: true },
+        ),
+      );
+    });
+
+    it('refuses clearing somebody else’s', async () => {
+      await seedChat(dmId('user1', 'user2'), {
+        ...dm('user1', 'user2'),
+        unread: { user1: 3, user2: 5 },
+      });
+      await assertFails(
+        setDoc(
+          doc(user('user1').firestore(), `chats/${dmId('user1', 'user2')}`),
+          { unread: { user2: 0 } },
+          { merge: true },
+        ),
+      );
+    });
+
+    it('refuses inventing a count for yourself', async () => {
+      // Only zero. A client that can set its own badge to any number is a
+      // client that can set anyone's.
+      await seedChat(dmId('user1', 'user2'), {
+        ...dm('user1', 'user2'),
+        unread: { user1: 3, user2: 0 },
+      });
+      await assertFails(
+        setDoc(
+          doc(user('user1').firestore(), `chats/${dmId('user1', 'user2')}`),
+          { unread: { user1: 99 } },
+          { merge: true },
+        ),
+      );
+    });
+  });
+
+  describe('the request gate', () => {
+    it('lets the recipient accept', async () => {
+      await seedChat(dmId('user1', 'user2'), dm('user1', 'user2'));
+      await assertSucceeds(
+        setDoc(
+          doc(user('user2').firestore(), `chats/${dmId('user1', 'user2')}`),
+          { acceptedBy: ['user1', 'user2'] },
+          { merge: true },
+        ),
+      );
+    });
+
+    it('refuses accepting on somebody else’s behalf', async () => {
+      await seedChat(dmId('user1', 'user2'), dm('user1', 'user2'));
+      await assertFails(
+        setDoc(
+          doc(user('user1').firestore(), `chats/${dmId('user1', 'user2')}`),
+          { acceptedBy: ['user1', 'user2'] },
+          { merge: true },
+        ),
+      );
+    });
+
+    it('lets the recipient decline outright', async () => {
+      await seedChat(dmId('user1', 'user2'), dm('user1', 'user2'));
+      await assertSucceeds(
+        deleteDoc(doc(user('user2').firestore(), `chats/${dmId('user1', 'user2')}`)),
+      );
+    });
+
+    it('refuses deleting a conversation both sides accepted', async () => {
+      // Once it is a real conversation, one party cannot erase it for both.
+      await seedChat(dmId('user1', 'user2'), {
+        ...dm('user1', 'user2'),
+        acceptedBy: ['user1', 'user2'],
+      });
+      await assertFails(
+        deleteDoc(doc(user('user2').firestore(), `chats/${dmId('user1', 'user2')}`)),
+      );
+    });
+  });
+
+  describe('messages', () => {
+    const message = (uid, overrides = {}) => ({
+      author: authorStub(uid),
+      kind: 'text',
+      text: 'شلونك',
+      at: new Date(),
+      ...overrides,
+    });
+
+    it('lets a member send', async () => {
+      await seedChat(dmId('user1', 'user2'), dm('user1', 'user2'));
+      await assertSucceeds(
+        addDoc(
+          collection(user('user1').firestore(), `chats/${dmId('user1', 'user2')}/messages`),
+          message('user1'),
+        ),
+      );
+    });
+
+    it('refuses a bystander sending into a conversation', async () => {
+      await seedChat(dmId('user1', 'user2'), dm('user1', 'user2'));
+      await assertFails(
+        addDoc(
+          collection(user('user3').firestore(), `chats/${dmId('user1', 'user2')}/messages`),
+          message('user3'),
+        ),
+      );
+    });
+
+    it('refuses a message signed with somebody else’s name', async () => {
+      await seedChat(dmId('user1', 'user2'), dm('user1', 'user2'));
+      await assertFails(
+        addDoc(
+          collection(user('user1').firestore(), `chats/${dmId('user1', 'user2')}/messages`),
+          message('user1', { author: authorStub('user2') }),
+        ),
+      );
+    });
+
+    it('refuses an unverified sender claiming the tick', async () => {
+      await seedChat(dmId('user1', 'user2'), dm('user1', 'user2'));
+      await assertFails(
+        addDoc(
+          collection(user('user1').firestore(), `chats/${dmId('user1', 'user2')}/messages`),
+          message('user1', { author: authorStub('user1', true) }),
+        ),
+      );
+    });
+
+    it('refuses a client posing as the system', async () => {
+      // System messages announce who joined and who left. A client that can
+      // write one can put words in the room's mouth.
+      await seedChat(dmId('user1', 'user2'), dm('user1', 'user2'));
+      await assertFails(
+        addDoc(
+          collection(user('user1').firestore(), `chats/${dmId('user1', 'user2')}/messages`),
+          message('user1', { kind: 'system', text: 'user2 left' }),
+        ),
+      );
+    });
+
+    it('refuses a bystander reading the messages', async () => {
+      await seedChat(dmId('user1', 'user2'), dm('user1', 'user2'));
+      await seed((db) =>
+        setDoc(doc(db, `chats/${dmId('user1', 'user2')}/messages/m1`), message('user1')),
+      );
+      await assertFails(
+        getDoc(doc(user('user3').firestore(), `chats/${dmId('user1', 'user2')}/messages/m1`)),
+      );
+    });
+
+    it('serves the message query for a member', async () => {
+      await seedChat(dmId('user1', 'user2'), dm('user1', 'user2'));
+      await assertSucceeds(
+        getDocs(query(
+          collection(user('user1').firestore(), `chats/${dmId('user1', 'user2')}/messages`),
+          orderBy('at', 'desc'),
+          limit(60),
+        )),
+      );
+    });
+
+    it('refuses editing what was said', async () => {
+      await seedChat(dmId('user1', 'user2'), dm('user1', 'user2'));
+      await seed((db) =>
+        setDoc(doc(db, `chats/${dmId('user1', 'user2')}/messages/m1`), message('user1')),
+      );
+      await assertFails(
+        setDoc(
+          doc(user('user1').firestore(), `chats/${dmId('user1', 'user2')}/messages/m1`),
+          { text: 'something else' },
+          { merge: true },
+        ),
+      );
+    });
+
+    it('lets the sender delete their own message', async () => {
+      await seedChat(dmId('user1', 'user2'), dm('user1', 'user2'));
+      await seed((db) =>
+        setDoc(doc(db, `chats/${dmId('user1', 'user2')}/messages/m1`), message('user1')),
+      );
+      await assertSucceeds(
+        deleteDoc(doc(user('user1').firestore(), `chats/${dmId('user1', 'user2')}/messages/m1`)),
+      );
+    });
+
+    it('refuses deleting the other person’s message in a DM', async () => {
+      await seedChat(dmId('user1', 'user2'), dm('user1', 'user2'));
+      await seed((db) =>
+        setDoc(doc(db, `chats/${dmId('user1', 'user2')}/messages/m1`), message('user2')),
+      );
+      await assertFails(
+        deleteDoc(doc(user('user1').firestore(), `chats/${dmId('user1', 'user2')}/messages/m1`)),
+      );
+    });
+  });
+
+  describe('groups', () => {
+    const group = (me, others, overrides = {}) => ({
+      kind: 'group',
+      memberIds: [me, ...others],
+      members: Object.fromEntries([me, ...others].map((u) => [u, authorStub(u)])),
+      acceptedBy: [me, ...others],
+      admins: [me],
+      title: 'طبخات الجمعة',
+      createdBy: me,
+      createdAt: new Date(),
+      ...overrides,
+    });
+
+    it('lets someone create a group they run', async () => {
+      await assertSucceeds(
+        setDoc(doc(user('user1').firestore(), 'chats/g1'), group('user1', ['user2'])),
+      );
+    });
+
+    it('refuses a group with no name', async () => {
+      await assertFails(
+        setDoc(
+          doc(user('user1').firestore(), 'chats/g1'),
+          group('user1', ['user2'], { title: '' }),
+        ),
+      );
+    });
+
+    it('refuses handing the admin seat to someone else at creation', async () => {
+      await assertFails(
+        setDoc(
+          doc(user('user1').firestore(), 'chats/g1'),
+          group('user1', ['user2'], { admins: ['user2'] }),
+        ),
+      );
+    });
+
+    it('refuses a group the creator is not in', async () => {
+      await assertFails(
+        setDoc(
+          doc(user('user1').firestore(), 'chats/g1'),
+          group('user1', ['user2'], { memberIds: ['user2', 'user3'] }),
+        ),
+      );
+    });
+
+    it('lets an admin rename it and add people', async () => {
+      await seedChat('g1', group('user1', ['user2']));
+      await assertSucceeds(
+        setDoc(
+          doc(user('user1').firestore(), 'chats/g1'),
+          {
+            title: 'طبخات الخميس',
+            memberIds: ['user1', 'user2', 'user3'],
+            members: {
+              user1: authorStub('user1'),
+              user2: authorStub('user2'),
+              user3: authorStub('user3'),
+            },
+          },
+          { merge: true },
+        ),
+      );
+    });
+
+    it('refuses a plain member adding people', async () => {
+      await seedChat('g1', group('user1', ['user2']));
+      await assertFails(
+        setDoc(
+          doc(user('user2').firestore(), 'chats/g1'),
+          {
+            memberIds: ['user1', 'user2', 'user3'],
+            members: {
+              user1: authorStub('user1'),
+              user2: authorStub('user2'),
+              user3: authorStub('user3'),
+            },
+          },
+          { merge: true },
+        ),
+      );
+    });
+
+    it('lets a member leave', async () => {
+      await seedChat('g1', group('user1', ['user2']));
+      await assertSucceeds(
+        setDoc(
+          doc(user('user2').firestore(), 'chats/g1'),
+          {
+            memberIds: ['user1'],
+            acceptedBy: ['user1'],
+            admins: ['user1'],
+            members: { user1: authorStub('user1') },
+          },
+          { merge: true },
+        ),
+      );
+    });
+
+    it('refuses a member removing somebody else on the way out', async () => {
+      await seedChat('g1', group('user1', ['user2', 'user3']));
+      await assertFails(
+        setDoc(
+          doc(user('user2').firestore(), 'chats/g1'),
+          {
+            memberIds: ['user1'],
+            acceptedBy: ['user1'],
+            admins: ['user1'],
+            members: { user1: authorStub('user1') },
+          },
+          { merge: true },
+        ),
+      );
+    });
+
+    it('lets an admin delete a group they created', async () => {
+      await seedChat('g1', group('user1', ['user2']));
+      await assertSucceeds(deleteDoc(doc(user('user1').firestore(), 'chats/g1')));
+    });
+
+    it('refuses a member deleting the group', async () => {
+      await seedChat('g1', group('user1', ['user2']));
+      await assertFails(deleteDoc(doc(user('user2').firestore(), 'chats/g1')));
+    });
+  });
+
+  describe('community rooms', () => {
+    const seedCommunityWith = async (cid, members) =>
+      seed(async (db) => {
+        await setDoc(doc(db, `communities/${cid}`), {
+          name: 'Baghdad kitchens',
+          category: 'regional',
+          privacy: 'public',
+          joinPolicy: 'open',
+          rules: [],
+          moderators: [],
+          createdBy: members[0],
+        });
+        for (const uid of members) {
+          await setDoc(doc(db, `communities/${cid}/members/${uid}`), {
+            uid,
+            author: authorStub(uid),
+            role: uid === members[0] ? 'owner' : 'member',
+            joinedAt: new Date(),
+          });
+        }
+      });
+
+    const room = (cid, me) => ({
+      kind: 'community',
+      memberIds: [me],
+      members: { [me]: authorStub(me) },
+      acceptedBy: [me],
+      admins: [],
+      title: 'Baghdad kitchens',
+      communityId: cid,
+      createdBy: me,
+      createdAt: new Date(),
+    });
+
+    it('lets a community member open the room', async () => {
+      await seedCommunityWith('c1', ['user1']);
+      await assertSucceeds(
+        setDoc(doc(user('user1').firestore(), 'chats/community_c1'), room('c1', 'user1')),
+      );
+    });
+
+    it('refuses someone who is not in the community', async () => {
+      await seedCommunityWith('c1', ['owner1']);
+      await assertFails(
+        setDoc(doc(user('user1').firestore(), 'chats/community_c1'), room('c1', 'user1')),
+      );
+    });
+
+    it('refuses a room whose id does not match its community', async () => {
+      await seedCommunityWith('c1', ['user1']);
+      await assertFails(
+        setDoc(doc(user('user1').firestore(), 'chats/community_other'), room('c1', 'user1')),
+      );
+    });
+
+    it('lets a second community member join the existing room', async () => {
+      await seedCommunityWith('c1', ['owner1', 'user1']);
+      await seedChat('community_c1', room('c1', 'owner1'));
+      await assertSucceeds(
+        setDoc(
+          doc(user('user1').firestore(), 'chats/community_c1'),
+          {
+            memberIds: ['owner1', 'user1'],
+            acceptedBy: ['owner1', 'user1'],
+            members: { owner1: authorStub('owner1'), user1: authorStub('user1') },
+          },
+          { merge: true },
+        ),
+      );
+    });
+
+    it('refuses an outsider joining the room', async () => {
+      await seedCommunityWith('c1', ['owner1']);
+      await seedChat('community_c1', room('c1', 'owner1'));
+      await assertFails(
+        setDoc(
+          doc(user('user1').firestore(), 'chats/community_c1'),
+          {
+            memberIds: ['owner1', 'user1'],
+            acceptedBy: ['owner1', 'user1'],
+            members: { owner1: authorStub('owner1'), user1: authorStub('user1') },
+          },
+          { merge: true },
+        ),
+      );
+    });
+  });
+});

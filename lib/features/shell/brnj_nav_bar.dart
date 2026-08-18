@@ -11,16 +11,23 @@ class BrnjNavItem {
     required this.selectedIcon,
     required this.label,
     this.action = false,
+    this.badge = 0,
   });
 
   const BrnjNavItem.action({required this.icon, required this.label})
     : selectedIcon = icon,
-      action = true;
+      action = true,
+      badge = 0;
 
   final IconData icon;
   final IconData selectedIcon;
   final String label;
   final bool action;
+
+  /// Unread count. Zero hides it. Rendered as a dot with a number rather than
+  /// a bare dot: "you have messages" and "you have eleven messages" are
+  /// different enough to be worth the extra glyphs.
+  final int badge;
 }
 
 /// The bottom bar.
@@ -117,10 +124,10 @@ class _Slot extends StatelessWidget {
               child: Center(
                 child: item.action
                     ? const _CreateButton()
-                    : Icon(
-                        selected ? item.selectedIcon : item.icon,
-                        size: 24,
+                    : _BadgedIcon(
+                        icon: selected ? item.selectedIcon : item.icon,
                         color: color,
+                        badge: item.badge,
                       ),
               ),
             ),
@@ -159,6 +166,62 @@ class _CreateButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       child: Icon(Icons.add, size: 20, color: theme.colorScheme.onPrimary),
+    );
+  }
+}
+
+/// An icon with an unread count riding on its corner.
+///
+/// The badge is drawn outside the icon's 24px box, so the stack is allowed to
+/// overflow — which is fine here because the icon slot is 30px tall and the
+/// badge sits inside that. Clipping it to the icon would put the number on top
+/// of the glyph.
+class _BadgedIcon extends StatelessWidget {
+  const _BadgedIcon({
+    required this.icon,
+    required this.color,
+    required this.badge,
+  });
+
+  final IconData icon;
+  final Color color;
+  final int badge;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final iconWidget = Icon(icon, size: 24, color: color);
+    if (badge <= 0) return iconWidget;
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        iconWidget,
+        PositionedDirectional(
+          top: -4,
+          end: -6,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+            constraints: const BoxConstraints(minWidth: 16),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.error,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              // Past ninety-nine the exact number stops meaning anything and
+              // starts breaking the layout.
+              badge > 99 ? '99+' : '$badge',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.labelSmall?.copyWith(
+                fontSize: 10,
+                height: 1.2,
+                color: theme.colorScheme.onError,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

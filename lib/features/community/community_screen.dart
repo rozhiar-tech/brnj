@@ -227,6 +227,12 @@ class _CommunityAbout extends ConsumerWidget {
 
           const SizedBox(height: Gap.md),
           JoinButton(community: community),
+          // Only for members. A room button that opens nothing is worse than
+          // no button, and the rules refuse the write anyway.
+          if (isMember) ...[
+            const SizedBox(height: Gap.sm),
+            _RoomButton(community: community),
+          ],
           const SizedBox(height: Gap.sm),
           const Divider(height: 1),
         ],
@@ -429,6 +435,66 @@ class _JoinButtonState extends ConsumerState<JoinButton> {
               ? l10n.communityAskToJoin
               : l10n.communityJoin,
         ),
+      ),
+    );
+  }
+}
+
+/// Opens the community's chat room, creating it on the first visit.
+///
+/// The room is not created with the community: an empty room attached to every
+/// community that ever gets made is a lot of documents for something most of
+/// them will never use. The first member to tap this makes it.
+class _RoomButton extends ConsumerStatefulWidget {
+  const _RoomButton({required this.community});
+
+  final Community community;
+
+  @override
+  ConsumerState<_RoomButton> createState() => _RoomButtonState();
+}
+
+class _RoomButtonState extends ConsumerState<_RoomButton> {
+  bool _busy = false;
+
+  Future<void> _open() async {
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() => _busy = true);
+    try {
+      final me = await ref.read(myAuthorStubFuture.future);
+      if (me == null) return;
+
+      final id = await ref
+          .read(chatRepositoryProvider)
+          .openCommunityRoom(
+            communityId: widget.community.id,
+            communityName: widget.community.name,
+            me: me,
+          );
+      if (mounted) await context.push('/chats/$id');
+    } on Exception catch (error) {
+      messenger.showSnackBar(SnackBar(content: Text('$error')));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: _busy ? null : _open,
+        icon: _busy
+            ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Icons.forum_outlined),
+        label: Text(l10n.chatOpenRoom),
       ),
     );
   }

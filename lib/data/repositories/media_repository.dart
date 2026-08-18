@@ -48,6 +48,18 @@ class MediaRepository {
     filePath: filePath,
   );
 
+  /// A photo sent in a conversation.
+  ///
+  /// Named by timestamp: a message has no id until it is written, and the
+  /// photo has to be uploaded before the message that carries its URL exists.
+  Future<String> uploadChatImage({
+    required String chatId,
+    required String filePath,
+  }) => _upload(
+    path: 'chats/$chatId/${DateTime.now().microsecondsSinceEpoch}.jpg',
+    filePath: filePath,
+  );
+
   Future<void> deleteRecipeImage({
     required String recipeId,
     required String slot,

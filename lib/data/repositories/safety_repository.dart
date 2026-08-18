@@ -12,7 +12,7 @@ enum ReportReason { harassment, spam, wrongOrStolen, inappropriate, other }
 /// auto-hide threshold in moderation.ts — that works on top-level collections,
 /// and a community post already has a moderator standing next to it who can
 /// remove it faster than a counter can.
-enum ReportTarget { recipe, plan, comment, profile, communityPost }
+enum ReportTarget { recipe, plan, comment, profile, communityPost, message }
 
 /// Reporting and blocking.
 ///

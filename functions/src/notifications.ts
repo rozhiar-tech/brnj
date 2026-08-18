@@ -45,19 +45,36 @@ export async function notify(uid: string, notification: Notification) {
     at: FieldValue.serverTimestamp(),
   });
 
+  await push(uid, {
+    title: notification.actorName ?? 'Brnj',
+    body: notification.body ?? '',
+    data: {
+      type: notification.type,
+      targetId: notification.targetId ?? '',
+    },
+  });
+}
+
+/**
+ * Push to every device a person has, and prune the ones that no longer exist.
+ *
+ * Split out of notify() because a chat message wants the push without the
+ * durable notification document: a conversation already has its own unread
+ * badge, and mirroring every message into the notification list would bury
+ * everything else in it.
+ */
+export async function push(
+  uid: string,
+  message: { title: string; body: string; data: Record<string, string> },
+) {
+  const firestore = db();
   const tokens = await firestore.collection(`users/${uid}/tokens`).get();
   if (tokens.empty) return;
 
   const response = await getMessaging().sendEachForMulticast({
     tokens: tokens.docs.map((d) => d.id),
-    notification: {
-      title: notification.actorName ?? 'Brnj',
-      body: notification.body ?? '',
-    },
-    data: {
-      type: notification.type,
-      targetId: notification.targetId ?? '',
-    },
+    notification: { title: message.title, body: message.body },
+    data: message.data,
   });
 
   // A token that fails permanently belongs to an app that was uninstalled or a

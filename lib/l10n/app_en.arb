@@ -473,5 +473,54 @@
     }
   },
   "actionCancel": "Cancel",
-  "actionDelete": "Delete"
+  "actionDelete": "Delete",
+  "chatsInbox": "Messages",
+  "chatsRequests": "Requests",
+  "chatsEmpty": "No conversations yet.",
+  "chatsRequestsEmpty": "Nothing waiting.",
+  "chatsRequestNote": "They messaged you first. Reply to accept, or delete it.",
+  "chatAccept": "Accept",
+  "chatDelete": "Delete",
+  "chatNewGroup": "New group",
+  "chatNewMessage": "New message",
+  "chatGroupNameHint": "Group name",
+  "chatMessageHint": "Message",
+  "chatSend": "Send",
+  "chatNoMessages": "Say the first thing.",
+  "chatLeave": "Leave conversation",
+  "chatLeaveConfirm": "Leave this conversation?",
+  "chatMembers": "People",
+  "chatDeleteMessage": "Delete message",
+  "chatOpenRoom": "Open the community room",
+  "chatMessagePhoto": "Photo",
+  "chatMessageVoice": "Voice note",
+  "chatMessageRecipe": "Recipe",
+  "chatStartWith": "Message {who}",
+  "@chatStartWith": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "chatDmClosed": "{who} does not take messages.",
+  "@chatDmClosed": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "chatDmFollowersOnly": "{who} only takes messages from people they follow.",
+  "@chatDmFollowersOnly": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "chatDmBlocked": "You cannot message this person.",
+  "chatPickPeople": "Who is in it?",
+  "chatNoOneToAdd": "Follow some people first — a group needs somebody in it.",
+  "chatYou": "You"
 }

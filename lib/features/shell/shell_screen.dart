@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../data/providers.dart';
 import '../../l10n/gen/app_localizations.dart';
 import 'brnj_nav_bar.dart';
 import 'create_sheet.dart';
@@ -9,7 +11,7 @@ import 'create_sheet.dart';
 ///
 /// [StatefulNavigationShell] keeps a separate navigation stack per destination,
 /// so switching tabs doesn't lose your place in the one you left.
-class ShellScreen extends StatelessWidget {
+class ShellScreen extends ConsumerWidget {
   const ShellScreen({required this.navigationShell, super.key});
 
   final StatefulNavigationShell navigationShell;
@@ -39,7 +41,7 @@ class ShellScreen extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
@@ -63,6 +65,7 @@ class ShellScreen extends StatelessWidget {
             icon: Icons.forum_outlined,
             selectedIcon: Icons.forum,
             label: l10n.navChats,
+            badge: ref.watch(unreadChatCountProvider),
           ),
           BrnjNavItem(
             icon: Icons.person_outline,

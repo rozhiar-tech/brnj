@@ -32,6 +32,7 @@ export {
   notifyOnMemberApproved,
   onCommunityDeleted,
 } from './communities';
+export { onMessageSent, onChatDeleted } from './chats';
 export {
   onLikeCreated,
   onLikeDeleted,
