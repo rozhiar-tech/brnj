@@ -334,6 +334,38 @@ describe('social', () => {
     );
   });
 
+  it('lets a verified user write while their token still says otherwise', async () => {
+    // A custom claim only reaches a device when its ID token is reissued, so
+    // for up to an hour a freshly verified account has verified:true in its
+    // profile and false in its token. Requiring the two to match exactly meant
+    // that account could not comment, cook, or post at all during the window.
+    // Claiming *no* badge must always be allowed.
+    await assertSucceeds(
+      addDoc(collection(user('user1').firestore(), 'recipes/r1/comments'), {
+        author: stub('user1', false),
+        text: 'still able to talk',
+      }),
+    );
+  });
+
+  it('still refuses a badge the token does not back', async () => {
+    await assertFails(
+      addDoc(collection(user('user1').firestore(), 'recipes/r1/comments'), {
+        author: stub('user1', true),
+        text: 'forged tick',
+      }),
+    );
+  });
+
+  it('lets a genuinely verified user claim the badge', async () => {
+    await assertSucceeds(
+      addDoc(collection(verified('star1').firestore(), 'recipes/r1/comments'), {
+        author: stub('star1', true),
+        text: 'real tick',
+      }),
+    );
+  });
+
   it('lets a registered user comment', async () => {
     await assertSucceeds(
       addDoc(collection(user('user1').firestore(), 'recipes/r1/comments'), {
@@ -418,6 +450,30 @@ describe('reports and blocking', () => {
       });
     });
     await assertFails(getDoc(doc(user('user1').firestore(), 'reports/r1_user1')));
+  });
+
+  it('lets a signed-in user read another profile', async () => {
+    await env.withSecurityRulesDisabled(async (admin) => {
+      await setDoc(doc(admin.firestore(), 'users/user2'), {
+        displayName: 'Cook',
+        counts: { recipes: 3 },
+      });
+    });
+    await assertSucceeds(getDoc(doc(user('user1').firestore(), 'users/user2')));
+  });
+
+  it('lets a guest read a profile', async () => {
+    await env.withSecurityRulesDisabled(async (admin) => {
+      await setDoc(doc(admin.firestore(), 'users/user2'), { displayName: 'Cook' });
+    });
+    await assertSucceeds(getDoc(doc(guest().firestore(), 'users/user2')));
+  });
+
+  it('resolves a profile that does not exist without erroring', async () => {
+    // isBlockedBy() does an exists() lookup on a subcollection of a document
+    // that may not be there. If that made the rule error rather than evaluate,
+    // every unknown uid would read as permission-denied.
+    await assertSucceeds(getDoc(doc(user('user1').firestore(), 'users/nobody')));
   });
 
   it('lets a user block someone', async () => {

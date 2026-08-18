@@ -334,5 +334,10 @@
         "type": "int"
       }
     }
-  }
+  },
+  "profileNotFound": "ئەڤ هەژمار ئێدی نینە.",
+  "searchTabRecipes": "ڕەچەتە",
+  "searchTabPeople": "کەس",
+  "searchPeopleHint": "ب ناڤ یان @ناڤێ بکارئینەری بگەڕە",
+  "searchNoPeople": "چو کەس نەهاتە دیتن. @ناڤێ بکارئینەری بجەڕبینە."
 }

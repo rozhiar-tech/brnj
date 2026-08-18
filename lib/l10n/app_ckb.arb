@@ -334,5 +334,10 @@
         "type": "int"
       }
     }
-  }
+  },
+  "profileNotFound": "ئەم هەژمارە چیتر بوونی نییە.",
+  "searchTabRecipes": "ڕێسەت",
+  "searchTabPeople": "کەسان",
+  "searchPeopleHint": "بە ناو یان @ناوی بەکارهێنەر بگەڕێ",
+  "searchNoPeople": "کەس نەدۆزرایەوە. @ناوی بەکارهێنەری تاقی بکەرەوە."
 }

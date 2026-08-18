@@ -97,17 +97,25 @@ final myProfileProvider = StreamProvider<UserProfile?>((ref) {
 
 /// The author stub stamped onto everything this person writes.
 ///
-/// `verified` is copied from the profile, and the security rules check that
-/// copy against the Auth token — so a client that lies about it has the write
-/// rejected rather than getting a free ranking boost.
+/// `verified` comes from the *token*, not the profile document, because the
+/// rules check the token. Taking it from the document meant a freshly verified
+/// account stamped verified:true while its token still said false, and every
+/// write it made was refused until it signed out.
+///
+/// The token lags by up to an hour, so a new tick shows up late on your own
+/// posts. That is the harmless direction: you lose a badge for a while rather
+/// than losing the ability to post.
 final myAuthorStubProvider = Provider<AuthorStub?>((ref) {
   final profile = ref.watch(myProfileProvider).value;
   if (profile == null) return null;
+
+  final verifiedByToken = ref.watch(adminClaimsProvider).value?.verified ?? false;
+
   return AuthorStub(
     uid: profile.uid,
     name: profile.displayName,
     photoUrl: profile.photoUrl,
-    verified: profile.verified,
+    verified: verifiedByToken,
   );
 });
 
@@ -310,3 +318,10 @@ final isBlockedProvider = StreamProvider.family<bool, String>((ref, targetUid) {
       .watch(safetyRepositoryProvider)
       .watchIsBlocked(uid: uid, targetUid: targetUid);
 });
+
+
+/// People search. Family-keyed on the query so each search is its own future
+/// and a stale one cannot overwrite a newer result.
+final peopleSearchProvider = FutureProvider.family<List<UserProfile>, String>(
+  (ref, query) => ref.watch(userRepositoryProvider).searchPeople(query),
+);

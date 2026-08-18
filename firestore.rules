@@ -28,6 +28,14 @@ service cloud.firestore {
       return signedIn() && request.auth.uid == uid;
     }
 
+    // Claiming the tick requires the token to say so; claiming *no* tick is
+    // always allowed. Requiring exact equality looked stricter and was worse:
+    // a custom claim only reaches a device when its ID token is reissued, so
+    // a freshly verified account carried verified:true in its profile and
+    // false in its token, and every write it made was refused until it signed
+    // out. Losing your own badge for an hour is recoverable; being unable to
+    // comment is not obviously a bug to the person it happens to.
+
     // Set by an admin Function only — never self-serve.
     //
     // Read through token.get() with a default: almost nobody has these claims,
@@ -175,7 +183,8 @@ service cloud.firestore {
                     && request.resource.data.author.uid == request.auth.uid
                     // The denormalised verified flag has to match the token,
                     // or anyone could mint themselves a boost.
-                    && request.resource.data.author.verified == isVerified()
+                    && (request.resource.data.author.verified == false
+                        || isVerified())
                     && noProtectedFieldsOnCreate()
                     && withinLimits()
                     && completeEnoughToPublish();
@@ -200,7 +209,8 @@ service cloud.firestore {
         allow create, update: if isSelf(uid)
                               && isRegistered()
                               && request.resource.data.author.uid == request.auth.uid
-                              && request.resource.data.author.verified == isVerified();
+                              && (request.resource.data.author.verified == false
+                        || isVerified());
         allow delete: if isSelf(uid) || isModerator();
       }
 
@@ -208,7 +218,8 @@ service cloud.firestore {
         allow read: if signedIn();
         allow create: if isRegistered()
                       && request.resource.data.author.uid == request.auth.uid
-                      && request.resource.data.author.verified == isVerified()
+                      && (request.resource.data.author.verified == false
+                        || isVerified())
                       && request.resource.data.text is string
                       && request.resource.data.text.size() > 0
                       && request.resource.data.text.size() <= 2000;
@@ -270,7 +281,8 @@ service cloud.firestore {
       allow create: if isRegistered()
                     && request.resource.data.owner.uid == request.auth.uid
                     && planId.split('_')[0] == request.auth.uid
-                    && request.resource.data.owner.verified == isVerified()
+                    && (request.resource.data.owner.verified == false
+                        || isVerified())
                     && noProtectedFieldsOnCreate()
                     && request.resource.data.days.size() == 7;
 

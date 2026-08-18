@@ -253,6 +253,21 @@
           "order": "ASCENDING"
         }
       ]
+    },
+    {
+      "_comment": "People search: a display-name prefix range, limited to accounts that have not opted out of being discoverable.",
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "privacy.discoverable",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "displayName",
+          "order": "ASCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": [

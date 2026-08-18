@@ -334,5 +334,10 @@
         "type": "int"
       }
     }
-  }
+  },
+  "profileNotFound": "هذا الحساب ما عاد موجود.",
+  "searchTabRecipes": "وصفات",
+  "searchTabPeople": "أشخاص",
+  "searchPeopleHint": "دور بالاسم أو @اسم المستخدم",
+  "searchNoPeople": "ماكو أحد. جرّب @اسم المستخدم."
 }

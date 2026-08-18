@@ -10,10 +10,22 @@ import '../models/user_profile.dart';
 /// what security rules and the callables actually trust. A user document field
 /// could be stale or, in principle, wrong.
 class AdminClaims {
-  const AdminClaims({this.admin = false, this.moderator = false});
+  const AdminClaims({
+    this.admin = false,
+    this.moderator = false,
+    this.verified = false,
+  });
 
   final bool admin;
   final bool moderator;
+
+  /// The verified tick *as this device's token sees it*.
+  ///
+  /// Deliberately not read from the profile document. The two disagree for as
+  /// long as it takes an ID token to be reissued after the claim changes, and
+  /// during that window the rules trust the token — so anything the client
+  /// stamps from the document gets rejected.
+  final bool verified;
 
   /// Moderators run the queues; admins can also promote other moderators.
   bool get canModerate => admin || moderator;
@@ -99,6 +111,7 @@ class AdminRepository {
     return AdminClaims(
       admin: token.claims?['admin'] == true,
       moderator: token.claims?['moderator'] == true,
+      verified: token.claims?['verified'] == true,
     );
   }
 

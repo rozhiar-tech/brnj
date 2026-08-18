@@ -334,5 +334,10 @@
         "type": "int"
       }
     }
-  }
+  },
+  "profileNotFound": "This account no longer exists.",
+  "searchTabRecipes": "Recipes",
+  "searchTabPeople": "People",
+  "searchPeopleHint": "Search by name or @username",
+  "searchNoPeople": "Nobody found. Try their @username."
 }

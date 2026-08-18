@@ -10,6 +10,7 @@ import '../../data/models/user_profile.dart';
 import '../../data/providers.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../shared/verified_tick.dart';
+import '../../shared/error_view.dart';
 import '../auth/sign_in_sheet.dart';
 
 /// The Me tab.
@@ -41,7 +42,10 @@ class ProfileScreen extends ConsumerWidget {
           ? const _GuestProfile()
           : profileAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) => _ProfileError(error: error),
+              error: (error, _) => ErrorView(
+                error: error,
+                onRetry: () => ref.invalidate(myProfileProvider),
+              ),
               data: (profile) => profile == null
                   ? const Center(child: CircularProgressIndicator())
                   : _ProfileBody(profile: profile),
@@ -338,19 +342,3 @@ class ProfileAvatar extends StatelessWidget {
   }
 }
 
-class _ProfileError extends StatelessWidget {
-  const _ProfileError({required this.error});
-
-  final Object error;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(Gap.xl),
-        child: Text(l10n.errorGeneric, textAlign: TextAlign.center),
-      ),
-    );
-  }
-}

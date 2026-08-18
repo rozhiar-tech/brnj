@@ -38,8 +38,10 @@ class PublicProfileScreen extends ConsumerWidget {
       body: profileAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => ErrorView(error: error),
+        // A profile that isn't there is not a failure — it is an answer, and
+        // "something went wrong" sends people looking for a bug that isn't one.
         data: (profile) => profile == null
-            ? const ErrorView(error: null)
+            ? const _ProfileNotFound()
             : _Body(profile: profile),
       ),
     );
@@ -231,6 +233,40 @@ class _Stat extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+
+class _ProfileNotFound extends StatelessWidget {
+  const _ProfileNotFound();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(Gap.xxl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.person_off_outlined,
+              size: 40,
+              color: theme.colorScheme.outline,
+            ),
+            const SizedBox(height: Gap.md),
+            Text(
+              l10n.profileNotFound,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -158,6 +158,46 @@ class UserRepository {
     }
   }
 
+  /// Finds people by @handle or by the start of their display name.
+  ///
+  /// Handle first and exactly, because someone typing "@rozha" wants that
+  /// person and not a list of near-misses. The name search is a prefix range —
+  /// Firestore has no substring matching, and adding a second search service
+  /// for a people list nobody has yet would be premature.
+  ///
+  /// `discoverable == false` means exactly this: don't return me here.
+  Future<List<UserProfile>> searchPeople(String query, {int limit = 20}) async {
+    final trimmed = query.trim().replaceAll('@', '');
+    if (trimmed.length < 2) return const [];
+
+    final results = <String, UserProfile>{};
+
+    final byHandle = await _handles.doc(normalizeHandle(trimmed)).get();
+    final handleUid = byHandle.data()?['uid'] as String?;
+    if (handleUid != null) {
+      final doc = await _users.doc(handleUid).get();
+      if (doc.exists) {
+        final profile = UserProfile.fromDoc(doc);
+        if (profile.privacy.discoverable) results[profile.uid] = profile;
+      }
+    }
+
+    final byName = await _users
+        .where('privacy.discoverable', isEqualTo: true)
+        .where('displayName', isGreaterThanOrEqualTo: trimmed)
+        // \uf8ff sorts after any ordinary character, which turns a range query
+        // into a prefix match.
+        .where('displayName', isLessThan: '$trimmed\uf8ff')
+        .limit(limit)
+        .get();
+
+    for (final doc in byName.docs) {
+      results.putIfAbsent(doc.id, () => UserProfile.fromDoc(doc));
+    }
+
+    return results.values.toList();
+  }
+
   // --- following -----------------------------------------------------------
 
   /// Writes only the caller's own `following` edge.
