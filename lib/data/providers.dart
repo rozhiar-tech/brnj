@@ -5,12 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../app/bootstrap.dart';
 import '../app/settings.dart';
 import '../core/iraqi_week.dart';
+import 'models/community.dart';
 import 'models/recipe.dart';
 import 'models/social.dart';
 import 'models/user_profile.dart';
 import 'models/weekly_plan.dart';
 import 'repositories/admin_repository.dart';
 import 'repositories/auth_repository.dart';
+import 'repositories/community_repository.dart';
 import 'repositories/media_repository.dart';
 import 'repositories/notification_repository.dart';
 import 'repositories/messaging_repository.dart';
@@ -25,6 +27,9 @@ final recipeRepositoryProvider = Provider<RecipeRepository>(
   (ref) => RecipeRepository(),
 );
 final planRepositoryProvider = Provider<PlanRepository>((ref) => PlanRepository());
+final communityRepositoryProvider = Provider<CommunityRepository>(
+  (ref) => CommunityRepository(),
+);
 final userRepositoryProvider = Provider<UserRepository>((ref) => UserRepository());
 final mediaRepositoryProvider = Provider<MediaRepository>(
   (ref) => MediaRepository(),
@@ -392,3 +397,114 @@ final followingProvider = FutureProvider.family<List<UserProfile>, String>(
     return repository.profilesByIds(ids);
   },
 );
+
+// ---- communities ----------------------------------------------------------
+
+/// Filters for the community directory. A record rather than a class so the
+/// family key compares by value for free — two identical filters are one
+/// provider, not two subscriptions.
+typedef CommunityFilter = ({CommunityCategory? category, String? region});
+
+const noCommunityFilter = (category: null, region: null);
+
+final communityDirectoryProvider =
+    StreamProvider.family<List<Community>, CommunityFilter>(
+      (ref, filter) => ref
+          .watch(communityRepositoryProvider)
+          .watchDirectory(category: filter.category, region: filter.region),
+    );
+
+/// Communities the signed-in person belongs to. Empty for guests, who have no
+/// membership documents to find.
+final myCommunitiesProvider = StreamProvider<List<Community>>((ref) {
+  final repository = ref.watch(communityRepositoryProvider);
+  final uid = ref.watch(currentUidProvider);
+  final guest = ref.watch(isGuestProvider);
+  if (uid == null || guest) return Stream.value(const <Community>[]);
+  return repository.watchMyCommunities(uid);
+});
+
+final communityProvider = StreamProvider.family<Community?, String>(
+  (ref, id) => ref.watch(communityRepositoryProvider).watchCommunity(id),
+);
+
+/// The signed-in person's membership row, or null if they are not in.
+final myMembershipProvider =
+    StreamProvider.family<CommunityMember?, String>((ref, communityId) {
+      final repository = ref.watch(communityRepositoryProvider);
+      final uid = ref.watch(currentUidProvider);
+      if (uid == null) return Stream.value(null);
+      return repository.watchMembership(communityId: communityId, uid: uid);
+    });
+
+final communityMembersProvider =
+    StreamProvider.family<List<CommunityMember>, String>(
+      (ref, id) => ref.watch(communityRepositoryProvider).watchMembers(id),
+    );
+
+/// The approval queue. Only a moderator can read it — for anyone else this
+/// provider errors, which is why nothing watches it outside the moderator tab.
+final communityRequestsProvider =
+    StreamProvider.family<List<CommunityJoinRequest>, String>(
+      (ref, id) => ref.watch(communityRepositoryProvider).watchRequests(id),
+    );
+
+/// Posts in a community, with blocked authors dropped.
+///
+/// Same after-the-fact filtering as recipe comments: Firestore cannot express
+/// "author not in this list", and a block that still shows you their posts is
+/// not a block.
+final communityPostsProvider =
+    StreamProvider.family<List<CommunityPost>, String>((ref, id) {
+      final repository = ref.watch(communityRepositoryProvider);
+      final blockedAsync = ref.watch(blockedIdsProvider);
+      final blocked = blockedAsync.value ?? const <String>[];
+
+      return repository
+          .watchPosts(id)
+          .map(
+            (posts) => blocked.isEmpty
+                ? posts
+                : posts
+                      .where((p) => !blocked.contains(p.author.uid))
+                      .toList(),
+          );
+    });
+
+final pinnedPostsProvider = StreamProvider.family<List<CommunityPost>, String>(
+  (ref, id) => ref.watch(communityRepositoryProvider).watchPinned(id),
+);
+
+/// Key for anything addressed by community *and* post.
+typedef PostKey = ({String communityId, String postId});
+
+final communityPostCommentsProvider =
+    StreamProvider.family<List<Comment>, PostKey>((ref, key) {
+      final repository = ref.watch(communityRepositoryProvider);
+      final blockedAsync = ref.watch(blockedIdsProvider);
+      final blocked = blockedAsync.value ?? const <String>[];
+
+      return repository
+          .watchPostComments(
+            communityId: key.communityId,
+            postId: key.postId,
+          )
+          .map(
+            (comments) => blocked.isEmpty
+                ? comments
+                : comments
+                      .where((c) => !blocked.contains(c.author.uid))
+                      .toList(),
+          );
+    });
+
+/// Whether the signed-in person is waiting on approval for [communityId].
+final myJoinRequestProvider = StreamProvider.family<bool, String>((
+  ref,
+  communityId,
+) {
+  final repository = ref.watch(communityRepositoryProvider);
+  final uid = ref.watch(currentUidProvider);
+  if (uid == null) return Stream.value(false);
+  return repository.watchMyRequest(communityId: communityId, uid: uid);
+});

@@ -6,7 +6,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 /// harder to triage. Free text carries the nuance.
 enum ReportReason { harassment, spam, wrongOrStolen, inappropriate, other }
 
-enum ReportTarget { recipe, plan, comment, profile }
+/// What is being reported.
+///
+/// `communityPost` files a report like any other but is not covered by the
+/// auto-hide threshold in moderation.ts — that works on top-level collections,
+/// and a community post already has a moderator standing next to it who can
+/// remove it faster than a counter can.
+enum ReportTarget { recipe, plan, comment, profile, communityPost }
 
 /// Reporting and blocking.
 ///

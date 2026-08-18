@@ -65,6 +65,44 @@ service cloud.firestore {
       return exists(/databases/$(database)/documents/users/$(ownerUid)/blocked/$(request.auth.uid));
     }
 
+    // ---- community helpers ------------------------------------------------
+    //
+    // These take the community id from the *path*, never from a result
+    // document, so they stay constant across every document a query returns.
+    // That is what makes them legal in a list rule — the lesson from the users
+    // collection, where a lookup keyed on each result made people search
+    // impossible to allow.
+
+    function communityExists(cid) {
+      return exists(/databases/$(database)/documents/communities/$(cid));
+    }
+
+    function communityDoc(cid) {
+      return get(/databases/$(database)/documents/communities/$(cid)).data;
+    }
+
+    // Moderator authority is read from the community document only — the
+    // `role` field on a member document is a label for the UI and grants
+    // nothing. One source of truth means a forged role is cosmetic.
+    function isCommunityMod(cid) {
+      return signedIn()
+             && communityExists(cid)
+             && (communityDoc(cid).createdBy == request.auth.uid
+                 || communityDoc(cid).moderators.hasAny([request.auth.uid]));
+    }
+
+    function isCommunityMember(cid) {
+      return signedIn()
+             && exists(/databases/$(database)/documents/communities/$(cid)/members/$(request.auth.uid));
+    }
+
+    // Private hides the contents, not the door: the community document itself
+    // stays listable so someone can find it and ask to join.
+    function communityContentVisible(cid) {
+      return communityExists(cid)
+             && (communityDoc(cid).privacy == 'public' || isCommunityMember(cid));
+    }
+
     // ---- users ------------------------------------------------------------
 
     match /users/{uid} {
@@ -321,6 +359,190 @@ service cloud.firestore {
 
     // Clients append here; a Function aggregates into stats and viewers, then
     // deletes. Nobody reads this collection — it's a write-only queue.
+    // ---- communities ------------------------------------------------------
+
+    match /communities/{cid} {
+
+      // Counters and ownership are not client business. Separate from the
+      // global noProtectedFields() because the field names differ.
+      function noCommunityCounters() {
+        return !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['memberCount', 'postCount', 'createdBy', 'createdAt']);
+      }
+
+      function communityWithinLimits() {
+        return request.resource.data.name is string
+               && request.resource.data.name.size() > 0
+               && request.resource.data.name.size() <= 60
+               && request.resource.data.get('description', '').size() <= 500
+               && request.resource.data.rules.size() <= 10
+               && request.resource.data.moderators.size() <= 20;
+      }
+
+      // Anyone signed in, guests included — browsing communities is how
+      // someone decides the app is worth an account.
+      allow read: if signedIn();
+
+      allow create: if isRegistered()
+                    && request.resource.data.createdBy == request.auth.uid
+                    // No self-appointed co-moderators at creation, and no
+                    // pre-seeded counters.
+                    && request.resource.data.moderators.size() == 0
+                    && !request.resource.data.keys()
+                         .hasAny(['memberCount', 'postCount'])
+                    && communityWithinLimits();
+
+      // Settings, rules, and the moderator list. `moderators` is editable here
+      // by design: promoting someone is a moderator action, and the only other
+      // place it could live is a Function that does exactly this check.
+      allow update: if isCommunityMod(cid)
+                    && noCommunityCounters()
+                    && communityWithinLimits();
+
+      // Only the person who made it, or staff. A moderator who could delete
+      // the community out from under its owner is a moderator with too much.
+      allow delete: if (signedIn() && resource.data.createdBy == request.auth.uid)
+                    || isModerator();
+
+      // ---- membership -----------------------------------------------------
+
+      match /members/{uid} {
+        // Membership is public in a public community and members-only in a
+        // private one — the same rule the posts follow.
+        allow read: if communityContentVisible(cid) || isModerator();
+
+        allow create: if isRegistered()
+                      && request.resource.data.uid == uid
+                      && request.resource.data.author.uid == uid
+                      && (request.resource.data.author.verified == false
+                          || isVerified())
+                      && (
+                        // Joining an open community, as yourself.
+                        (isSelf(uid)
+                         && communityExists(cid)
+                         && communityDoc(cid).joinPolicy == 'open'
+                         && request.resource.data.role == 'member')
+
+                        // The creator's own row. The community document is
+                        // created in the same batch, so it does not exist yet
+                        // as far as this rule can see — get() reads committed
+                        // state, not the batch. Allowing it only while the
+                        // community is absent keeps the window to exactly that
+                        // batch, and ids are server-random, so there is nothing
+                        // to squat on.
+                        || (isSelf(uid)
+                            && !communityExists(cid)
+                            && request.resource.data.role == 'owner')
+
+                        // A moderator approving someone off the queue.
+                        || (isCommunityMod(cid)
+                            && request.resource.data.role == 'member')
+                      );
+
+        // Role changes are a moderator action. Nobody promotes themselves.
+        allow update: if isCommunityMod(cid)
+                      && request.resource.data.uid == resource.data.uid;
+
+        // Leaving, or being removed. The owner is not allowed to vanish: a
+        // community with nobody who can approve or promote is stuck.
+        allow delete: if (isSelf(uid) || isCommunityMod(cid) || isModerator())
+                      && !(communityExists(cid)
+                           && communityDoc(cid).createdBy == uid);
+      }
+
+      // ---- the approval queue ---------------------------------------------
+
+      match /requests/{uid} {
+        // Moderators see the queue; you can see your own request, which is how
+        // the join button knows to say "pending" instead of "join".
+        allow read: if isSelf(uid) || isCommunityMod(cid) || isModerator();
+
+        allow create: if isRegistered()
+                      && isSelf(uid)
+                      && request.resource.data.uid == uid
+                      && request.resource.data.author.uid == uid
+                      && (request.resource.data.author.verified == false
+                          || isVerified())
+                      && communityExists(cid)
+                      && communityDoc(cid).joinPolicy == 'approval'
+                      && !isCommunityMember(cid);
+
+        allow update: if false;
+
+        // Withdrawn by the asker, or cleared by a moderator on approve/reject.
+        allow delete: if isSelf(uid) || isCommunityMod(cid) || isModerator();
+      }
+
+      // ---- posts ----------------------------------------------------------
+
+      match /posts/{postId} {
+        function isPostAuthor() {
+          return signedIn() && resource.data.author.uid == request.auth.uid;
+        }
+
+        // resource == null so a listener on a deleted post resolves to "gone"
+        // rather than to a permission error.
+        allow read: if signedIn()
+                    && (resource == null
+                        || communityContentVisible(cid)
+                        || isModerator());
+
+        // Posting requires membership — in every community, public ones
+        // included. A public community is readable by all and writable by its
+        // members; that difference is the whole point of joining.
+        allow create: if isRegistered()
+                      && isCommunityMember(cid)
+                      && request.resource.data.author.uid == request.auth.uid
+                      && (request.resource.data.author.verified == false
+                          || isVerified())
+                      && request.resource.data.body is string
+                      && request.resource.data.body.size() <= 5000
+                      // Pinning is a moderator act, so a new post may only
+                      // arrive pinned if a moderator wrote it.
+                      && (request.resource.data.pinned == false
+                          || isCommunityMod(cid))
+                      && !request.resource.data.keys().hasAny(['commentCount']);
+
+        allow update: if (
+                        // The author may edit their words and nothing else.
+                        (isPostAuthor()
+                         && request.resource.data.pinned == resource.data.pinned
+                         && request.resource.data.author.uid == resource.data.author.uid)
+                        // A moderator may pin and unpin, and nothing else.
+                        || (isCommunityMod(cid)
+                            && request.resource.data.diff(resource.data)
+                                 .affectedKeys().hasOnly(['pinned']))
+                      )
+                      && !request.resource.data.diff(resource.data)
+                           .affectedKeys().hasAny(['commentCount', 'createdAt']);
+
+        allow delete: if isPostAuthor() || isCommunityMod(cid) || isModerator();
+
+        match /comments/{commentId} {
+          allow read: if signedIn()
+                      && (communityContentVisible(cid) || isModerator());
+
+          allow create: if isRegistered()
+                        && isCommunityMember(cid)
+                        && request.resource.data.author.uid == request.auth.uid
+                        && (request.resource.data.author.verified == false
+                            || isVerified())
+                        && request.resource.data.text is string
+                        && request.resource.data.text.size() > 0
+                        && request.resource.data.text.size() <= 2000;
+
+          allow update: if signedIn()
+                        && resource.data.author.uid == request.auth.uid
+                        && noProtectedFields();
+
+          allow delete: if (signedIn()
+                            && resource.data.author.uid == request.auth.uid)
+                           || isCommunityMod(cid)
+                           || isModerator();
+        }
+      }
+    }
+
     match /viewEvents/{eventId} {
       allow create: if signedIn()
                     && request.resource.data.uid == request.auth.uid
@@ -355,6 +577,23 @@ service cloud.firestore {
     match /config/{doc} {
       allow read: if true;
       allow write: if false;
+    }
+
+    // ---- "which communities am I in" ---------------------------------------
+    //
+    // A collection-group query over member rows, and it needs its own rule: the
+    // nested match under /communities/{cid} never applies to one, because there
+    // is no cid to bind. Without this the query falls straight through to the
+    // deny-all below — which is exactly what it did.
+    //
+    // The condition reads `resource`, which a list rule normally cannot do.
+    // Here it can, because the app's query carries `where('uid', '==', myUid)`
+    // and Firestore can prove every result satisfies the rule from that
+    // constraint alone. Drop the filter and the query is denied — which is the
+    // behaviour we want, since without it this would list the whole app's
+    // memberships.
+    match /{path=**}/members/{memberUid} {
+      allow read: if signedIn() && resource.data.uid == request.auth.uid;
     }
 
     // Anything not matched above is closed.

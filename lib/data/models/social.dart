@@ -78,7 +78,17 @@ class Comment {
   };
 }
 
-enum NotificationType { like, cooked, comment, follow, planCopied, unknown }
+enum NotificationType {
+  like,
+  cooked,
+  comment,
+  follow,
+  planCopied,
+  communityJoinRequest,
+  communityApproved,
+  communityPost,
+  unknown,
+}
 
 /// Written by Cloud Functions, never by a client.
 class AppNotification {
@@ -129,6 +139,16 @@ class AppNotification {
     NotificationType.comment => targetId == null ? null : '/recipe/$targetId',
     NotificationType.planCopied => targetId == null ? null : '/plan/$targetId',
     NotificationType.follow => targetId == null ? null : '/user/$targetId',
+    // A join request opens the queue, not the community — the moderator is
+    // being asked to do something, and landing them on the feed makes them
+    // hunt for it.
+    NotificationType.communityJoinRequest => targetId == null
+        ? null
+        : '/communities/$targetId/members',
+    NotificationType.communityApproved ||
+    NotificationType.communityPost => targetId == null
+        ? null
+        : '/communities/$targetId',
     NotificationType.unknown => null,
   };
 }

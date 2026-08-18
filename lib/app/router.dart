@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/community/communities_screen.dart';
+import '../features/community/community_form_screen.dart';
+import '../features/community/community_members_screen.dart';
+import '../features/community/community_screen.dart';
+import '../features/community/post_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/plan/my_week_screen.dart';
 import '../features/plan/plan_detail_screen.dart';
@@ -39,6 +44,7 @@ abstract final class Routes {
   static String recipeFor(String id) => '/recipe/$id';
   static String planFor(String id) => '/plan/$id';
   static String profileFor(String handle) => '/user/$handle';
+  static String communityFor(String id) => '/communities/$id';
 }
 
 final _rootKey = GlobalKey<NavigatorState>();
@@ -126,6 +132,39 @@ GoRouter createRouter() => GoRouter(
     // itself outside the shell put a second copy of the shell on the root
     // navigator. go_router keys the shell page off the route object, so both
     // copies carried the same key and Navigator asserted on the duplicate.
+    // Communities open from the tab, from a notification, and from a post's
+    // author line — so they sit at the top level for exactly the reason
+    // recipes do. `/communities/new` is declared before `/communities/:id` or
+    // it would be matched as a community whose id is "new".
+    GoRoute(
+      path: '/communities/new',
+      builder: (context, state) => const CommunityFormScreen(),
+    ),
+    GoRoute(
+      path: '/communities/:id',
+      builder: (context, state) =>
+          CommunityScreen(communityId: state.pathParameters['id']!),
+      routes: [
+        GoRoute(
+          path: 'settings',
+          builder: (context, state) =>
+              CommunityFormScreen(communityId: state.pathParameters['id']!),
+        ),
+        GoRoute(
+          path: 'members',
+          builder: (context, state) => CommunityMembersScreen(
+            communityId: state.pathParameters['id']!,
+          ),
+        ),
+        GoRoute(
+          path: 'post/:postId',
+          builder: (context, state) => CommunityPostScreen(
+            communityId: state.pathParameters['id']!,
+            postId: state.pathParameters['postId']!,
+          ),
+        ),
+      ],
+    ),
     GoRoute(
       path: '/recipe/:id',
       builder: (context, state) =>
@@ -167,13 +206,7 @@ GoRouter createRouter() => GoRouter(
           routes: [
             GoRoute(
               path: Routes.communities,
-              builder: (context, state) => PlaceholderScreen(
-                title: AppLocalizations.of(context).navCommunities,
-                icon: Icons.groups_outlined,
-                note: 'Phase 4. Communities open after there is enough content '
-                    'for them to feel alive — an empty community is worse '
-                    'than none.',
-              ),
+              builder: (context, state) => const CommunitiesScreen(),
             ),
           ],
         ),

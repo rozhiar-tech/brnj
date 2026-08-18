@@ -8,6 +8,7 @@ import {
 import {
   addDoc,
   collection,
+  collectionGroup,
   deleteDoc,
   doc,
   getDoc,
@@ -819,5 +820,770 @@ describe('view events', () => {
       });
     });
     await assertFails(getDoc(doc(user('user1').firestore(), 'viewEvents/e1')));
+  });
+});
+
+describe('communities', () => {
+  const seed = async (fn) => env.withSecurityRulesDisabled((a) => fn(a.firestore()));
+
+  const community = (overrides = {}) => ({
+    name: 'Baghdad kitchens',
+    description: 'Everything from Karrada to Adhamiyah',
+    category: 'regional',
+    privacy: 'public',
+    joinPolicy: 'open',
+    rules: [],
+    moderators: [],
+    createdBy: 'owner1',
+    searchName: 'baghdad kitchens',
+    memberCount: 0,
+    postCount: 0,
+    ...overrides,
+  });
+
+  /// What the client actually sends when creating one: the counters are absent,
+  /// because they are Function-owned and the rules reject a create that carries
+  /// them.
+  const newCommunity = (overrides = {}) => {
+    const { memberCount, postCount, ...rest } = community(overrides);
+    return rest;
+  };
+
+  /// Seeds a community and its member rows in one go. Membership is a document,
+  /// so nearly every rule below needs one to exist first.
+  const seedCommunity = async (id, overrides = {}, members = ['owner1']) =>
+    seed(async (db) => {
+      await setDoc(doc(db, `communities/${id}`), community(overrides));
+      for (const uid of members) {
+        await setDoc(doc(db, `communities/${id}/members/${uid}`), {
+          uid,
+          author: authorStub(uid),
+          role: uid === (overrides.createdBy ?? 'owner1') ? 'owner' : 'member',
+          joinedAt: new Date(),
+        });
+      }
+    });
+
+  describe('the community document', () => {
+    it('is readable by a guest — browsing is how someone decides to sign up', async () => {
+      await seedCommunity('c1');
+      await assertSucceeds(getDoc(doc(guest().firestore(), 'communities/c1')));
+    });
+
+    it('lets a registered user create one they own', async () => {
+      await assertSucceeds(
+        setDoc(
+          doc(user('user1').firestore(), 'communities/c1'),
+          newCommunity({ createdBy: 'user1' }),
+        ),
+      );
+    });
+
+    it('refuses a community created in someone else’s name', async () => {
+      await assertFails(
+        setDoc(doc(user('user1').firestore(), 'communities/c1'), {
+          name: 'Not mine',
+          category: 'other',
+          privacy: 'public',
+          joinPolicy: 'open',
+          rules: [],
+          moderators: [],
+          createdBy: 'someone-else',
+        }),
+      );
+    });
+
+    it('refuses a community that arrives with its member count pre-filled', async () => {
+      await assertFails(
+        setDoc(doc(user('user1').firestore(), 'communities/c1'), {
+          name: 'Inflated',
+          category: 'other',
+          privacy: 'public',
+          joinPolicy: 'open',
+          rules: [],
+          moderators: [],
+          createdBy: 'user1',
+          memberCount: 5000,
+        }),
+      );
+    });
+
+    it('refuses a creator who appoints co-moderators up front', async () => {
+      await assertFails(
+        setDoc(doc(user('user1').firestore(), 'communities/c1'), {
+          name: 'Packed',
+          category: 'other',
+          privacy: 'public',
+          joinPolicy: 'open',
+          rules: [],
+          moderators: ['friend1', 'friend2'],
+          createdBy: 'user1',
+        }),
+      );
+    });
+
+    it('refuses a guest', async () => {
+      await assertFails(
+        setDoc(
+          doc(guest().firestore(), 'communities/c1'),
+          newCommunity({ createdBy: 'guest1' }),
+        ),
+      );
+    });
+
+    it('lets a moderator edit the settings', async () => {
+      await seedCommunity('c1', { moderators: ['mod1'] }, ['owner1', 'mod1']);
+      await assertSucceeds(
+        setDoc(
+          doc(user('mod1').firestore(), 'communities/c1'),
+          { ...community({ moderators: ['mod1'] }), name: 'Renamed' },
+          { merge: true },
+        ),
+      );
+    });
+
+    it('refuses a plain member editing the settings', async () => {
+      await seedCommunity('c1', {}, ['owner1', 'member1']);
+      await assertFails(
+        setDoc(
+          doc(user('member1').firestore(), 'communities/c1'),
+          { name: 'Hijacked' },
+          { merge: true },
+        ),
+      );
+    });
+
+    it('refuses a moderator inflating the member count', async () => {
+      await seedCommunity('c1', { moderators: ['mod1'] }, ['owner1', 'mod1']);
+      await assertFails(
+        setDoc(
+          doc(user('mod1').firestore(), 'communities/c1'),
+          { memberCount: 9999 },
+          { merge: true },
+        ),
+      );
+    });
+
+    it('lets the creator delete it', async () => {
+      await seedCommunity('c1');
+      await assertSucceeds(
+        deleteDoc(doc(user('owner1').firestore(), 'communities/c1')),
+      );
+    });
+
+    it('refuses a moderator deleting the community out from under its owner', async () => {
+      await seedCommunity('c1', { moderators: ['mod1'] }, ['owner1', 'mod1']);
+      await assertFails(
+        deleteDoc(doc(user('mod1').firestore(), 'communities/c1')),
+      );
+    });
+  });
+
+  describe('joining', () => {
+    it('lets anyone registered join an open community', async () => {
+      await seedCommunity('c1');
+      await assertSucceeds(
+        setDoc(doc(user('user1').firestore(), 'communities/c1/members/user1'), {
+          uid: 'user1',
+          author: authorStub('user1'),
+          role: 'member',
+          joinedAt: new Date(),
+        }),
+      );
+    });
+
+    it('refuses a guest joining', async () => {
+      await seedCommunity('c1');
+      await assertFails(
+        setDoc(doc(guest().firestore(), 'communities/c1/members/guest1'), {
+          uid: 'guest1',
+          author: authorStub('guest1'),
+          role: 'member',
+          joinedAt: new Date(),
+        }),
+      );
+    });
+
+    it('refuses joining an approval-gated community directly', async () => {
+      await seedCommunity('c1', { joinPolicy: 'approval' });
+      await assertFails(
+        setDoc(doc(user('user1').firestore(), 'communities/c1/members/user1'), {
+          uid: 'user1',
+          author: authorStub('user1'),
+          role: 'member',
+          joinedAt: new Date(),
+        }),
+      );
+    });
+
+    it('refuses adding somebody else as a member', async () => {
+      await seedCommunity('c1');
+      await assertFails(
+        setDoc(doc(user('user1').firestore(), 'communities/c1/members/user2'), {
+          uid: 'user2',
+          author: authorStub('user2'),
+          role: 'member',
+          joinedAt: new Date(),
+        }),
+      );
+    });
+
+    it('refuses self-appointment as moderator on the way in', async () => {
+      await seedCommunity('c1');
+      await assertFails(
+        setDoc(doc(user('user1').firestore(), 'communities/c1/members/user1'), {
+          uid: 'user1',
+          author: authorStub('user1'),
+          role: 'moderator',
+          joinedAt: new Date(),
+        }),
+      );
+    });
+
+    it('refuses an unverified account claiming the tick on its member row', async () => {
+      await seedCommunity('c1');
+      await assertFails(
+        setDoc(doc(user('user1').firestore(), 'communities/c1/members/user1'), {
+          uid: 'user1',
+          author: authorStub('user1', true),
+          role: 'member',
+          joinedAt: new Date(),
+        }),
+      );
+    });
+
+    it('lets the creator write their own owner row before the community exists', async () => {
+      // The app writes both in one batch. get() reads committed state, so the
+      // community is genuinely absent as far as this rule can see — which is
+      // the case that has to be allowed or nobody can create anything.
+      await assertSucceeds(
+        setDoc(doc(user('user1').firestore(), 'communities/new1/members/user1'), {
+          uid: 'user1',
+          author: authorStub('user1'),
+          role: 'owner',
+          joinedAt: new Date(),
+        }),
+      );
+    });
+
+    it('lets a member leave', async () => {
+      await seedCommunity('c1', {}, ['owner1', 'member1']);
+      await assertSucceeds(
+        deleteDoc(doc(user('member1').firestore(), 'communities/c1/members/member1')),
+      );
+    });
+
+    it('refuses the owner leaving — a community with no owner is stuck', async () => {
+      await seedCommunity('c1');
+      await assertFails(
+        deleteDoc(doc(user('owner1').firestore(), 'communities/c1/members/owner1')),
+      );
+    });
+
+    it('lets a moderator remove a member', async () => {
+      await seedCommunity('c1', { moderators: ['mod1'] }, ['owner1', 'mod1', 'member1']);
+      await assertSucceeds(
+        deleteDoc(doc(user('mod1').firestore(), 'communities/c1/members/member1')),
+      );
+    });
+
+    it('refuses a member removing another member', async () => {
+      await seedCommunity('c1', {}, ['owner1', 'member1', 'member2']);
+      await assertFails(
+        deleteDoc(doc(user('member1').firestore(), 'communities/c1/members/member2')),
+      );
+    });
+  });
+
+  describe('the approval queue', () => {
+    it('lets someone ask to join an approval-gated community', async () => {
+      await seedCommunity('c1', { joinPolicy: 'approval' });
+      await assertSucceeds(
+        setDoc(doc(user('user1').firestore(), 'communities/c1/requests/user1'), {
+          uid: 'user1',
+          author: authorStub('user1'),
+          requestedAt: new Date(),
+        }),
+      );
+    });
+
+    it('refuses a request to an open community — there is nothing to queue for', async () => {
+      await seedCommunity('c1');
+      await assertFails(
+        setDoc(doc(user('user1').firestore(), 'communities/c1/requests/user1'), {
+          uid: 'user1',
+          author: authorStub('user1'),
+          requestedAt: new Date(),
+        }),
+      );
+    });
+
+    it('lets the asker read their own request — the button says "pending" from it', async () => {
+      await seedCommunity('c1', { joinPolicy: 'approval' });
+      await seed((db) =>
+        setDoc(doc(db, 'communities/c1/requests/user1'), {
+          uid: 'user1',
+          author: authorStub('user1'),
+          requestedAt: new Date(),
+        }),
+      );
+      await assertSucceeds(
+        getDoc(doc(user('user1').firestore(), 'communities/c1/requests/user1')),
+      );
+    });
+
+    it('hides other people’s requests from a plain member', async () => {
+      await seedCommunity('c1', { joinPolicy: 'approval' }, ['owner1', 'member1']);
+      await seed((db) =>
+        setDoc(doc(db, 'communities/c1/requests/user1'), {
+          uid: 'user1',
+          author: authorStub('user1'),
+          requestedAt: new Date(),
+        }),
+      );
+      await assertFails(
+        getDoc(doc(user('member1').firestore(), 'communities/c1/requests/user1')),
+      );
+    });
+
+    it('lets a moderator approve — the member row and the request removal together', async () => {
+      await seedCommunity('c1', { joinPolicy: 'approval', moderators: ['mod1'] }, [
+        'owner1',
+        'mod1',
+      ]);
+      await seed((db) =>
+        setDoc(doc(db, 'communities/c1/requests/user1'), {
+          uid: 'user1',
+          author: authorStub('user1'),
+          requestedAt: new Date(),
+        }),
+      );
+      const db = user('mod1').firestore();
+      await assertSucceeds(
+        setDoc(doc(db, 'communities/c1/members/user1'), {
+          uid: 'user1',
+          author: authorStub('user1'),
+          role: 'member',
+          joinedAt: new Date(),
+        }),
+      );
+      await assertSucceeds(
+        deleteDoc(doc(db, 'communities/c1/requests/user1')),
+      );
+    });
+
+    it('lets the asker withdraw', async () => {
+      await seedCommunity('c1', { joinPolicy: 'approval' });
+      await seed((db) =>
+        setDoc(doc(db, 'communities/c1/requests/user1'), {
+          uid: 'user1',
+          author: authorStub('user1'),
+          requestedAt: new Date(),
+        }),
+      );
+      await assertSucceeds(
+        deleteDoc(doc(user('user1').firestore(), 'communities/c1/requests/user1')),
+      );
+    });
+  });
+
+  describe('posts', () => {
+    const post = (uid, overrides = {}) => ({
+      author: authorStub(uid),
+      type: 'text',
+      body: 'Made kubba today',
+      pinned: false,
+      createdAt: new Date(),
+      ...overrides,
+    });
+
+    it('lets a member post', async () => {
+      await seedCommunity('c1', {}, ['owner1', 'member1']);
+      await assertSucceeds(
+        addDoc(collection(user('member1').firestore(), 'communities/c1/posts'), post('member1')),
+      );
+    });
+
+    it('refuses a non-member posting in a public community', async () => {
+      // Readable by all, writable by members — that difference is the whole
+      // reason joining is a thing.
+      await seedCommunity('c1');
+      await assertFails(
+        addDoc(collection(user('user1').firestore(), 'communities/c1/posts'), post('user1')),
+      );
+    });
+
+    it('refuses a member posting under someone else’s name', async () => {
+      await seedCommunity('c1', {}, ['owner1', 'member1']);
+      await assertFails(
+        addDoc(
+          collection(user('member1').firestore(), 'communities/c1/posts'),
+          post('member1', { author: authorStub('owner1') }),
+        ),
+      );
+    });
+
+    it('refuses an unverified member claiming the tick', async () => {
+      await seedCommunity('c1', {}, ['owner1', 'member1']);
+      await assertFails(
+        addDoc(
+          collection(user('member1').firestore(), 'communities/c1/posts'),
+          post('member1', { author: authorStub('member1', true) }),
+        ),
+      );
+    });
+
+    it('refuses a member pinning their own post on the way in', async () => {
+      await seedCommunity('c1', {}, ['owner1', 'member1']);
+      await assertFails(
+        addDoc(
+          collection(user('member1').firestore(), 'communities/c1/posts'),
+          post('member1', { pinned: true }),
+        ),
+      );
+    });
+
+    it('lets a moderator post something already pinned', async () => {
+      await seedCommunity('c1', { moderators: ['mod1'] }, ['owner1', 'mod1']);
+      await assertSucceeds(
+        addDoc(
+          collection(user('mod1').firestore(), 'communities/c1/posts'),
+          post('mod1', { pinned: true }),
+        ),
+      );
+    });
+
+    it('lets a guest read a public community’s posts', async () => {
+      await seedCommunity('c1');
+      await seed((db) => setDoc(doc(db, 'communities/c1/posts/p1'), post('owner1')));
+      await assertSucceeds(getDoc(doc(guest().firestore(), 'communities/c1/posts/p1')));
+    });
+
+    it('hides a private community’s posts from an outsider', async () => {
+      await seedCommunity('c1', { privacy: 'private' });
+      await seed((db) => setDoc(doc(db, 'communities/c1/posts/p1'), post('owner1')));
+      await assertFails(getDoc(doc(user('user1').firestore(), 'communities/c1/posts/p1')));
+    });
+
+    it('shows a private community’s posts to its members', async () => {
+      await seedCommunity('c1', { privacy: 'private' }, ['owner1', 'member1']);
+      await seed((db) => setDoc(doc(db, 'communities/c1/posts/p1'), post('owner1')));
+      await assertSucceeds(
+        getDoc(doc(user('member1').firestore(), 'communities/c1/posts/p1')),
+      );
+    });
+
+    it('lets a moderator pin an existing post', async () => {
+      await seedCommunity('c1', { moderators: ['mod1'] }, ['owner1', 'mod1', 'member1']);
+      await seed((db) => setDoc(doc(db, 'communities/c1/posts/p1'), post('member1')));
+      await assertSucceeds(
+        setDoc(
+          doc(user('mod1').firestore(), 'communities/c1/posts/p1'),
+          { pinned: true },
+          { merge: true },
+        ),
+      );
+    });
+
+    it('refuses the author pinning their own post', async () => {
+      await seedCommunity('c1', {}, ['owner1', 'member1']);
+      await seed((db) => setDoc(doc(db, 'communities/c1/posts/p1'), post('member1')));
+      await assertFails(
+        setDoc(
+          doc(user('member1').firestore(), 'communities/c1/posts/p1'),
+          { pinned: true },
+          { merge: true },
+        ),
+      );
+    });
+
+    it('refuses a moderator rewriting someone else’s words while pinning', async () => {
+      await seedCommunity('c1', { moderators: ['mod1'] }, ['owner1', 'mod1', 'member1']);
+      await seed((db) => setDoc(doc(db, 'communities/c1/posts/p1'), post('member1')));
+      await assertFails(
+        setDoc(
+          doc(user('mod1').firestore(), 'communities/c1/posts/p1'),
+          { pinned: true, body: 'Words I did not write' },
+          { merge: true },
+        ),
+      );
+    });
+
+    it('refuses anyone writing the comment count', async () => {
+      await seedCommunity('c1', {}, ['owner1', 'member1']);
+      await seed((db) => setDoc(doc(db, 'communities/c1/posts/p1'), post('member1')));
+      await assertFails(
+        setDoc(
+          doc(user('member1').firestore(), 'communities/c1/posts/p1'),
+          { commentCount: 500 },
+          { merge: true },
+        ),
+      );
+    });
+
+    it('lets the author delete their post', async () => {
+      await seedCommunity('c1', {}, ['owner1', 'member1']);
+      await seed((db) => setDoc(doc(db, 'communities/c1/posts/p1'), post('member1')));
+      await assertSucceeds(
+        deleteDoc(doc(user('member1').firestore(), 'communities/c1/posts/p1')),
+      );
+    });
+
+    it('lets a moderator delete somebody else’s post', async () => {
+      await seedCommunity('c1', { moderators: ['mod1'] }, ['owner1', 'mod1', 'member1']);
+      await seed((db) => setDoc(doc(db, 'communities/c1/posts/p1'), post('member1')));
+      await assertSucceeds(
+        deleteDoc(doc(user('mod1').firestore(), 'communities/c1/posts/p1')),
+      );
+    });
+
+    it('refuses a bystander deleting a post', async () => {
+      await seedCommunity('c1', {}, ['owner1', 'member1']);
+      await seed((db) => setDoc(doc(db, 'communities/c1/posts/p1'), post('member1')));
+      await assertFails(
+        deleteDoc(doc(user('user1').firestore(), 'communities/c1/posts/p1')),
+      );
+    });
+  });
+
+  describe('post replies', () => {
+    const post = { author: authorStub('member1'), type: 'question', body: 'Why?', pinned: false };
+
+    it('lets a member reply', async () => {
+      await seedCommunity('c1', {}, ['owner1', 'member1']);
+      await seed((db) => setDoc(doc(db, 'communities/c1/posts/p1'), post));
+      await assertSucceeds(
+        addDoc(collection(user('member1').firestore(), 'communities/c1/posts/p1/comments'), {
+          author: authorStub('member1'),
+          text: 'Because the rice needs washing',
+          createdAt: new Date(),
+        }),
+      );
+    });
+
+    it('refuses a non-member replying', async () => {
+      await seedCommunity('c1', {}, ['owner1', 'member1']);
+      await seed((db) => setDoc(doc(db, 'communities/c1/posts/p1'), post));
+      await assertFails(
+        addDoc(collection(user('user1').firestore(), 'communities/c1/posts/p1/comments'), {
+          author: authorStub('user1'),
+          text: 'Butting in',
+          createdAt: new Date(),
+        }),
+      );
+    });
+
+    it('refuses an empty reply', async () => {
+      await seedCommunity('c1', {}, ['owner1', 'member1']);
+      await seed((db) => setDoc(doc(db, 'communities/c1/posts/p1'), post));
+      await assertFails(
+        addDoc(collection(user('member1').firestore(), 'communities/c1/posts/p1/comments'), {
+          author: authorStub('member1'),
+          text: '',
+          createdAt: new Date(),
+        }),
+      );
+    });
+
+    it('lets a moderator delete a reply', async () => {
+      await seedCommunity('c1', { moderators: ['mod1'] }, ['owner1', 'mod1', 'member1']);
+      await seed(async (db) => {
+        await setDoc(doc(db, 'communities/c1/posts/p1'), post);
+        await setDoc(doc(db, 'communities/c1/posts/p1/comments/x1'), {
+          author: authorStub('member1'),
+          text: 'Off topic',
+          createdAt: new Date(),
+        });
+      });
+      await assertSucceeds(
+        deleteDoc(doc(user('mod1').firestore(), 'communities/c1/posts/p1/comments/x1')),
+      );
+    });
+  });
+
+  describe('the queries the app actually makes', () => {
+    it('directory, filtered by category', async () => {
+      await seedCommunity('c1');
+      await assertSucceeds(
+        getDocs(query(
+          collection(guest().firestore(), 'communities'),
+          where('category', '==', 'regional'),
+          orderBy('memberCount', 'desc'),
+          limit(40),
+        )),
+      );
+    });
+
+    it('directory, unfiltered', async () => {
+      await seedCommunity('c1');
+      await assertSucceeds(
+        getDocs(query(
+          collection(guest().firestore(), 'communities'),
+          orderBy('memberCount', 'desc'),
+          limit(40),
+        )),
+      );
+    });
+
+    it('name search', async () => {
+      await seedCommunity('c1');
+      await assertSucceeds(
+        getDocs(query(
+          collection(guest().firestore(), 'communities'),
+          orderBy('searchName'),
+          limit(20),
+        )),
+      );
+    });
+
+    it('post feed in a public community, as a guest', async () => {
+      await seedCommunity('c1');
+      await assertSucceeds(
+        getDocs(query(
+          collection(guest().firestore(), 'communities/c1/posts'),
+          orderBy('createdAt', 'desc'),
+          limit(30),
+        )),
+      );
+    });
+
+    it('post feed in a private community, as a member', async () => {
+      await seedCommunity('c1', { privacy: 'private' }, ['owner1', 'member1']);
+      await assertSucceeds(
+        getDocs(query(
+          collection(user('member1').firestore(), 'communities/c1/posts'),
+          orderBy('createdAt', 'desc'),
+          limit(30),
+        )),
+      );
+    });
+
+    it('refuses the post feed in a private community to an outsider', async () => {
+      await seedCommunity('c1', { privacy: 'private' });
+      await assertFails(
+        getDocs(query(
+          collection(user('user1').firestore(), 'communities/c1/posts'),
+          orderBy('createdAt', 'desc'),
+          limit(30),
+        )),
+      );
+    });
+
+    it('pinned posts', async () => {
+      await seedCommunity('c1');
+      await assertSucceeds(
+        getDocs(query(
+          collection(guest().firestore(), 'communities/c1/posts'),
+          where('pinned', '==', true),
+          limit(3),
+        )),
+      );
+    });
+
+    it('member list', async () => {
+      await seedCommunity('c1');
+      await assertSucceeds(
+        getDocs(query(
+          collection(guest().firestore(), 'communities/c1/members'),
+          orderBy('joinedAt', 'desc'),
+          limit(100),
+        )),
+      );
+    });
+
+    it('the approval queue, as a moderator', async () => {
+      await seedCommunity('c1', { joinPolicy: 'approval', moderators: ['mod1'] }, [
+        'owner1',
+        'mod1',
+      ]);
+      await assertSucceeds(
+        getDocs(query(
+          collection(user('mod1').firestore(), 'communities/c1/requests'),
+          orderBy('requestedAt'),
+          limit(100),
+        )),
+      );
+    });
+
+    it('refuses the approval queue to a plain member', async () => {
+      await seedCommunity('c1', { joinPolicy: 'approval' }, ['owner1', 'member1']);
+      await assertFails(
+        getDocs(query(
+          collection(user('member1').firestore(), 'communities/c1/requests'),
+          orderBy('requestedAt'),
+          limit(100),
+        )),
+      );
+    });
+
+    it('my communities — the collection-group query over member rows', async () => {
+      // The one that needs the redundant `uid` field on every member document:
+      // a collection group cannot be filtered by document id.
+      await seedCommunity('c1', {}, ['owner1', 'member1']);
+      await assertSucceeds(
+        getDocs(query(
+          collectionGroup(user('member1').firestore(), 'members'),
+          where('uid', '==', 'member1'),
+          orderBy('joinedAt', 'desc'),
+          limit(50),
+        )),
+      );
+    });
+
+    it('refuses the collection-group query without the uid filter', async () => {
+      // The filter is what makes the rule provable. Without it this would list
+      // every membership in the app, so it has to be denied — and this is the
+      // test that says the rule is a filter requirement rather than a hole.
+      await seedCommunity('c1', {}, ['owner1', 'member1']);
+      await assertFails(
+        getDocs(query(
+          collectionGroup(user('member1').firestore(), 'members'),
+          orderBy('joinedAt', 'desc'),
+          limit(50),
+        )),
+      );
+    });
+
+    it('refuses another user\u2019s memberships through the collection group', async () => {
+      await seedCommunity('c1', {}, ['owner1', 'member1']);
+      await assertFails(
+        getDocs(query(
+          collectionGroup(user('user1').firestore(), 'members'),
+          where('uid', '==', 'member1'),
+          orderBy('joinedAt', 'desc'),
+          limit(50),
+        )),
+      );
+    });
+
+    it('refuses a private community\u2019s member list to an outsider', async () => {
+      await seedCommunity('c1', { privacy: 'private' }, ['owner1', 'member1']);
+      await assertFails(
+        getDocs(query(
+          collection(user('user1').firestore(), 'communities/c1/members'),
+          orderBy('joinedAt', 'desc'),
+          limit(100),
+        )),
+      );
+    });
+
+    it('post replies', async () => {
+      await seedCommunity('c1');
+      await seed((db) =>
+        setDoc(doc(db, 'communities/c1/posts/p1'), {
+          author: authorStub('owner1'),
+          type: 'text',
+          body: 'Hello',
+          pinned: false,
+        }),
+      );
+      await assertSucceeds(
+        getDocs(query(
+          collection(guest().firestore(), 'communities/c1/posts/p1/comments'),
+          orderBy('createdAt'),
+          limit(200),
+        )),
+      );
+    });
   });
 });

@@ -136,6 +136,9 @@ class _NotificationTile extends ConsumerWidget {
     NotificationType.comment => Icons.chat_bubble_outline,
     NotificationType.follow => Icons.person_add_alt,
     NotificationType.planCopied => Icons.copy_all_outlined,
+    NotificationType.communityJoinRequest => Icons.person_add_alt_1,
+    NotificationType.communityApproved => Icons.groups,
+    NotificationType.communityPost => Icons.forum_outlined,
     NotificationType.unknown => Icons.notifications_none,
   };
 
@@ -147,6 +150,11 @@ class _NotificationTile extends ConsumerWidget {
       NotificationType.comment => l10n.notificationCommented(who),
       NotificationType.follow => l10n.notificationFollowed(who),
       NotificationType.planCopied => l10n.notificationCopiedWeek(who),
+      NotificationType.communityJoinRequest => l10n.notificationJoinRequest(who),
+      NotificationType.communityApproved => l10n.notificationCommunityApproved(
+        who,
+      ),
+      NotificationType.communityPost => l10n.notificationCommunityPost(who),
       NotificationType.unknown => who,
     };
   }

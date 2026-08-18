@@ -8,7 +8,15 @@ import { REGION } from './config';
 const db = () => getFirestore();
 
 type Notification = {
-  type: 'like' | 'cooked' | 'comment' | 'follow' | 'planCopied';
+  type:
+    | 'like'
+    | 'cooked'
+    | 'comment'
+    | 'follow'
+    | 'planCopied'
+    | 'communityJoinRequest'
+    | 'communityApproved'
+    | 'communityPost';
   actorUid: string;
   actorName?: string;
   targetId?: string;
@@ -25,7 +33,7 @@ type Notification = {
  * The document is written even when there is no token to push to: the in-app
  * list is the durable record, and push is a courtesy on top of it.
  */
-async function notify(uid: string, notification: Notification) {
+export async function notify(uid: string, notification: Notification) {
   // Nobody needs telling about their own actions.
   if (uid === notification.actorUid) return;
 

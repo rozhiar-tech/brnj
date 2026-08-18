@@ -33,6 +33,21 @@ class MediaRepository {
     required String slot,
   }) => _upload(path: 'plans/$planId/$slot.jpg', filePath: filePath);
 
+  /// A photo attached to a community post.
+  ///
+  /// Named by timestamp rather than by post id: the post does not exist yet
+  /// when its photo is picked, and creating an empty post just to have an id
+  /// leaves a stub behind every time someone changes their mind.
+  Future<String> uploadCommunityImage({
+    required String communityId,
+    required String filePath,
+  }) => _upload(
+    path:
+        'communities/$communityId/'
+        '${DateTime.now().microsecondsSinceEpoch}.jpg',
+    filePath: filePath,
+  );
+
   Future<void> deleteRecipeImage({
     required String recipeId,
     required String slot,

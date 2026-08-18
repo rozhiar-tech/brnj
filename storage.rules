@@ -74,6 +74,14 @@ service firebase.storage {
                    && isImage() && imageSizeOk();
     }
 
+    match /communities/{communityId}/{fileName} {
+      // Read is open like recipes: a public community's photos are public, and
+      // a private one's are protected by the Firestore rule on the post that
+      // carries the URL — nobody outside can learn the URL to begin with.
+      allow read: if true;
+      allow write: if isRegistered() && isImage() && imageSizeOk();
+    }
+
     match /chats/{chatId}/{fileName} {
       // Chat media is only reachable by someone who already has the URL, and
       // Firestore rules gate who can read the message carrying it.

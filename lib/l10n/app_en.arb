@@ -352,5 +352,126 @@
   "recipeDelete": "Delete recipe",
   "recipeDeleteConfirm": "This also removes the photos people posted of their own attempts, and the comments. It cannot be undone.",
   "followersEmpty": "Nobody yet. Recipes are how people find you.",
-  "followingEmpty": "Not following anyone yet. Follow a cook and their recipes reach you."
+  "followingEmpty": "Not following anyone yet. Follow a cook and their recipes reach you.",
+  "communitiesMine": "My communities",
+  "communitiesDiscover": "Discover",
+  "communitiesEmptyMine": "You have not joined a community yet. Have a look at the ones below.",
+  "communitiesEmptyDirectory": "No communities here yet.",
+  "communitiesCreate": "Create a community",
+  "communitiesSearchHint": "Search communities",
+  "communitiesAll": "All",
+  "communityJoin": "Join",
+  "communityLeave": "Leave",
+  "communityAskToJoin": "Ask to join",
+  "communityPending": "Waiting for approval",
+  "communityJoined": "Joined",
+  "communityLeaveConfirm": "Leave this community?",
+  "communityOwnerCannotLeave": "You created this community, so you cannot leave it. Delete it instead, or hand it to someone else.",
+  "communityRequestSent": "Your request was sent. A moderator will look at it.",
+  "communityMemberCount": "{count} members",
+  "@communityMemberCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPostCount": "{count} posts",
+  "@communityPostCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityAbout": "About",
+  "communityRulesTitle": "Rules",
+  "communityMembersTitle": "Members",
+  "communityRequestsTitle": "Requests",
+  "communityPrivateNotice": "This community is private. Its posts are visible to members only.",
+  "communityNoPosts": "Nothing here yet. Be the first.",
+  "communityJoinToPost": "Join this community to post.",
+  "communityNoRequests": "Nobody is waiting.",
+  "communityDeleted": "This community no longer exists.",
+  "communityNameLabel": "Name",
+  "communityDescriptionLabel": "What is this community for?",
+  "communityCategoryLabel": "Category",
+  "communityPrivacyLabel": "Who can read the posts?",
+  "communityJoinPolicyLabel": "Who can join?",
+  "communityPrivacyPublic": "Anyone",
+  "communityPrivacyPrivate": "Members only",
+  "communityJoinOpen": "Anyone, straight away",
+  "communityJoinApproval": "After a moderator approves",
+  "communityJoinPolicyHelp": "Approval is slower, but it is what keeps a small kitchen from turning into a market.",
+  "communityRulesLabel": "Rules",
+  "communityRulesHelp": "Shown to everyone who joins. Someone who broke a rule they read is a different problem from someone who never saw it.",
+  "communityAddRule": "Add a rule",
+  "communityCreateAction": "Create",
+  "communitySaveAction": "Save",
+  "communitySettings": "Community settings",
+  "communityDelete": "Delete community",
+  "communityDeleteConfirm": "Delete this community and everything in it? This cannot be undone.",
+  "communityCategoryRegional": "Regional",
+  "communityCategoryEveryday": "Everyday food",
+  "communityCategoryBaking": "Baking",
+  "communityCategoryOccasions": "Occasions",
+  "communityCategoryHealth": "Health",
+  "communityCategoryBudget": "On a budget",
+  "communityCategoryBeginners": "Beginners",
+  "communityCategoryOther": "Other",
+  "postComposerHint": "Say something",
+  "postQuestionHint": "Ask the community",
+  "postPublish": "Post",
+  "postTypeText": "Post",
+  "postTypePhoto": "Photo",
+  "postTypeRecipe": "Recipe",
+  "postTypeQuestion": "Question",
+  "postPinned": "Pinned",
+  "postPin": "Pin to top",
+  "postUnpin": "Unpin",
+  "postDelete": "Delete post",
+  "postReplyCount": "{count} replies",
+  "@postReplyCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "postNoReplies": "No replies yet",
+  "postAnswer": "Answer",
+  "postEmptyBody": "Write something first.",
+  "communityApprove": "Approve",
+  "communityReject": "Reject",
+  "communityMakeModerator": "Make moderator",
+  "communityRemoveModerator": "Remove as moderator",
+  "communityRemoveMember": "Remove from community",
+  "communityRoleOwner": "Owner",
+  "communityRoleModerator": "Moderator",
+  "notificationJoinRequest": "{who} asked to join",
+  "@notificationJoinRequest": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationCommunityApproved": "You were accepted into {who}",
+  "@notificationCommunityApproved": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationCommunityPost": "{who} posted in your community",
+  "@notificationCommunityPost": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "actionCancel": "Cancel",
+  "actionDelete": "Delete"
 }
