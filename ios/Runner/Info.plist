@@ -80,6 +80,17 @@
 	     The app has no universal links yet, so nothing is lost by turning the
 	     forwarding off. Turn it back on when share links are set up, and route
 	     around the auth callbacks explicitly. -->
+	<!-- Purpose strings. Apple's static scan flags any app that links these
+	     frameworks without one, whether or not the feature is reachable yet —
+	     image_picker and record are both in the bundle, so both are required.
+	     Camera is listed because image_picker links UIImagePickerController's
+	     camera path even though the composer only opens the gallery today. -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Brnj needs your photos so you can add a picture to a recipe, a post, or a message.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Brnj needs the camera so you can photograph a dish you just cooked.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Brnj needs the microphone so you can send a voice note in a conversation.</string>
 	<key>FlutterDeepLinkingEnabled</key>
 	<false/>
 	<key>CFBundleURLTypes</key>

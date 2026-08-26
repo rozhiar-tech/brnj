@@ -1,7 +1,7 @@
 name: brnj
 description: "Brnj — a community recipe app for Iraq."
 publish_to: 'none'
-version: 0.1.0
+version: 0.1.0+1
 
 environment:
   sdk: ^3.9.0
